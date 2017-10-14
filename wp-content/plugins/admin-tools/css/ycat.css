@@ -1,0 +1,175 @@
+ul.tab {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+	width: initial;
+}
+
+/* Float the list items side by side */
+ul.tab li {
+	float: left;
+	margin-bottom: 0px;
+}
+
+/* Style the links inside the list items */
+ul.tab li a {
+    display: inline-block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of links on hover */
+.ycat-settings ul.tab li a:hover {
+	background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.ycat-settings ul.tab li a:focus, .ycat-settings .active {
+	background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+.ycat-settings {
+    width: calc(100% - 300px);
+    float: left;
+}
+
+.ycat-sidebar {
+    width: 300px;
+    float: left;
+}
+
+.ycat-sidebar {
+    width: 270px;
+    float: left;
+    margin-left: 20px;
+}
+
+.ycat-sidebar-box {
+    display: inline-block;
+    width: 100%;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.ycat-sidebar-box-title {
+    display: inline-block;
+    border-bottom: 1px solid #cccccc;
+    width: 100%;
+}
+
+#image_admin_login_logo {
+    max-height: 340px;
+    max-width: 340px;
+    padding: 5px;
+    margin-bottom: 0;
+    margin-top: 10px;
+    margin-right: 15px;
+    border: 1px solid #e3e3e3;
+    background: #f7f7f7;
+    -moz-border-radius: 3px;
+    -khtml-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+}
+
+input#url_admin_login_logo {
+    display: none!important;
+}
+
+input#url_admin_small_logo {
+    display: none!important;
+}
+
+input#options_for_top_bar_menus, input#menu_items_list_to_hide, input#submenu_items_list_to_hide, input#plugin_items_list_to_hide {
+    display: none!important;
+}
+
+.menu-row {
+    padding: 5px;
+}
+
+.menu-row +.menu-row {
+    border-top: 1px solid gainsboro;
+}
+
+.submenu-row {
+    margin-left: 20px;
+    position: relative;
+}
+
+.submenu-row:before {
+    content: ">";
+    position: absolute;
+    left: -15px;
+}
+
+.menu-row > label {
+    font-weight: bold;
+}
+
+.plugins-php span.displaying-num {
+    display: none!important;
+}
+
+/*--------------------------RTL------------------------------*/
+
+.rtl .ycat-settings {
+    width: calc(100% - 300px);
+    float: right;
+}
+
+.rtl .ycat-sidebar {
+    width: 270px;
+    float: right;
+    margin-left: 0px;
+    margin-right: 20px;
+}
+
+.rtl ul.tab li {
+    float: right;
+    margin-bottom: 0px;
+}
+
+.rtl .submenu-row {
+    margin-left: 0px;
+	margin-right: 20px;
+}
+
+.rtl .submenu-row:before {
+    left: inherit;
+	right: -15px
+}
+
+/*--------------------------Responsive------------------------------*/
+
+@media screen and (max-width: 600px) {
+	
+.ycat-settings {
+    width: 100%;
+}
+
+.ycat-sidebar {
+    width: 100%;
+    float: left;
+    margin-top: 5px;
+    margin-left: 0px;
+}
+
+}
+

@@ -1,0 +1,33 @@
+[11 Oct 15:28:23] DUP_PRO | cc82d47e | DUP_PRO_Package_Runner::process() | PACKAGE 224:PROCESSING 
+[11 Oct 15:28:23] DUP_PRO | cc82d47e | DUP_PRO_Package_Runner::process() | PACKAGE 224:BUILDING 
+[11 Oct 15:28:23] DUP_PRO | cc82d47e | DUP_PRO_Package::build() | Main build step 
+[11 Oct 15:28:23] DUP_PRO | cc82d47e | DUP_PRO_Database::Build() | Building database 
+[11 Oct 15:28:23] DUP_PRO | cc82d47e | DUP_PRO_Database::Build() | Forcing into PHP mode - the mysqldump executable wasn't found! 
+[11 Oct 15:28:24] DUP_PRO | cc82d47e | DUP_PRO_Database::Build() | Done building database 
+[11 Oct 15:28:24] DUP_PRO | cc82d47e | DUP_PRO_Package::build() | Set db built for package 224 
+[11 Oct 15:28:24] DUP_PRO | cc82d47e | DUP_PRO_Package_Runner::process() | BUILD TIME=1 seconds 
+[11 Oct 15:28:24] DUP_PRO | cc82d47e | DUP_PRO_Package_Runner::process() | File lock released 
+[11 Oct 15:28:24] DUP_PRO | cc82d47e | DUP_PRO_Package_Runner::kick_off_worker() | Kicking off worker process as requested by DUP_PRO_Package_Runner::process 
+[11 Oct 15:28:24] DUP_PRO | cc82d47e | DUP_PRO_Package_Runner::kick_off_worker() | Attempting to use ajax url http://www.mcgregorfund.dev/wp-admin/admin-ajax.php 
+[11 Oct 15:28:24] DUP_PRO | cc82d47e | DUP_PRO_Package_Runner::kick_off_worker() | KICKOFF: Server Side 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Package_Runner::init() | File lock acquired 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Package_Runner::init() | File lock released 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Web_Services::process_worker() | Process worker request 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Package_Runner::process() | PROCESS: From server 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Package_Runner::process() | File lock acquired 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Package_Runner::process() | PACKAGE 224:PROCESSING 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Package_Runner::process() | PACKAGE 224:BUILDING 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Package::build() | Main build step 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Archive::Build() | Building archive 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Zip::Create() | **** scan file /Users/Matt/Documents/Websites/www.mcgregorfund.dev/wp-content/backups-dup-pro/tmp/20161027_mcgregorfund_59de2f7f69a0d_20171011144935_scan.json doesn't exist!! 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Log::Error() | Forced Error Generated: ERROR: Can't find Scanfile /Users/Matt/Documents/Websites/www.mcgregorfund.dev/wp-content/backups-dup-pro/tmp/20161027_mcgregorfund_59de2f7f69a0d_20171011144935_scan.json. Please ensure there no non-English characters in the package or schedule name. 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_U::log_error() | Error building archive 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_JSON_Entity_Base::get_by_id_and_type() | get_by_id_and_type: row SELECT * FROM wp_duplicator_pro_entities WHERE id = -1 is null 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Log::Error() | Forced Error Generated: ERROR: Installer file not complete.  The end of file marker was not found.  Please try to re-create the package. 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Package::build() | Done package building 
+[11 Oct 15:28:25] DUP_PRO | f4d5564f | DUP_PRO_Log::Error() | Forced Error Generated: Package creation failed. 
+[11 Oct 15:28:25] DUP_PRO | cc82d47e | DUP_PRO_Package_Runner::kick_off_worker() | after sent kickoff request 
+[11 Oct 15:28:25] DUP_PRO | cc82d47e | DUP_PRO_Web_Services::process_worker() | Exiting process worker request 
+[11 Oct 15:28:25] DUP_PRO | 45c14083 | DUP_PRO_Package_Runner::kick_off_worker() | after sent kickoff request 
+[11 Oct 17:04:57] DUP_PRO | 8393a6f6 | DUP_PRO_Package_Runner::init() | File lock acquired 
+[11 Oct 17:04:57] DUP_PRO | 8393a6f6 | DUP_PRO_Package_Runner::init() | File lock released 

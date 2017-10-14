@@ -1,0 +1,212 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Admin Tools\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-04-27 13:09+0100\n"
+"PO-Revision-Date: 2016-09-19 10:21+0300\n"
+"Last-Translator: YC <wp-plugins@madadim.co.il>\n"
+"Language-Team: Yehi Cohen <madadim.co.il>\n"
+"Language: he_IL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: .\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.9\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+msgid "Admin Tools"
+msgstr "כלי מנהל"
+
+msgid "Preparing your customer management interface easily"
+msgstr "הכנת ממשק הניהול באופן מיטבי עבור הלקוח שלך או יתר המשתמשים"
+
+msgid "Settings"
+msgstr "הגדרות"
+
+msgid "Admin Tools Settings"
+msgstr "הגדרות כלי מנהל"
+
+msgid "General"
+msgstr "כללי"
+
+msgid "Admin Menu"
+msgstr "תפריט ניהול"
+
+msgid "Plugins"
+msgstr "תוספים"
+
+msgid "Save All Settings"
+msgstr "שמירת כל ההגדרות"
+
+msgid "Admin user hidden"
+msgstr "הסתרת משתמש המנהל"
+
+msgid "Hide Your user from other users"
+msgstr "הסתרת משתמש זה מיתר המשתמשים"
+
+msgid "Hide user ID:"
+msgstr "הסתרת משתמש ID:"
+
+msgid "Hide admin tools plugin"
+msgstr "הסתרת תוסף כלי הניהול"
+
+msgid "Hide the plugin from other users. Only you can see the plugin"
+msgstr "הסתרת תוסף זה מיתר המשתמשים. רק אתה תוכל לראות את התוסף"
+
+msgid "Hide this plugin"
+msgstr "הסתר תוסף זה"
+
+msgid "Who can see"
+msgstr "מי יכול לראות"
+
+msgid "Hide menus from who is not administrator or hide from everyone except me"
+msgstr "הסתרת תפריטי ניהול ממי שאינו מנהל או מכל אחד חוץ ממני"
+
+msgid "All Administrators"
+msgstr "כל המנהלים"
+
+msgid "Only me"
+msgstr "רק אני"
+
+msgid "Menu hidden"
+msgstr "תפריט מוסתר"
+
+msgid "Hide menu items from other users"
+msgstr "הסתרת תפריטים מיתר המשתמשים"
+
+msgid "Hide"
+msgstr "הסתרת"
+
+msgid "Hide plugins from who is not administrator or hide from everyone except me"
+msgstr "הסתר תוספים ממי שאינו מנהל או מכל אחד חוץ ממני"
+
+msgid "Plugin hidden"
+msgstr "תוסף מוסתר"
+
+msgid "Hide plugin from other users"
+msgstr "הסתרת תוספים מיתר המשתמשים"
+
+msgid "Change login logo"
+msgstr "החלפת הלוגו בכניסה לאדמין"
+
+msgid "Choose your brand logo"
+msgstr "בחר את הלוגו של המותג שלך"
+
+msgid "Upload Image"
+msgstr "העלאת תמונה"
+
+msgid "Remove"
+msgstr "הסרה"
+
+msgid "Top Bar"
+msgstr "סרגל עליון"
+
+msgid "Apply options on"
+msgstr "החל אפשרויות על"
+
+msgid "Starting the options on who they are not administrator or from everyone except me"
+msgstr "החל את האפשרויות על כל מי שאינו מנהל או על כולם חוץ ממני"
+
+msgid "Top Bar hidden"
+msgstr "הסתרת סרגל עליון"
+
+msgid "Hide Top Bar from other users"
+msgstr "הסתר את הסרגל העליון משאר המשתמשים"
+
+msgid "Hide all Top Bar"
+msgstr "הסתר את כל הסרגל העליון"
+
+msgid "Change small wp-logo"
+msgstr "החלפת האיקון הקטן"
+
+msgid "Choose your brand icon. Optimal dimensions: 32px on 32px"
+msgstr "בחר את האיקון של המותג שלך. מידות אופטמאליות: 32 פקסלים על 32 פקסלים"
+
+msgid "Hide parts from the Top Bar"
+msgstr "הסתר חלקים מהסרגל העליון"
+
+msgid "Hide Top Bar parts from other users"
+msgstr "הסתרת חלקים בסרגל העליון מיתר המשתמשים"
+
+msgid "Add site menu"
+msgstr "הוספת תפריט האתר"
+
+msgid "Choose menu to view on top bar, helping to develop the site"
+msgstr "בחר את התפריט שתרצה שיופיע בסרגל העליון, זה עוזר לפיתוח"
+
+msgid "Advanced"
+msgstr "מתקדם"
+
+msgid "Everybody"
+msgstr "כל אחד"
+
+msgid "Updates & Notifications"
+msgstr "עדכונים והתראות"
+
+msgid "Admin notifications"
+msgstr "התראות בממשק ניהול"
+
+msgid "Choose who can see admin notifications"
+msgstr "בחר מי יכול לראות התראות בממשק ניהול"
+
+msgid "Who can update wordprss core"
+msgstr "מי יכול לעדכן את וורדפרס"
+
+msgid "Choose who allowed to update wordprss core"
+msgstr "בחר מי רשאי לעדכן את גרסת וורדפרס של האתר"
+
+msgid "Who can update wordprss.org plugins"
+msgstr "מי יכול לעדכן את התוספים מ-  wordprss.org"
+
+msgid "Choose who allowed to update plugins (works only on plugins from wordprss.org)"
+msgstr "בחר מי רשאי לעדכן את התוספים (עובד רק על התוספים מ-  wordprss.org)"
+
+msgid "Who can update wordprss.org themes"
+msgstr "מי יכול לעדכן את התבניות מ-  wordprss.org"
+
+msgid "Choose who allowed to update themes (works only on themes from wordprss.org)"
+msgstr "בחר מי רשאי לעדכן את התבניות (עובד רק על התבניות מ-  wordprss.org)"
+
+msgid "Disable automatic updates"
+msgstr "ביטול עדכונים אוטומטים"
+
+msgid "You can disable all automatic updates using the following options"
+msgstr "ניתן לבטל את העדכונים האוטומטים הבאים"
+
+msgid "Disable translation files updates"
+msgstr "ביטול עדכון אוטומטי של קבצי התרגום"
+
+msgid "You can disable translation files updates using the following options"
+msgstr "באפשרות זאת ניתן לבטל את העדכון האוטומטי של קבצי התרגם של האתר כולו"
+
+msgid "Disable update notification emails"
+msgstr "ביטול שליחת מייל בעת עדכון האתר"
+
+msgid "You can disable update notification emails using the following options"
+msgstr "באפשרות זאת ניתן לבטל את המייל שנישלח לאחר עדכון גרסת האתר"
+
+msgid "Disable update admin tools plugin"
+msgstr "ביטול עדכון אוטומטי של התוסף כלי מנהל"
+
+msgid "You can disable update admin tools plugin using the following options"
+msgstr "ניתן לבטל את העדכון האותומטי של תוסף זה אך זה לא מומלץ"
+
+msgid "Disable development updates"
+msgstr "ביטול עדכוני פיתוח"
+
+msgid "Disable minor updates"
+msgstr "ביטול עדכונים קטנים"
+
+msgid "Disable major updates"
+msgstr "ביטול עדכונים גדולים"
+
+msgid "Disable auto update translation"
+msgstr "בטול עדכון קבצי שפה אוטומטי"
+
+msgid "Disable update send email"
+msgstr "ביטול שליחת מייל לאחר עדכון"
+
+msgid "Disable update admin tools (not recommended)"
+msgstr "ביטול עדכון אוטומטי של כלי מנהל (לא מומלץ)"
