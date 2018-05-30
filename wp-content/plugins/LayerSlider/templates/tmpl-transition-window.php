@@ -1,9 +1,10 @@
 <?php if(!defined('LS_ROOT_FILE')) {  header('HTTP/1.0 403 Forbidden'); exit; } ?>
 <script type="text/html" id="tmpl-ls-transition-modal">
-	<div id="ls-transition-window">
+	<div id="ls-transition-window" class="<?php echo ( LS_Config::get('theme_bundle') && ! $lsActivated ) ? 'hide-special-effects' : '' ?>">
 		<header>
 			<h1><?php _e('Select slide transitions', 'LayerSlider') ?></h1>
 			<b class="dashicons dashicons-no"></b>
+
 			<div id="tryorigami">
 				<img src="<?php echo LS_ROOT_URL ?>/static/admin/img/origami.png" alt="Try the Origami Effect!">
 			</div>
@@ -13,7 +14,10 @@
 					<li class="active"><?php _e('2D', 'LayerSlider') ?></li>
 					<li><?php _e('3D', 'LayerSlider') ?></li>
 					<li><?php _e('Custom 2D &amp; 3D', 'LayerSlider') ?></li>
+
+					<?php if( ! LS_Config::get('theme_bundle') || $lsActivated ) : ?>
 					<li><?php _e('Special Effects', 'LayerSlider') ?></li>
+					<?php endif ?>
 				</ul>
 				<i><?php _e('Apply to others', 'LayerSlider') ?></i>
 				<i class="off"><?php _e('Select all', 'LayerSlider') ?></i>
@@ -36,7 +40,7 @@
 				<section data-tr-type="custom_2d_transitions">
 					<h4><?php _e('Custom 2D transitions', 'LayerSlider') ?></h4>
 					<div>
-						<p><?php _e("You haven't created any custom 2D transitions yet.", 'LayerSlider') ?></p>
+						<p><?php _e('You haven’t created any custom 2D transitions yet.', 'LayerSlider') ?></p>
 					</div>
 				</section>
 
@@ -44,7 +48,7 @@
 				<section data-tr-type="custom_3d_transitions">
 					<h4><?php _e('Custom 3D transitions', 'LayerSlider') ?></h4>
 					<div>
-						<p><?php _e("You haven't created any custom 3D transitions yet.", 'LayerSlider') ?></p>
+						<p><?php _e('You haven’t created any custom 3D transitions yet.', 'LayerSlider') ?></p>
 					</div>
 				</section>
 
@@ -53,7 +57,7 @@
 
 				<p class="ls-description">
 					<small>
-						<?php _e('Special effects are like regular slide transitions and they work in the same way. You can set them on each slide individually. Mixing them with other transitions on other slides is perfectly fine. You can also apply them on all of your slides at once by pressing the "Apply to others" button above. In case of 3D special effects, selecting additional 2D transitions can ensure backward compatibility for older browsers.', 'LayerSlider') ?>
+						<?php _e('Special effects are like regular slide transitions and they work in the same way. You can set them on each slide individually. Mixing them with other transitions on other slides is perfectly fine. You can also apply them on all of your slides at once by pressing the “Apply to others” button above. In case of 3D special effects, selecting additional 2D transitions can ensure backward compatibility for older browsers.', 'LayerSlider') ?>
 					</small>
 				</p>
 
@@ -62,7 +66,7 @@
 						<table>
 							<tr>
 								<td>
-									<h4><?php _e('Origami transition', 'LayerSlider') ?><a class="dashicons dashicons-star-filled" target="_blank" href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#activation" data-help="Premium feature. Click to learn more."></a></h4>
+									<h4><?php _e('Origami transition', 'LayerSlider') ?></h4>
 								</td>
 								<td rowspan="2">
 									<p>
@@ -75,9 +79,12 @@
 							</tr>
 							<tr>
 								<td class="center">
-									<div class="ls-select-special-transition" data-name="transitionorigami">
+									<div class="ls-select-special-transition <?php echo ! $lsActivated ? 'locked' : '' ?>" data-name="transitionorigami">
 										<span class="dashicons dashicons-yes"></span>
 										<?php _e('Use it on this slide', 'LayerSlider') ?>
+										<?php if( ! $lsActivated ) : ?>
+										<a class="dashicons dashicons-lock" target="_blank" href="<?php echo admin_url('admin.php?page=layerslider-addons' ) ?>" data-help="<?php _e('This feature requires product activation. Click on the padlock icon to learn more.', 'LayerSlider') ?>" data-help-delay="100"></a>
+										<?php endif ?>
 									</div>
 									<div class="center ls-example-link">
 										<a href="https://layerslider.kreaturamedia.com/sliders/origami/" target="_blank"><?php _e('Click here for live example', 'LayerSlider') ?></a>

@@ -1,6 +1,13 @@
 <?php
 /**
- * This file contains typography styles for Fusion Core plugin
+ * This file contains typography styles for Fusion Core plugin.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.0.0
  */
 
 // Do not allow directly accessing this file.
@@ -55,9 +62,9 @@ function avada_fusion_core_h4_typography( $typography_elements ) {
 	$typography_elements['size'][] = '.fusion-person .person-author-wrapper .person-title';
 	$typography_elements['size'][] = '.person-author-wrapper';
 	$typography_elements['size'][] = '.popover .popover-title';
-	$typography_elements['size'][] = '.fusion-flip-box .flip-box-heading-back';
+	$typography_elements['size'][] = '.fusion-flip-boxes .fusion-flip-box .flip-box-heading-back';
 	$typography_elements['family'][] = '.popover .popover-title';
-	$typography_elements['family'][] = '.fusion-flip-box .flip-box-heading-back';
+	$typography_elements['family'][] = '.fusion-flip-boxes .fusion-flip-box .flip-box-heading-back';
 	$typography_elements['family'][] = '.fusion-tabs .nav-tabs  li .fusion-tab-heading';
 	$typography_elements['family'][] = '.fusion-accordian .panel-heading a';
 	$typography_elements['family'][] = '.fusion-person .person-desc .person-author .person-author-wrapper';

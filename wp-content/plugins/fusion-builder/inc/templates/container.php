@@ -6,7 +6,7 @@
 			has_bg = true;
 		}
 		#>
-		<# section_name = typeof ( params.admin_label ) !== 'undefined' ? params.admin_label : fusionBuilderText.full_width_section; #>
+		<# section_name = typeof ( params.admin_label ) !== 'undefined' ? _.unescape( params.admin_label ) : fusionBuilderText.full_width_section; #>
 		<input type="text" class="fusion-builder-section-name" name="" value="{{ section_name }}" />
 		<div class="fusion-builder-controls fusion-builder-section-controls">
 			<a href="#" class="fusion-builder-settings fusion-builder-settings-container" title="{{ fusionBuilderText.section_settings }}"><span class="fusiona-pen"></span></a>

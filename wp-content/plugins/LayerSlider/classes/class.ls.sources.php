@@ -52,6 +52,10 @@ class LS_Sources {
 			if(file_exists($path.'/info.json')) {
 				$skins[$handle]['info'] = json_decode(file_get_contents($path.'/info.json'), true);
 				$skins[$handle]['name'] = $skins[$handle]['info']['name'];
+
+				if( ! empty( $skins[$handle]['info']['requires'] ) ) {
+					$skins[$handle]['requires'] = $skins[$handle]['info']['requires'];
+				}
 			}
 		}
 
@@ -124,10 +128,16 @@ class LS_Sources {
 	 * @param string $skin The name of the skin/folder
 	 * @return string URL for the skin's directory
 	 */
-	public static function urlForSkin($handle) {
+	public static function urlForSkin( $handle ) {
 		$path = self::$skins[ strtolower($handle) ]['dir'];
 		$url = content_url() . str_replace(realpath(WP_CONTENT_DIR), '', realpath($path)).'/';
-		return str_replace('\\', '/', $url);
+		$url = str_replace('\\', '/', $url);
+
+		if( has_filter( 'layerslider_skin_url' ) ) {
+			$url = apply_filters( 'layerslider_skin_url', $url, $handle );
+		}
+
+		return $url;
 	}
 
 
@@ -189,6 +199,10 @@ class LS_Sources {
 					$sliders[$handle]['url'] = '#';
 					if( ! empty($sliders[$handle]['info']['url']) ) {
 						$sliders[$handle]['url'] = $sliders[$handle]['info']['url'];
+					}
+
+					if( ! empty( $sliders[$handle]['info']['requires'] ) ) {
+						$sliders[$handle]['requires'] = $sliders[$handle]['info']['requires'];
 					}
 				}
 

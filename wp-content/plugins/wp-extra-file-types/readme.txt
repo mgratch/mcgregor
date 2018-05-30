@@ -2,8 +2,8 @@
 Contributors: davide.airaghi
 Tags: file type, upload, media library
 Requires at least: 4.0
-Tested up to: 4.7.2
-Stable tag: 0.3.6
+Tested up to: 4.8.2
+Stable tag: 0.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,14 @@ supported by the Media Library upload procedure.
 3. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+= 0.4.1 =
+* changed .exe mime type
+
+= 0.4.0 =
+* added more extensions and mime types
+* added the option "skip wordpress check" to disable WordPress internal checks
+* changes to settings page
 
 = 0.3.6 =
 * do not display file types already allowed by WordPress

@@ -11,22 +11,22 @@ Admin Tools Helps you to get better admin for your customers. Manage your menus,
 
 == Description ==
 
-Admin Tools Helps you prepared the Admin interface for your customers.
-The plugin extends your admin control, allowing you to extend the control of the Admin Control.
+Admin Tools allows you to prepare your site for the client. You can arrange the admin interface so that the client has all access to the necessary things only without deleting or editing the plugins or content that could harm the performance or visibility of the site.
+The plugin is lightweight and a must for any web designer who wants to provide his client with a clean and branded admin management interface
 
-= Features: =
+= What you can do with Admin Tools: =
+* Brand the admin interface with your logo.
+* Protect your user (developer) from being deleted.
+* Hide the plugins that you do not want to appear to other site administrators.
+* Hide the admin menus that you do not want to appear to the other administrators of the site.
+* Hide admin notifications from other users.
+* Disable automatic updates of WordPress.
+* Control of what items appears in the admin bar.
+* Adding a menu of the site to Adam Bar (development assistant).
 
-* Easy to Use
-* Lightweight
-* Hide Admin Menus & Sub-Menus
-* Hide Plugins from Admin Users
-* Hide Top Bar or parts from Top Bar
-* Change logo on the admin login page
-* Choose who can see admin notifications
-* Control wordpress updates
-
-
-
+= Updates to be added soon: =
+Security options such as changing the url of the login page
+Increase site speed by removing unnecessary WordPress code
 
 = Feedback =
 If you like this plugin, then please leave us a good rating and review.<br> Consider following us on <a rel="author" href="https://plus.google.com/109974551206892069425">Google+</a>, and <a href="https://www.facebook.com/madadim.co.il">Facebook</a>
@@ -45,6 +45,11 @@ Upload the Admin Tools plugin to your plugin folder on your site, Activate it.
 
 
 == Changelog ==
+
+= 1.3.7 =
+*Release Date - 16/03/2017 *
+
+* Add: Remove register setting on uninstall
 
 = 1.3.6 =
 *Release Date - 03/03/2017 *

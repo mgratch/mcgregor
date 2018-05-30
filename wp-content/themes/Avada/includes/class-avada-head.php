@@ -1,4 +1,14 @@
 <?php
+/**
+ * Tweaks for the <head> of the document.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      3.8
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -7,8 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Tweaks for the <head> of the document.
- *
- * @since 3.8
  */
 class Avada_Head {
 
@@ -35,6 +43,8 @@ class Avada_Head {
 		if ( ! function_exists( '_wp_render_title_tag' ) ) {
 			add_action( 'wp_head', array( $this, 'render_title' ) );
 		}
+
+		/* add_filter( 'wpseo_metadesc', array( $this, 'yoast_metadesc_helper' ) ); */
 
 	}
 
@@ -102,21 +112,22 @@ class Avada_Head {
 		}
 		?>
 
-		<meta property="og:title" content="<?php echo strip_tags( str_replace( array( '"', "'" ), array( '&quot;', '&#39;' ), $post->post_title ) ); ?>"/>
+		<meta property="og:title" content="<?php echo esc_attr( strip_tags( str_replace( array( '"', "'" ), array( '&quot;', '&#39;' ), $post->post_title ) ) ); ?>"/>
 		<meta property="og:type" content="article"/>
-		<meta property="og:url" content="<?php echo get_permalink(); ?>"/>
-		<meta property="og:site_name" content="<?php echo get_bloginfo( 'name' ); ?>"/>
-		<meta property="og:description" content="<?php echo Avada()->blog->get_content_stripped_and_excerpted( 55, $post->post_content ); ?>"/>
+		<meta property="og:url" content="<?php echo esc_url_raw( get_permalink() ); ?>"/>
+		<meta property="og:site_name" content="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"/>
+		<meta property="og:description" content="<?php echo esc_attr( Avada()->blog->get_content_stripped_and_excerpted( 55, $post->post_content ) ); ?>"/>
 
 		<?php if ( '' != $image ) : ?>
 			<?php if ( is_array( $image ) ) : ?>
 				<?php if ( isset( $image['url'] ) ) : ?>
-					<meta property="og:image" content="<?php echo $image['url']; ?>"/>
+					<meta property="og:image" content="<?php echo esc_url_raw( $image['url'] ); ?>"/>
 				<?php endif; ?>
 			<?php else : ?>
-				<meta property="og:image" content="<?php echo $image; ?>"/>
+				<meta property="og:image" content="<?php echo esc_url_raw( $image ); ?>"/>
 			<?php endif; ?>
-		<?php endif;
+		<?php endif; ?>
+		<?php
 
 	}
 
@@ -126,11 +137,9 @@ class Avada_Head {
 	 * @access  public
 	 */
 	public function x_ua_meta() {
-
-		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && ( false !== strpos( $_SERVER['HTTP_USER_AGENT'], 'MSIE' ) ) ) : ?>
-			<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-		<?php endif;
-
+		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && ( false !== strpos( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ), 'MSIE' ) ) ) { // WPCS: sanitization ok.
+			echo '<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />';
+		}
 	}
 
 	/**
@@ -151,31 +160,77 @@ class Avada_Head {
 	 * @return  void
 	 */
 	public function insert_favicons() {
+		?>
+		<?php if ( '' !== Avada()->settings->get( 'favicon', 'url' ) ) : ?>
+			<link rel="shortcut icon" href="<?php echo esc_url_raw( Avada()->settings->get( 'favicon', 'url' ) ); ?>" type="image/x-icon" />
+		<?php endif; ?>
 
-		if ( '' != Avada()->settings->get( 'favicon', 'url' ) ) : ?>
-			<link rel="shortcut icon" href="<?php echo Avada()->settings->get( 'favicon', 'url' ); ?>" type="image/x-icon" />
-		<?php endif;
-
-		if ( '' != Avada()->settings->get( 'iphone_icon', 'url' ) ) : ?>
+		<?php if ( '' !== Avada()->settings->get( 'iphone_icon', 'url' ) ) : ?>
 			<!-- For iPhone -->
-			<link rel="apple-touch-icon-precomposed" href="<?php echo Avada()->settings->get( 'iphone_icon', 'url' ); ?>">
-		<?php endif;
+			<link rel="apple-touch-icon" href="<?php echo esc_url_raw( Avada()->settings->get( 'iphone_icon', 'url' ) ); ?>">
+		<?php endif; ?>
 
-		if ( '' != Avada()->settings->get( 'iphone_icon_retina', 'url' ) ) : ?>
-			<!-- For iPhone 4 Retina display -->
-			<link rel="apple-touch-icon-precomposed" sizes="114x114" href="<?php echo Avada()->settings->get( 'iphone_icon_retina', 'url' ); ?>">
-		<?php endif;
+		<?php if ( '' !== Avada()->settings->get( 'iphone_icon_retina', 'url' ) ) : ?>
+			<!-- For iPhone Retina display -->
+			<link rel="apple-touch-icon" sizes="114x114" href="<?php echo esc_url_raw( Avada()->settings->get( 'iphone_icon_retina', 'url' ) ); ?>">
+		<?php endif; ?>
 
-		if ( '' != Avada()->settings->get( 'ipad_icon', 'url' ) ) : ?>
+		<?php if ( '' !== Avada()->settings->get( 'ipad_icon', 'url' ) ) : ?>
 			<!-- For iPad -->
-			<link rel="apple-touch-icon-precomposed" sizes="72x72" href="<?php echo Avada()->settings->get( 'ipad_icon', 'url' ); ?>">
-		<?php endif;
+			<link rel="apple-touch-icon" sizes="72x72" href="<?php echo esc_url_raw( Avada()->settings->get( 'ipad_icon', 'url' ) ); ?>">
+		<?php endif; ?>
 
-		if ( '' != Avada()->settings->get( 'ipad_icon_retina' ) ) : ?>
+		<?php if ( '' !== Avada()->settings->get( 'ipad_icon_retina', 'url' ) ) : ?>
 			<!-- For iPad Retina display -->
-			<link rel="apple-touch-icon-precomposed" sizes="144x144" href="<?php echo Avada()->settings->get( 'ipad_icon_retina', 'url' ); ?>">
-		<?php endif;
+			<link rel="apple-touch-icon" sizes="144x144" href="<?php echo esc_url_raw( Avada()->settings->get( 'ipad_icon_retina', 'url' ) ); ?>">
+		<?php endif; ?>
+		<?php
 
+	}
+
+	/**
+	 * Fixes YOAST SEO plugin issues.
+	 *
+	 * @access public
+	 * @since 5.0.3
+	 * @param string $metadesc The description.
+	 * @return string
+	 */
+	public function yoast_metadesc_helper( $metadesc ) {
+		if ( '' === $metadesc ) {
+			global $post;
+
+			$metadesc = Avada()->blog->get_content_stripped_and_excerpted( 55, $post->post_content );
+		}
+
+		return $metadesc;
+	}
+
+	/**
+	 * Echoes the viewport.
+	 *
+	 * @access public
+	 * @since 5.1.0
+	 * @return void
+	 */
+	public function the_viewport() {
+
+		$is_ipad = (bool) ( isset( $_SERVER['HTTP_USER_AGENT'] ) && false !== strpos( $_SERVER['HTTP_USER_AGENT'], 'iPad' ) ); // WPCS: sanitization ok.
+
+		$viewport = '';
+		if ( Avada()->settings->get( 'responsive' ) && $is_ipad ) {
+			$viewport .= '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />';
+		} elseif ( Avada()->settings->get( 'responsive' ) ) {
+			if ( Avada()->settings->get( 'mobile_zoom' ) ) {
+				$viewport .= '<meta name="viewport" content="width=device-width, initial-scale=1" />';
+			} else {
+				$viewport .= '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />';
+			}
+		}
+
+		$viewport = apply_filters( 'avada_viewport_meta', $viewport );
+
+		echo $viewport; // WPCS: XSS ok.
 	}
 }
 

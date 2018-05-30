@@ -1,4 +1,15 @@
 <?php
+/**
+ * The main theme class.
+ * We're using this one to instantiate uther classes
+ * and access the main theme objects.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -62,7 +73,7 @@ class Avada {
 	 * @access public
 	 * @var string
 	 */
-	public static $version = '5.0.2';
+	public static $version = AVADA_VERSION;
 
 	/**
 	 * The original option name.
@@ -73,7 +84,7 @@ class Avada {
 	 * @access private
 	 * @var string
 	 */
-	private static $original_option_name = 'avada_theme_options';
+	private static $original_option_name = 'fusion_options';
 
 	/**
 	 * The option name including the language suffix.
@@ -150,6 +161,14 @@ class Avada {
 	public static $bundled_plugins = array();
 
 	/**
+	 * Fusion.
+	 *
+	 * @access public
+	 * @var object
+	 */
+	public $fusion_library;
+
+	/**
 	 * Avada_Init.
 	 *
 	 * @access public
@@ -206,14 +225,6 @@ class Avada {
 	public $layout;
 
 	/**
-	 * Avada_Dynamic_CSS.
-	 *
-	 * @access public
-	 * @var object
-	 */
-	public $dynamic_css;
-
-	/**
 	 * Avada_GoogleMap.
 	 *
 	 * @access public
@@ -246,20 +257,12 @@ class Avada {
 	public $registration;
 
 	/**
-	 * Avada_Theme_Updater.
+	 * Avada_Sermon_Manager
 	 *
 	 * @access public
-	 * @var object Avada_Theme_Updater.
+	 * @var object Avada_Sermon_Manager
 	 */
-	public $theme_updater;
-
-	/**
-	 * The current page ID.
-	 *
-	 * @access public
-	 * @var bool|int
-	 */
-	public static $c_page_id = false;
+	public $sermon_manager;
 
 	/**
 	 * Access the single instance of this class.
@@ -282,23 +285,23 @@ class Avada {
 
 	/**
 	 * The class constructor
+	 *
+	 * @access private
 	 */
 	private function __construct() {
 
 		// Add a non-persistent cache group.
-		if ( ! class_exists( 'WpeCommon' ) ) {
-			wp_cache_add_non_persistent_groups( 'avada' );
-		}
+		wp_cache_add_non_persistent_groups( 'avada' );
 
 		// Set static vars.
 		if ( '' === self::$template_dir_path ) {
-			self::$template_dir_path = get_template_directory();
+			self::$template_dir_path = wp_normalize_path( get_template_directory() );
 		}
 		if ( '' === self::$template_dir_url ) {
 			self::$template_dir_url = get_template_directory_uri();
 		}
 		if ( '' === self::$stylesheet_dir_path ) {
-			self::$stylesheet_dir_path = get_stylesheet_directory();
+			self::$stylesheet_dir_path = wp_normalize_path( get_stylesheet_directory() );
 		}
 		if ( '' === self::$stylesheet_dir_url ) {
 			self::$stylesheet_dir_url = get_stylesheet_directory_uri();
@@ -314,34 +317,44 @@ class Avada {
 			self::$option_name = self::get_option_name();
 		}
 
-		// Initialize bundled plugins array.
-		self::$bundled_plugins = array(
-			'fusion_core' => array( 'slug' => 'fusion-core', 'name' => 'Fusion Core', 'version' => '3.0.2' ),
-			'fusion_builder' => array( 'slug' => 'fusion-builder', 'name' => 'Fusion Builder', 'version' => '1.0.2' ),
-			'layer_slider' => array( 'slug' => 'LayerSlider', 'name' => 'LayerSlider WP', 'version' => '5.6.10' ),
-			'slider_revolution' => array( 'slug' => 'revslider', 'name' => 'Slider Revolution', 'version' => '5.2.6' ),
-		);
-
 		// Instantiate secondary classes.
 		$this->settings       = Avada_Settings::get_instance();
-		$this->registration   = new Avada_Product_Registration();
+		$this->registration   = new Fusion_Product_Registration(
+			array(
+				'type'    => 'theme',
+				'name'    => 'Avada',
+				'bundled' => array(
+					'fusion-core'                 => 'Fusion Core',
+					'fusion-builder'              => 'Fusion Builder',
+					'fusion-white-label-branding' => 'Fusion White Label Branding',
+				),
+			)
+		);
+
 		$this->init           = new Avada_Init();
 		$this->social_sharing = new Avada_Social_Sharing();
 		$this->template       = new Avada_Template();
 		$this->blog           = new Avada_Blog();
 		$this->images         = new Avada_Images();
 		$this->head           = new Avada_Head();
-		$this->dynamic_css    = new Avada_Dynamic_CSS();
 		$this->layout         = new Avada_Layout();
 		$this->google_map     = new Avada_GoogleMap();
 		$this->remote_install = new Avada_Remote_installer();
-		$this->theme_updater  = new Avada_Theme_Updater();
-		add_action( 'wp', array( $this, 'set_page_id' ) );
+		$this->fusion_library = Fusion::get_instance();
+		$this->sermon_manager = new Avada_Sermon_Manager();
+
+		// Set the Fusion Library Image Class variable to the Avada one, to avoid duplication.
+		global $fusion_library;
+		if ( $fusion_library ) {
+			$fusion_library->images = $this->images;
+		}
 	}
 
 	/**
 	 * Checks if we're in the migration page.
 	 * It does that by checking _GET, and then sets the $is_updating property.
+	 *
+	 * @access public
 	 */
 	public function set_is_updating() {
 		if ( ! self::$is_updating && $_GET && isset( $_GET['avada_update'] ) && '1' == $_GET['avada_update'] ) {
@@ -352,8 +365,9 @@ class Avada {
 	/**
 	 * Gets the theme version.
 	 *
+	 * @static
+	 * @access public
 	 * @since 5.0
-	 *
 	 * @return string
 	 */
 	public static function get_theme_version() {
@@ -363,8 +377,9 @@ class Avada {
 	/**
 	 * Gets the normalized theme version.
 	 *
+	 * @static
+	 * @access public
 	 * @since 5.0
-	 *
 	 * @return string
 	 */
 	public static function get_normalized_theme_version() {
@@ -379,66 +394,73 @@ class Avada {
 	}
 
 	/**
-	 * Gets the bundled plugins.
+	 * Gets info for premium (and free) plugins from the ThemeFusion API
+	 * in a JSON format and then format them as an array.
 	 *
+	 * @static
+	 * @access public
 	 * @since 5.0
-	 *
 	 * @return array Array of bundled plugins.
 	 */
 	public static function get_bundled_plugins() {
-		return self::$bundled_plugins;
-	}
+		if ( empty( self::$bundled_plugins ) ) {
 
-	/**
-	 * Gets the current page ID.
-	 *
-	 * @return string The current page ID.
-	 */
-	public function get_page_id() {
-		return self::$c_page_id;
-	}
+			// Check for transient, if none, grab remote HTML file.
+			$plugins = get_transient( 'avada_premium_plugins_info' );
 
-	/**
-	 * Sets the current page ID.
-	 *
-	 * @uses self::c_page_id
-	 */
-	public function set_page_id() {
-		self::$c_page_id = self::c_page_id();
-	}
+			if ( ! $plugins || empty( $plugins ) ) {
+				$url = 'https://updates.theme-fusion.com/?avada_action=get_plugins&avada_version=' . self::get_normalized_theme_version();
 
-	/**
-	 * Gets the current page ID.
-	 *
-	 * @return bool|int
-	 */
-	private static function c_page_id() {
-		$object_id = get_queried_object_id();
+				// Get remote HTML file.
+				$response = wp_remote_get(
+					$url, array(
+						'user-agent' => 'avada-user-agent',
+					)
+				);
 
-		$c_page_id = false;
+				// Check for error.
+				if ( is_wp_error( $response ) ) {
+					return array();
+				}
 
-		if ( get_option( 'show_on_front' ) && get_option( 'page_for_posts' ) && is_home() ) {
-			$c_page_id = get_option( 'page_for_posts' );
-		} else {
-			// Use the $object_id if available.
-			if ( isset( $object_id ) ) {
-				$c_page_id = $object_id;
+				// Parse remote HTML file.
+				$data = wp_remote_retrieve_body( $response );
+
+				// Check for error.
+				if ( is_wp_error( $data ) ) {
+					return array();
+				}
+
+				$data = json_decode( $data, true );
+
+				if ( ! is_array( $data ) && function_exists( 'file_get_contents' ) ) {
+					// Fallback to file_get_contents in case.
+					$response = file_get_contents( $url );
+					$data     = json_decode( $response, true );
+				}
+
+				$plugins = array();
+				foreach ( $data as $plugin ) {
+					if ( $plugin['premium'] ) {
+
+						// Making sure the correct array index is present, latest_version being returned from server plugin.
+						$plugin['version'] = $plugin['latest_version'];
+
+						$plugin['Author'] = $plugin['plugin_author'];
+						$plugin['AuthorURI'] = $plugin['plugin_author_url'];
+					}
+
+					$plugins[ $plugin['slug'] ] = $plugin;
+				}
+
+				// Store remote data file in transient, expire after 24 hours.
+				set_transient( 'avada_premium_plugins_info', $plugins, 24 * HOUR_IN_SECONDS );
 			}
-			// If we're not on a singular post, set to false.
-			if ( ! is_singular() ) {
-				$c_page_id = false;
-			}
-			// Front page is the posts page.
-			if ( isset( $object_id ) && 'posts' == get_option( 'show_on_front' ) && is_home() ) {
-				$c_page_id = $object_id;
-			}
-			// The woocommerce shop page.
-			if ( class_exists( 'WooCommerce' ) && ( is_shop() || is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) ) {
-				$c_page_id = get_option( 'woocommerce_shop_page_id' );
-			}
+
+			self::$bundled_plugins = $plugins;
 		}
 
-		return $c_page_id;
+		return self::$bundled_plugins;
 	}
 
 	/**
@@ -448,11 +470,19 @@ class Avada {
 	 * If we're not currently performing a migration
 	 * it also checks if the options for the current language are set.
 	 * If they are not, then we will copy the options from the main language.
+	 *
+	 * @static
+	 * @access public
 	 */
 	public static function multilingual_options() {
+
+		global $fusion_library;
+		$multilingual = $fusion_library->multilingual;
+
 		// Set the self::$lang.
-		if ( ! in_array( Avada_Multilingual::get_active_language(), array( '', 'en', 'all' ) ) ) {
-			self::$lang = '_' . Avada_Multilingual::get_active_language();
+		$active_language = Fusion_Multilingual::get_active_language();
+		if ( ! in_array( $active_language, array( '', 'en', 'all' ) ) ) {
+			self::$lang = '_' . $active_language;
 		}
 		// Make sure the options are copied if needed.
 		if ( ! in_array( self::$lang, array( '', 'en', 'all' ) ) && ! self::$lang_applied ) {
@@ -478,6 +508,8 @@ class Avada {
 	 * Get the private $option_name.
 	 * If empty returns the original_option_name.
 	 *
+	 * @static
+	 * @access public
 	 * @return string
 	 */
 	public static function get_option_name() {
@@ -490,6 +522,8 @@ class Avada {
 	/**
 	 * Get the private $original_option_name.
 	 *
+	 * @static
+	 * @access public
 	 * @return string
 	 */
 	public static function get_original_option_name() {
@@ -499,7 +533,9 @@ class Avada {
 	/**
 	 * Change the private $option_name.
 	 *
-	 * @param  false|string $option_name The option name to use.
+	 * @static
+	 * @access public
+	 * @param false|string $option_name The option name to use.
 	 */
 	public static function set_option_name( $option_name = false ) {
 		if ( false !== $option_name && ! empty( $option_name ) ) {

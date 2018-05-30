@@ -1,269 +1,17 @@
 <?php
+/**
+ * Dynamic-css helpers.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
+
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit( 'Direct script access denied.' );
-}
-
-/**
- * Helper function.
- * Merge and combine the CSS elements.
- *
- * @param  string|array $elements An array of our elements.
- *                                If we use a string then it is directly returned.
- * @return  string
- */
-function avada_implode( $elements = array() ) {
-
-	if ( ! is_array( $elements ) ) {
-		return $elements;
-	}
-
-	// Make sure our values are unique.
-	$elements = array_unique( $elements );
-	// Sort elements alphabetically.
-	// This way all duplicate items will be merged in the final CSS array.
-	sort( $elements );
-
-	// Implode items and return the value.
-	return implode( ',', $elements );
-
-}
-
-/**
- * Maps elements from dynamic css to the selector.
- *
- * @param  array  $elements The elements.
- * @param  string $selector The selector.
- * @return  array
- */
-function avada_map_selector( $elements, $selector ) {
-	$array = array();
-
-	foreach ( $elements as $element ) {
-		$array[] = $element . $selector;
-	}
-
-	return $array;
-}
-
-/**
- * Get the array of dynamically-generated CSS and convert it to a string.
- * Parses the array and adds quotation marks to font families and prefixes for browser-support.
- *
- * @param  array $css The CSS array.
- * @return  string
- */
-function avada_dynamic_css_parser( $css ) {
-	/**
-	 * Prefixes.
-	 */
-	foreach ( $css as $media_query => $elements ) {
-		foreach ( $elements as $element => $style_array ) {
-			foreach ( $style_array as $property => $value ) {
-				// Font family.
-				if ( 'font-family' == $property ) {
-					if ( false === strpos( $value, ',' ) && false === strpos( $value, "'" ) && false === strpos( $value, '"' ) ) {
-						$value = "'" . $value . "'";
-					}
-					$css[ $media_query ][ $element ]['font-family'] = $value;
-				} // border-radius.
-				elseif ( 'border-radius' == $property ) {
-					$css[ $media_query ][ $element ]['-webkit-border-radius'] = $value;
-				} // box-shadow.
-				elseif ( 'box-shadow' == $property ) {
-					$css[ $media_query ][ $element ]['-webkit-box-shadow'] = $value;
-					$css[ $media_query ][ $element ]['-moz-box-shadow']    = $value;
-				} // box-sizing.
-				elseif ( 'box-sizing' == $property ) {
-					$css[ $media_query ][ $element ]['-webkit-box-sizing'] = $value;
-					$css[ $media_query ][ $element ]['-moz-box-sizing']    = $value;
-				} // text-shadow.
-				elseif ( 'text-shadow' == $property ) {
-					$css[ $media_query ][ $element ]['-webkit-text-shadow'] = $value;
-					$css[ $media_query ][ $element ]['-moz-text-shadow']    = $value;
-				} // transform.
-				elseif ( 'transform' == $property ) {
-					$css[ $media_query ][ $element ]['-webkit-transform'] = $value;
-					$css[ $media_query ][ $element ]['-moz-transform']    = $value;
-					$css[ $media_query ][ $element ]['-ms-transform']     = $value;
-					$css[ $media_query ][ $element ]['-o-transform']      = $value;
-				} // background-size.
-				elseif ( 'background-size' == $property ) {
-					$css[ $media_query ][ $element ]['-webkit-background-size'] = $value;
-					$css[ $media_query ][ $element ]['-moz-background-size']    = $value;
-					$css[ $media_query ][ $element ]['-ms-background-size']     = $value;
-					$css[ $media_query ][ $element ]['-o-background-size']      = $value;
-				} // transition.
-				elseif ( 'transition' == $property ) {
-					$css[ $media_query ][ $element ]['-webkit-transition'] = $value;
-					$css[ $media_query ][ $element ]['-moz-transition']    = $value;
-					$css[ $media_query ][ $element ]['-ms-transition']     = $value;
-					$css[ $media_query ][ $element ]['-o-transition']      = $value;
-				} // transition-property.
-				elseif ( 'transition-property' == $property ) {
-					$css[ $media_query ][ $element ]['-webkit-transition-property'] = $value;
-					$css[ $media_query ][ $element ]['-moz-transition-property']    = $value;
-					$css[ $media_query ][ $element ]['-ms-transition-property']     = $value;
-					$css[ $media_query ][ $element ]['-o-transition-property']      = $value;
-				} // linear-gradient.
-				elseif ( is_array( $value ) ) {
-					foreach ( $value as $subvalue ) {
-						if ( false !== strpos( $subvalue, 'linear-gradient' ) ) {
-							$css[ $media_query ][ $element ][ $property ][] = '-webkit-' . $subvalue;
-							$css[ $media_query ][ $element ][ $property ][] = '-moz-' . $subvalue;
-							$css[ $media_query ][ $element ][ $property ][] = '-ms-' . $subvalue;
-							$css[ $media_query ][ $element ][ $property ][] = '-o-' . $subvalue;
-						} // calc.
-						elseif ( 0 === stripos( $subvalue, 'calc' ) ) {
-							$css[ $media_query ][ $element ][ $property ][] = '-webkit-' . $subvalue;
-							$css[ $media_query ][ $element ][ $property ][] = '-moz-' . $subvalue;
-							$css[ $media_query ][ $element ][ $property ][] = '-ms-' . $subvalue;
-							$css[ $media_query ][ $element ][ $property ][] = '-o-' . $subvalue;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Process the array of CSS properties and produce the final CSS.
-	 */
-	$final_css = '';
-	foreach ( $css as $media_query => $styles ) {
-
-		$final_css .= ( 'global' != $media_query ) ? $media_query . '{' : '';
-
-		foreach ( $styles as $style => $style_array ) {
-			$final_css .= $style . '{';
-			foreach ( $style_array as $property => $value ) {
-				if ( is_array( $value ) ) {
-					foreach ( $value as $sub_value ) {
-						$final_css .= $property . ':' . $sub_value . ';';
-					}
-				} else {
-					$final_css .= $property . ':' . $value . ';';
-				}
-			}
-			$final_css .= '}';
-		}
-
-		$final_css .= ( 'global' != $media_query ) ? '}' : '';
-
-	}
-
-	return apply_filters( 'avada_dynamic_css', $final_css );
-
-}
-
-/**
- * Returns the dynamic CSS.
- * If possible, it also caches the CSS using WordPress transients.
- *
- * @return  string  the dynamically-generated CSS.
- */
-function avada_dynamic_css_cached() {
-	/**
-	 * Get the page ID
-	 */
-	$c_page_id = Avada()->get_page_id();
-
-	/**
-	 * Do we have WP_DEBUG set to true?
-	 * If yes, then do not cache.
-	 */
-	$cache = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? false : true;
-	/**
-	 * If the dynamic_css_db_caching option is not set.
-	 * or set to off, then do not cache.
-	 */
-	$cache = ( $cache && ( null == Avada()->settings->get( 'dynamic_css_db_caching' ) || ! Avada()->settings->get( 'dynamic_css_db_caching' ) ) ) ? false : $cache;
-	/**
-	 * If we're compiling to file, then do not use transients for caching.
-	 */
-	/**
-	 * Check if we're using file mode or inline mode.
-	 * This simply checks the dynamic_css_compiler options.
-	 */
-	$mode = Avada_Dynamic_CSS::$mode;
-
-	/**
-	 * ALWAYS use 'inline' mode when in the customizer.
-	 */
-	global $wp_customize;
-	if ( $wp_customize ) {
-		$mode = 'inline';
-	}
-
-	$cache = ( $cache && 'file' == $mode ) ? false : $cache;
-
-	if ( $cache ) {
-		/**
-		 * Build the transient name.
-		 */
-		$transient_name = ( $c_page_id ) ? 'avada_dynamic_css_' . $c_page_id : 'avada_dynamic_css_global';
-
-		/**
-		 * Check if the dynamic CSS needs updating.
-		 * If it does, then calculate the CSS and then update the transient.
-		 */
-		if ( Avada_Dynamic_CSS::needs_update( $mode ) ) {
-			/**
-			 * Calculate the dynamic CSS.
-			 */
-			$dynamic_css = avada_dynamic_css_parser( avada_dynamic_css_array() );
-			/**
-			 * Append the user-entered dynamic CSS.
-			 */
-			$dynamic_css .= wp_strip_all_tags( Avada()->settings->get( 'custom_css' ) );
-
-			$dynamic_css .= '/* cached */';
-			/**
-			 * Set the transient for an hour.
-			 */
-			set_transient( $transient_name, $dynamic_css, 60 * 60 );
-
-			if ( 'inline' === $mode ) {
-				$page_id = ( $c_page_id > 0 ) ? $c_page_id : 'global';
-				$option  = get_option( 'avada_dynamic_css_posts', array() );
-				$option[ $page_id ] = true;
-				update_option( 'avada_dynamic_css_posts', $option );
-			}
-		} else {
-			/**
-			 * Check if the transient exists.
-			 * If it does not exist, then generate the CSS and update the transient.
-			 */
-			if ( false === ( $dynamic_css = get_transient( $transient_name ) ) ) {
-				/**
-				 * Calculate the dynamic CSS.
-				 */
-				$dynamic_css = avada_dynamic_css_parser( avada_dynamic_css_array() );
-				/**
-				 * Append the user-entered dynamic CSS.
-				 */
-				$dynamic_css .= wp_strip_all_tags( Avada()->settings->get( 'custom_css' ) );
-
-				$dynamic_css .= '/* cached */';
-				/**
-				 * Set the transient for an hour.
-				 */
-				set_transient( $transient_name, $dynamic_css, 60 * 60 );
-			}
-		}
-	} else {
-		/**
-		 * Calculate the dynamic CSS.
-		 */
-		$dynamic_css = avada_dynamic_css_parser( avada_dynamic_css_array() );
-		/**
-		 * Append the user-entered dynamic CSS.
-		 */
-		$dynamic_css .= wp_strip_all_tags( Avada()->settings->get( 'custom_css' ) );
-	}
-
-	return $dynamic_css;
-
 }
 
 /**
@@ -282,61 +30,63 @@ function avada_custom_fonts_font_faces( $css = '' ) {
 		// Make sure we have titles for our fonts.
 		if ( isset( $custom_fonts['name'] ) && is_array( $custom_fonts['name'] ) ) {
 			foreach ( $custom_fonts['name'] as $key => $label ) {
-				$label = trim( $label );
 				// Make sure we have some files to work with.
-				if (
-					( isset( $custom_fonts['woff'] ) && isset( $custom_fonts['woff'][ $key ] ) ) ||
-					( isset( $custom_fonts['woff2'] ) && isset( $custom_fonts['woff2'][ $key ] ) ) ||
-					( isset( $custom_fonts['ttf'] ) && isset( $custom_fonts['ttf'][ $key ] ) ) ||
-					( isset( $custom_fonts['svg'] ) && isset( $custom_fonts['svg'][ $key ] ) ) ||
-					( isset( $custom_fonts['eot'] ) && isset( $custom_fonts['eot'][ $key ] ) )
-				) {
-					$firstfile = true;
-					$font_face .= '@font-face{';
-						$font_face .= 'font-family:';
-						// If font-name has a space, then it must be wrapped in double-quotes.
-					if ( false !== strpos( $label, ' ' ) ) {
-						$font_face .= '"' . $label . '";';
-					} else {
-						$font_face .= $label . ';';
+				$process = false;
+				foreach ( array( 'woff', 'woff2', 'ttf', 'svg', 'eot' ) as $filetype ) {
+					if ( ! $process && isset( $custom_fonts[ $filetype ] ) && isset( $custom_fonts[ $filetype ][ $key ] ) ) {
+						$process = true;
 					}
-						// Start adding sources.
-						$font_face .= 'src:';
-						// Add .eot file.
-					if ( isset( $custom_fonts['eot'] ) && isset( $custom_fonts['eot'][ $key ] ) && $custom_fonts['eot'][ $key ]['url'] ) {
-						$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['eot'][ $key ]['url'] ) . '?#iefix") format("embedded-opentype")';
-						$firstfile = false;
-					}
-						// Add .woff file.
-					if ( isset( $custom_fonts['woff'] ) && isset( $custom_fonts['woff'][ $key ] ) && $custom_fonts['woff'][ $key ]['url'] ) {
-						$font_face .= ( $firstfile ) ? '' : ',';
-						$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['woff'][ $key ]['url'] ) . '") format("woff")';
-						$firstfile = false;
-					}
-						// Add .woff2 file.
-					if ( isset( $custom_fonts['woff2'] ) && isset( $custom_fonts['woff2'][ $key ]['url'] ) && $custom_fonts['woff2'][ $key ]['url'] ) {
-						$font_face .= ( $firstfile ) ? '' : ',';
-						$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['woff2'][ $key ]['url'] ) . '") format("woff2")';
-						$firstfile = false;
-					}
-						// Add .ttf file.
-					if ( isset( $custom_fonts['ttf'] ) && isset( $custom_fonts['ttf'][ $key ] ) && $custom_fonts['ttf'][ $key ]['url'] ) {
-						$font_face .= ( $firstfile ) ? '' : ',';
-						$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['ttf'][ $key ]['url'] ) . '") format("truetype")';
-						$firstfile = false;
-					}
-						// Add .svg file.
-					if ( isset( $custom_fonts['svg'] ) && isset( $custom_fonts['svg'][ $key ] ) && $custom_fonts['svg'][ $key ]['url'] ) {
-						$font_face .= ( $firstfile ) ? '' : ',';
-						$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['svg'][ $key ]['url'] ) . '") format("svg")';
-						$firstfile = false;
-					}
-						$font_face .= ';font-weight: normal;font-style: normal;';
-					$font_face .= '}';
 				}
-			}
-		}
-	}
+				// If we don't have any files to process then skip this item.
+				if ( ! $process ) {
+					continue;
+				}
+
+				$firstfile = true;
+				$font_face .= '@font-face{';
+					$font_face .= 'font-family:';
+					// If font-name has a space, then it must be wrapped in double-quotes.
+				if ( false !== strpos( $label, ' ' ) ) {
+					$font_face .= '"' . $label . '";';
+				} else {
+					$font_face .= $label . ';';
+				}
+				// Start adding sources.
+				$font_face .= 'src:';
+				// Add .eot file.
+				if ( isset( $custom_fonts['eot'] ) && isset( $custom_fonts['eot'][ $key ] ) && $custom_fonts['eot'][ $key ]['url'] ) {
+					$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['eot'][ $key ]['url'] ) . '?#iefix") format("embedded-opentype")';
+					$firstfile = false;
+				}
+				// Add .woff file.
+				if ( isset( $custom_fonts['woff'] ) && isset( $custom_fonts['woff'][ $key ] ) && $custom_fonts['woff'][ $key ]['url'] ) {
+					$font_face .= ( $firstfile ) ? '' : ',';
+					$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['woff'][ $key ]['url'] ) . '") format("woff")';
+					$firstfile = false;
+				}
+				// Add .woff2 file.
+				if ( isset( $custom_fonts['woff2'] ) && isset( $custom_fonts['woff2'][ $key ]['url'] ) && $custom_fonts['woff2'][ $key ]['url'] ) {
+					$font_face .= ( $firstfile ) ? '' : ',';
+					$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['woff2'][ $key ]['url'] ) . '") format("woff2")';
+					$firstfile = false;
+				}
+				// Add .ttf file.
+				if ( isset( $custom_fonts['ttf'] ) && isset( $custom_fonts['ttf'][ $key ] ) && $custom_fonts['ttf'][ $key ]['url'] ) {
+					$font_face .= ( $firstfile ) ? '' : ',';
+					$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['ttf'][ $key ]['url'] ) . '") format("truetype")';
+					$firstfile = false;
+				}
+				// Add .svg file.
+				if ( isset( $custom_fonts['svg'] ) && isset( $custom_fonts['svg'][ $key ] ) && $custom_fonts['svg'][ $key ]['url'] ) {
+					$font_face .= ( $firstfile ) ? '' : ',';
+					$font_face .= 'url("' . str_replace( array( 'http://', 'https://' ), '//', $custom_fonts['svg'][ $key ]['url'] ) . '") format("svg")';
+					$firstfile = false;
+				}
+				$font_face .= ';font-weight: normal;font-style: normal;';
+				$font_face .= '}';
+			} // End foreach().
+		} // End if().
+	} // End if().
 	return $font_face . $css;
 }
 add_filter( 'avada_dynamic_css', 'avada_custom_fonts_font_faces' );
@@ -495,6 +245,7 @@ function avada_get_h1_typography_elements() {
 		'.fusion-page-title-bar h1',
 		'.fusion-modal h1',
 		'.fusion-widget-area h1',
+		'.fusion-title h1',
 	);
 	// CSS classes that inherit h1 color.
 	$typography_elements['color'] = array(
@@ -620,7 +371,6 @@ function avada_get_h4_typography_elements() {
 	$typography_elements['size'] = array(
 		// 'h4',
 		'.post-content h4',
-		'.fusion-portfolio-post .fusion-portfolio-content h4',
 		'.fusion-rollover .fusion-rollover-content .fusion-rollover-title',
 		'.fusion-carousel-title',
 		'#wrapper .fusion-tabs-widget .tab-holder .tabs li a',
@@ -662,6 +412,7 @@ function avada_get_h4_typography_elements() {
 		'.fusion-image-wrapper .fusion-rollover .fusion-rollover-content .fusion-rollover-title a',
 		'.fusion-modal h4',
 		'.fusion-content-widget-area h4',
+		'.fusion-title h4',
 	);
 
 	$typography_elements['line-height'] = array(
@@ -704,6 +455,7 @@ function avada_get_h5_typography_elements() {
 		'.post-content h5',
 		'.fusion-modal h5',
 		'.fusion-widget-area h5',
+		'.fusion-title h5',
 	);
 
 	return $typography_elements;
@@ -740,75 +492,8 @@ function avada_get_h6_typography_elements() {
 		'.post-content h6',
 		'.fusion-modal h6',
 		'.fusion-widget-area h6',
+		'.fusion-title h6',
 	);
 
 	return $typography_elements;
-}
-
-/**
- * CSS classes that inherit Avada's button typography settings.
- *
- * @return array
- */
-function avada_get_button_typography_elements() {
-	$typography_elements = array();
-
-	// CSS classes that inherit h3 font family.
-	$typography_elements['family'] = array(
-		'.fusion-button',
-		'.fusion-load-more-button',
-		'.comment-form input[type="submit"]',
-		'.ticket-selector-submit-btn[type="submit"]',
-		'.woocommerce .cart-collaterals .checkout-button',
-		'.woocommerce-MyAccount-content form .button',
-	);
-
-	return $typography_elements;
-}
-
-/**
- * Combines google-fonts & fallback fonts.
- *
- * @since 5.0.0
- * @param array $typo_array The typography setting as saved in the db.
- * @return string
- */
-function avada_combined_font_family( $typo_array = array() ) {
-
-	$google_font    = isset( $typo_array['font-family'] ) ? $typo_array['font-family'] : '';
-	$fallback_fonts = isset( $typo_array['font-backup'] ) ? $typo_array['font-backup'] : '';
-
-	// Exit early by returning the fallback font
-	// in case no google-font is defined.
-	if ( empty( $google_font ) ) {
-		return wp_strip_all_tags( $fallback_fonts );
-	}
-
-	// Exit early returning the google font
-	// in case no fallback font is defined.
-	if ( empty( $fallback_fonts ) ) {
-		return wp_strip_all_tags( $google_font );
-	}
-
-	// Convert $fallback_fonts to an array.
-	// We'll need that to make sure that quotes are properly used.
-	$fallback_fonts_array = explode( ',', $fallback_fonts );
-	foreach ( $fallback_fonts_array as $key => $fallback_font ) {
-		$fallback_font = trim( $fallback_font );
-		$fallback_fonts_array[ $key ] = $fallback_font;
-		if ( false !== strpos( $fallback_font, ' ' ) && false === strpos( $fallback_font, '"' ) && false === strpos( $fallback_font, "'" ) ) {
-			$fallback_fonts_array[ $key ] = '"' . $fallback_font . '"';
-		}
-	}
-
-	// Make sure the google font has quotes if they are needed.
-	if ( false !== strpos( $google_font, ' ' ) && false === strpos( $google_font, '"' ) && false === strpos( $google_font, "'" ) ) {
-		$google_font = '"' . $google_font . '"';
-	}
-
-	// Return the sum of the font-families properly formatted.
-	$fonts = array( $google_font );
-	$fonts = array_merge( $fonts, $fallback_fonts_array );
-	return wp_strip_all_tags( implode( ', ', $fonts ) );
-
 }

@@ -1,101 +1,198 @@
-jQuery(document).ready(function($){
-	if($('.fusion_upload_button').length ) {
-		window.avada_uploadfield = '';
+jQuery( document ).ready( function() {
+	var id;
 
-		$('.fusion_upload_button').live('click', function() {
-			window.avada_uploadfield = $('.upload_field', $(this).parents( '.pyre_upload' ));
-			tb_show('Upload', 'media-upload.php?type=image&TB_iframe=true', false);
+	if ( jQuery( '.fusion_upload_button' ).length ) {
+		window.avadaUploadfield = '';
+		window.mediaUploader;
+
+		jQuery( '.fusion_upload_button' ).on( 'click', function() {
+			window.avadaUploadfield = jQuery( '.upload_field', jQuery( this ).parent() );
+
+			if ( window.mediaUploader ) {
+				window.mediaUploader.open();
+				return;
+			}
+
+			// Extend the wp.media object
+			window.mediaUploader = wp.media.frames.file_frame = wp.media({
+				title: 'Choose Image',
+				button: {
+					text: 'Choose Image'
+				}, multiple: false
+			});
+
+			window.mediaUploader.on( 'select', function() {
+				var attachment = window.mediaUploader.state().get( 'selection' ).first().toJSON();
+				window.sendToEditor( attachment );
+			});
+
+			window.mediaUploader.on( 'open', function() {
+				var lib,
+				    selected,
+				    attachment,
+				    selection;
+
+				// Get selected media.
+				selected  = window.avadaUploadfield.val();
+				if ( selected ) {
+
+					// Get library.
+					lib = window.mediaUploader.state().get( 'library' );
+					lib.comparator = function( a, b ) {
+						var aInQuery = !! this.mirroring.get( a.cid ),
+						    bInQuery = !! this.mirroring.get( b.cid );
+
+						if ( ! aInQuery && bInQuery ) {
+							return -1;
+						}
+						if ( aInQuery && ! bInQuery ) {
+							return 1;
+						}
+						return 0;
+					};
+
+					// Get attachment and add to library.
+					attachment = wp.media.attachment( selected );
+					attachment.fetch();
+					lib.add( attachment ? [ attachment ] : [] );
+
+					// Make it selected.
+					selection = window.mediaUploader.state().get( 'selection' );
+					selection.add( attachment ? [ attachment ] : [] );
+				} else {
+					selection = window.mediaUploader.state().get( 'selection' );
+					selection.add( [] );
+				}
+			});
+
+			// Open the uploader dialog
+			window.mediaUploader.open();
 
 			return false;
 		});
 
-		window.avada_send_to_editor_backup = window.send_to_editor;
-		window.send_to_editor = function( $html ) {
-			if ( window.avada_uploadfield ) {
-				if ( $( $html ).is( 'img' ) ) {
-					var $image_url = $( $html ).attr( 'src' );
-				} else if ( $( 'img', $html ).length ) {
-					var $image_url = $( 'img', $html ).attr( 'src' );
-				} else {
-					var $image_url = $ ( $( $html )[0] ).attr( 'href' );
+		window.avadaSendToEditorBackup = window.sendToEditor;
+		window.sendToEditor = function( attachment ) {
+			var imageUrl             = '',
+			    imageId              = '',
+			    imageAlt             = '',
+			    imageWidth           = '',
+			    imageHeight          = '',
+			    featuredImageWrapper = jQuery( window.avadaUploadfield ).parents( '.fusion-featured-image-meta-box' );
+			if ( window.avadaUploadfield ) {
+				if ( 0 < attachment.url.length ) {
+					imageUrl    = attachment.url;
+					imageId     = attachment.id;
+					imageAlt    = attachment.alt;
+					imageWidth  = attachment.width;
+					imageHeight = attachment.height;
 				}
-				$( window.avada_uploadfield ).val( $image_url ).trigger( 'change' );
-				window.avada_uploadfield = '';
 
-				tb_remove();
+				if ( featuredImageWrapper.length ) {
+					featuredImageWrapper.find( '.fusion-preview-image' ).attr({
+						'src': imageUrl,
+						'alt': imageAlt,
+						'width': imageWidth,
+						'height': imageHeight,
+						'srcset': '',
+						'sizes': '',
+						'style': ''
+					});
+					jQuery( window.avadaUploadfield ).val( imageId ).trigger( 'change' );
+
+					featuredImageWrapper.find( '.fusion-remove-featured-image' ).show();
+					featuredImageWrapper.find( '.fusion-set-featured-image' ).hide();
+
+				} else {
+					jQuery( window.avadaUploadfield ).val( imageUrl ).trigger( 'change' );
+				}
+				window.avadaUploadfield = '';
+
 			} else {
-				window.avada_send_to_editor_backup( $html );
+				window.avadaSendToEditorBackup( attachment );
 			}
-		}
+		};
 	}
 
-	if($.cookie('fusion_metabox_tab_' + jQuery('#post_ID').val())) {
-		var id = $.cookie('fusion_metabox_tab_' + jQuery('#post_ID').val());
+	// Remove the featured image preview and also the id from form input.
+	jQuery( '.fusion-remove-featured-image' ).on( 'click', function( e ) {
+		var featuredImageWrapper = jQuery( this ).parents( '.fusion-featured-image-meta-box' );
 
-		jQuery('.pyre_metabox_tabs li').removeClass('active');
-		jQuery('.pyre_metabox_tabs li a[href=' + id + ']').parent().addClass('active');
-
-		jQuery('.pyre_metabox_tabs li a[href=' + id + ']').parents('.inside').find('.pyre_metabox_tab').removeClass('active').hide();
-		jQuery('.pyre_metabox_tabs li a[href=' + id + ']').parents('.inside').find('#pyre_tab_' + id).addClass('active').fadeIn();
-
-		calc_element_heights();
-	} else {
-		jQuery('.pyre_metabox_tabs li:first-child').addClass('active');
-		jQuery('.pyre_metabox .pyre_metabox_tab:first-child').addClass('active').fadeIn();
-	}
-	jQuery('.pyre_metabox_tabs li a').click(function(e) {
 		e.preventDefault();
 
-		var id = jQuery(this).attr('href');
+		featuredImageWrapper.find( '.fusion-preview-image' ).attr({
+			'src': '',
+			'alt': '',
+			'width': '',
+			'height': '',
+			'srcset': '',
+			'sizes': '',
+			'style': 'display:none;'
+		});
 
-		$.cookie('fusion_metabox_tab_' + jQuery('#post_ID').val(), id, { expires: 7 });
+		featuredImageWrapper.find( '.upload_field' ).val( '' );
 
-		jQuery(this).parents('ul').find('li').removeClass('active');
-		jQuery(this).parent().addClass('active');
-
-		jQuery(this).parents('.inside').find('.pyre_metabox_tab').removeClass('active').hide();
-		jQuery(this).parents('.inside').find('#pyre_tab_' + id).addClass('active').fadeIn();
-
-		calc_element_heights();
+		featuredImageWrapper.find( '.fusion-remove-featured-image' ).hide();
+		featuredImageWrapper.find( '.fusion-set-featured-image' ).show();
 	});
 
-	// calc height if the whole panel toggle is closed on load and opened later
-	jQuery( '#post-body #advanced-sortables #pyre_page_options .handlediv, #post-body #advanced-sortables #pyre_page_options .hndle' ).click(function(e) {
-		setTimeout( function() {
-			calc_element_heights();
-		}, 250 );
+	if ( jQuery.cookie( 'fusion_metabox_tab_' + jQuery( '#post_ID' ).val() ) ) {
+		id = jQuery.cookie( 'fusion_metabox_tab_' + jQuery( '#post_ID' ).val() );
 
-	});
+		jQuery( '.pyre_metabox_tabs li' ).removeClass( 'active' );
+		jQuery( '.pyre_metabox_tabs li a[href=' + id + ']' ).parent().addClass( 'active' );
 
-	// initialize heights on load
-	calc_element_heights();
+		jQuery( '.pyre_metabox_tabs li a[href=' + id + ']' ).parents( '.inside' ).find( '.pyre_metabox_tab' ).removeClass( 'active' ).hide();
+		jQuery( '.pyre_metabox_tabs li a[href=' + id + ']' ).parents( '.inside' ).find( '#pyre_tab_' + id ).addClass( 'active' ).fadeIn();
 
-	// set the page options to same width as other boxes (this is builder specific)
-	/*if( jQuery( '#post-body #normal-sortables' ).length && jQuery( '#post-body #normal-sortables' ).css( 'width' ) != '0px' ) {
-		jQuery( '#post-body #advanced-sortables' ).css( 'width', jQuery( '#post-body #normal-sortables' ).css( 'width' ) );
+		calcElementHeights();
+	} else {
+		jQuery( '.pyre_metabox_tabs li:first-child' ).addClass( 'active' );
+		jQuery( '.pyre_metabox .pyre_metabox_tab:first-child' ).addClass( 'active' ).fadeIn();
 	}
 
-	jQuery( window ).on( 'resize', function() {
-		if( jQuery( '#post-body #normal-sortables' ).length && jQuery( '#post-body #normal-sortables' ).css( 'width' ) != '0px' ) {
-			jQuery( '#post-body #advanced-sortables' ).css( 'width', jQuery( '#post-body #normal-sortables' ).css( 'width' ) );
-		}
-	});*/
+	jQuery( '.pyre_metabox_tabs li a' ).click( function( e ) {
+		var id = jQuery( this ).attr( 'href' );
+
+		e.preventDefault();
+
+		jQuery.cookie( 'fusion_metabox_tab_' + jQuery( '#post_ID' ).val(), id, { expires: 7 } );
+
+		jQuery( this ).parents( 'ul' ).find( 'li' ).removeClass( 'active' );
+		jQuery( this ).parent().addClass( 'active' );
+
+		jQuery( this ).parents( '.inside' ).find( '.pyre_metabox_tab' ).removeClass( 'active' ).hide();
+		jQuery( this ).parents( '.inside' ).find( '#pyre_tab_' + id ).addClass( 'active' ).fadeIn();
+
+		calcElementHeights();
+	});
+
+	// Calc height if the whole panel toggle is closed on load and opened later.
+	jQuery( '#post-body #advanced-sortables #pyre_page_options .handlediv, #post-body #advanced-sortables #pyre_page_options .hndle' ).click( function() {
+		setTimeout( function() {
+			calcElementHeights();
+		}, 250 );
+	});
+
+	// Initialize heights on load.
+	calcElementHeights();
 });
 
-function calc_element_heights() {
+function calcElementHeights() {
+	var tabContentHeight,
+	    tabsHeight;
 
-	// set tabs pane height same as the tab content height
+	// Set tabs pane height same as the tab content height.
 	jQuery( '.pyre_metabox_tabs' ).removeAttr( 'style' );
-	var tab_content_height = jQuery( '.pyre_metabox' ).outerHeight();
-	var tabs_height = jQuery( '.pyre_metabox_tabs' ).height();
-	if( tab_content_height > tabs_height ) {
-		jQuery( '.pyre_metabox_tabs' ).css( 'height', tab_content_height );
+	tabContentHeight = jQuery( '.pyre_metabox' ).outerHeight();
+	tabsHeight = jQuery( '.pyre_metabox_tabs' ).height();
+	if ( tabContentHeight > tabsHeight ) {
+		jQuery( '.pyre_metabox_tabs' ).css( 'height', tabContentHeight );
 	}
 
-
-	// set heights of select arrows correctly
+	// Set heights of select arrows correctly.
 	jQuery( '.pyre_field .fusion-shortcodes-arrow' ).each( function() {
-		if( jQuery( this ).next().innerHeight() > 0 ) {
+		if ( jQuery( this ).next().innerHeight() > 0 ) {
 			jQuery( this ).css( {
 				height: jQuery( this ).next().innerHeight(),
 				width: jQuery( this ).next().innerHeight(),
@@ -104,11 +201,12 @@ function calc_element_heights() {
 		}
 	});
 
-	// set height of upload buttons to correspond with text field height
+	// Set height of upload buttons to correspond with text field height.
 	jQuery( '.pyre_field .fusion_upload_button' ).each( function() {
-		var field_height = jQuery( this ).parents( '.pyre_upload' ).find( 'input' ).outerHeight();
-		if( field_height > 0 ) {
-			jQuery( this ).css( 'height', field_height );
+		var fieldHeight = jQuery( this ).parents( '.pyre_upload' ).find( 'input' ).outerHeight();
+
+		if ( fieldHeight > 0 ) {
+			jQuery( this ).css( 'height', fieldHeight );
 		}
 	});
 }

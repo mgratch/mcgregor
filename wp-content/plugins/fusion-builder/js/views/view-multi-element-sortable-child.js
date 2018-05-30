@@ -1,3 +1,4 @@
+/* global FusionPageBuilderEvents, FusionPageBuilderViewManager, FusionPageBuilderApp */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function( $ ) {
@@ -21,31 +22,29 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			render: function() {
-				var view;
-
 				this.$el.html( this.template( { atts: this.model.attributes } ) );
-
 				return this;
 			},
 
 			cloneElement: function( event ) {
 
-				var elementAttributes;
+				var elementAttributes,
+				    titleLabel = this.$el.find( '.multi-element-child-name' ).html();
 
 				if ( event ) {
 					event.preventDefault();
 				}
 
-				elementAttributes         = _.clone( this.model.attributes );
-				elementAttributes.created = 'manually';
-				elementAttributes.cid     = FusionPageBuilderViewManager.generateCid();
+				elementAttributes               = $.extend( true, {}, this.model.attributes );
+				elementAttributes.created       = 'manually';
+				elementAttributes.cid           = FusionPageBuilderViewManager.generateCid();
+				elementAttributes.cloned        = true;
+				elementAttributes.targetElement = this.$el;
+				elementAttributes.titleLabel    = titleLabel;
 
 				FusionPageBuilderApp.collection.add( elementAttributes );
 
 				FusionPageBuilderEvents.trigger( 'fusion-multi-element-edited' );
-
-				// Clone exact tab title being used.
-				jQuery( event.target ).parents( 'ul' ).find( 'li:last-child .multi-element-child-name' ).text( jQuery( event.target ).parents( 'li' ).find( '.multi-element-child-name' ).text() );
 			},
 
 			showSettings: function( event ) {
@@ -99,7 +98,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					$title = '';
 					if ( 'undefined' !== typeof $attributes.params.title && $attributes.params.title.length ) {
 						$title = $attributes.params.title;
-					} else if ( 'fusion_flip_box' == $model.get( 'element_type' ) && 'undefined' !== typeof $attributes.params.title_front && $attributes.params.title_front.length ) {
+					} else if ( 'fusion_flip_box' === $model.get( 'element_type' ) && 'undefined' !== typeof $attributes.params.title_front && $attributes.params.title_front.length ) {
 						$title = $attributes.params.title_front;
 					} else if ( 'undefined' !== typeof $attributes.params.image && $attributes.params.image.length ) {
 						$title = $attributes.params.image;
@@ -136,9 +135,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				FusionPageBuilderEvents.trigger( 'fusion-multi-element-edited' );
 			}
-
 		} );
-
 	} );
-
 } )( jQuery );

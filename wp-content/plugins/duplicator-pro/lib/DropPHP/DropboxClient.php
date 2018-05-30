@@ -11,7 +11,7 @@
  * @license    See LICENSE
  *
  */
-/* RSR */
+
 require_once(dirname(__FILE__) . "/OAuthSimple.php");
 
 if (!class_exists('DUP_PRO_DropboxClient_UploadInfo'))
@@ -65,32 +65,14 @@ if (!class_exists('DUP_PRO_DropboxClient'))
             
             if($this->useCurl)
             {
-                DUP_PRO_U::log("Using cURL for Dropbox transfers");    
+                DUP_PRO_LOG::trace("Using cURL for Dropbox transfers");    
             }
             else
             {
-                DUP_PRO_U::log("Using FOpen URL for Dropbox transfers");    
+                DUP_PRO_LOG::trace("Using FOpen URL for Dropbox transfers");    
             }
             
-            //rsr this causes problems on many boxes $this->useCurl = false;	// RSR TEMP until we fully support curl - right now was using for auth but not other
         }
-
-//        function __wakeup()
-//        {
-//      //      $this->useCurl = $this->useCurl && function_exists('curl_init');
-//        }
-//
-//        /**
-//         * Sets whether to use cURL if its available or PHP HTTP wrappers otherwise
-//         * 
-//         * @access public
-//         * @return boolean Whether to actually use cURL (always false if not installed)
-//         */
-//        public function SetUseCUrl($use_it)
-//	{
-//		////rsr this causes problems on many boxes  return false; // RSR Temp until we fully support curl - had been using it for auth but not transfer
-//        return ($this->useCurl = ($use_it && function_exists('curl_init')));
-//        }
 
         // ##################################################
         // Authorization
@@ -161,7 +143,6 @@ if (!class_exists('DUP_PRO_DropboxClient'))
 
             if (!isset($at['oauth_token']) || !isset($at['oauth_token_secret']))
             {
-                // rsr fix
                 throw new DropboxException(sprintf('Could not get access token! (request token: %s)', $request_token['t']));
             }
             return ($this->accessToken = array('t' => $at['oauth_token'], 's' => $at['oauth_token_secret']));
@@ -310,17 +291,16 @@ if (!class_exists('DUP_PRO_DropboxClient'))
             return $meta;
         }
 
-        // RSR NEW function
         // @returns DUP_PRO_DropboxClient_UploadInfo
         public function upload_file_chunk($src_file, $dropbox_path = '', $upload_chunk_size = self::UPLOAD_CHUNK_SIZE, $max_upload_time_in_sec = 15, $offset = 0, $upload_id = null, $server_load_delay = 0)
         {
-            DUP_PRO_U::log("start");
+            DUP_PRO_LOG::trace("start");
             $dropbox_client_upload_info = new DUP_PRO_DropboxClient_UploadInfo();
             $dropbox_client_upload_info->next_offset = $offset;
             $dropbox_client_upload_info->upload_id = $upload_id;
 
-            DUP_PRO_U::log("offset coming in=$offset");
-            DUP_PRO_U::log("chunk size=$upload_chunk_size");
+            DUP_PRO_LOG::trace("offset coming in=$offset");
+            DUP_PRO_LOG::trace("chunk size=$upload_chunk_size");
             if (empty($dropbox_path))
             {
                 $dropbox_path = basename($src_file);
@@ -343,11 +323,11 @@ if (!class_exists('DUP_PRO_DropboxClient'))
                 }
                 catch (Exception $e)
                 {
-                    DUP_PRO_U::log("problem getting metadata");
+                    DUP_PRO_LOG::trace("problem getting metadata");
                 }
             }
 
-            DUP_PRO_U::log("dropbox path=$dropbox_path");
+            DUP_PRO_LOG::trace("dropbox path=$dropbox_path");
             $file_size = filesize($src_file);
 
 
@@ -356,12 +336,12 @@ if (!class_exists('DUP_PRO_DropboxClient'))
             if ($fh === false)
             {
                 //throw new DropboxException();
-                DUP_PRO_U::log_error("problem opening $src_file");
+                DUP_PRO_LOG::traceError("problem opening $src_file");
             }
 
             fseek($fh, $offset);
 
-            DUP_PRO_U::log("Just did fseek now tell says " . ftell($fh));
+            DUP_PRO_LOG::trace("Just did fseek now tell says " . ftell($fh));
 
             $start_time = time();
             $time_passed = 0;
@@ -369,21 +349,20 @@ if (!class_exists('DUP_PRO_DropboxClient'))
 
             $eof_string = $end_of_file ? 'true' : 'false';
 
-            DUP_PRO_U::log("upload_id=$upload_id filesize = $file_size end_of_file=$eof_string max_upload_time=$max_upload_time_in_sec");
+            DUP_PRO_LOG::trace("upload_id=$upload_id filesize = $file_size end_of_file=$eof_string max_upload_time=$max_upload_time_in_sec");
 
             $error_present = false;
 
             while (($end_of_file == false) && ($time_passed < $max_upload_time_in_sec) & ($error_present == false))
             {
-                usleep($server_load_delay);
+                if($server_load_delay !== 0) {
+                    usleep($server_load_delay);
+                }
                 
-                DUP_PRO_U::log("Uploading offset $offset since timepassed=$time_passed");
+                DUP_PRO_LOG::trace("Uploading offset $offset since timepassed=$time_passed");
                 $url = $this->cleanUrl(self::API_CONTENT_URL . "/chunked_upload") . '?' . http_build_query(compact('upload_id', 'offset'), '', '&');
 
-                // rsr temp
-          //      $this->useCurl = false;
-
-                DUP_PRO_U::log("3");
+                DUP_PRO_LOG::trace("3");
                 $content = fread($fh, $upload_chunk_size);
 
                 $context = $this->createRequestContext($url, "PUT", $content);
@@ -393,13 +372,13 @@ if (!class_exists('DUP_PRO_DropboxClient'))
                 
                 if($this->useCurl)
                 {
-                    DUP_PRO_U::log("Using curl from url = $url");
+                    DUP_PRO_LOG::trace("Using curl from url = $url");
                     curl_setopt($context, CURLOPT_BINARYTRANSFER, true);
 					$response = json_decode(self::execCurlAndClose($context));
                 }
                 else
                 {
-                    DUP_PRO_U::log("Using file_get_contents  from url = $url");
+                    DUP_PRO_LOG::trace("Using file_get_contents  from url = $url");
                     $file_contents = file_get_contents($url, false, $context);
                     $response = json_decode($file_contents);
                 }
@@ -415,16 +394,37 @@ if (!class_exists('DUP_PRO_DropboxClient'))
                     {
                         $error_message = DUP_PRO_U::__('Response error present:') . $response->error;
 
+                        DUP_PRO_LOG::trace("rolling back dropbox due to $error_message");
+						if(strpos($response->error, 'expected [') !== false)
+						{							
+							$matches = array();
+							$preg_retval = preg_match("/.*expected\\s+\\[(.+)\\]/", $response->error, $matches);
+							
+							if(count($matches) == 2)
+							{								
+								$old_offset = (int)$matches[1];
+								DUP_PRO_LOG::trace("Forcing old offset to be $old_offset");
+							}
+							else
+							{
+								DUP_PRO_LOG::traceObject("Something wrong with parsing matches, retval=$preg_retval", $matches);
+							}
+						}
+						else
+						{
+							DUP_PRO_LOG::trace("Response error doens't contain expected");
+						}
+						
                         $dropbox_client_upload_info->error_details = $error_message;
                         $error_present = true;
                         $offset = $old_offset;
-                        DUP_PRO_U::log("rolling back dropbox to offset $offset due to $error_message");
+                        DUP_PRO_LOG::trace("rolling back dropbox to offset $offset due to $error_message");
                     }
                     else if (empty($upload_id))
                     {
 
                         $upload_id = $response->upload_id;
-                        DUP_PRO_U::log("upload id set to $upload_id");
+                        DUP_PRO_LOG::trace("upload id set to $upload_id");
                     }
                 }
                 else
@@ -436,25 +436,25 @@ if (!class_exists('DUP_PRO_DropboxClient'))
                     $error_present = true;
                     $offset = $old_offset;
                     
-                    DUP_PRO_U::log("rolling back dropbox to offset $offset due to $error_message");
+                    DUP_PRO_LOG::trace("rolling back dropbox to offset $offset due to $error_message");
                 }
 
-                DUP_PRO_U::log("4");
+                DUP_PRO_LOG::trace("4");
 
                 
 
-                DUP_PRO_U::log("5");
+                DUP_PRO_LOG::trace("5");
                 $time_passed = time() - $start_time;
                 $end_of_file = feof($fh);
             }
 
             @fclose($fh);
 
-            DUP_PRO_U::log("Time passed=$time_passed");
+            DUP_PRO_LOG::trace("Time passed=$time_passed");
 
             if ($end_of_file)
             {
-                DUP_PRO_U::log("end of file");
+                DUP_PRO_LOG::trace("end of file");
                 $dropbox_client_upload_info->file_meta = $this->apiCall("commit_chunked_upload/$this->rootPath/$dropbox_path", "POST", compact('overwrite', 'parent_rev', 'upload_id'), true);
             }
 
@@ -498,7 +498,7 @@ if (!class_exists('DUP_PRO_DropboxClient'))
 			// Delete any file that may be there ahead of time
 			try
 			{
-				DUP_PRO_U::log("Deleting dropbox files $dropbox_path");
+				DUP_PRO_LOG::trace("Deleting dropbox files $dropbox_path");
 				$this->Delete($dropbox_path);
 			}
 			catch(Exception $ex)
@@ -639,6 +639,14 @@ if (!class_exists('DUP_PRO_DropboxClient'))
         function Delta($cursor)
         {
             return $this->apiCall("delta", "POST", compact('cursor'));
+        }
+
+        function token_from_oauth1()
+        {
+            /*
+            https://www.dropbox.com/developers-v1/core/docs#oa2-from-oa1
+            */
+            return $this->apiCall("oauth2/token_from_oauth1", "POST");
         }
 
         function GetRevisions($dropbox_file, $rev_limit = 10)
@@ -902,6 +910,8 @@ if (!class_exists('DUP_PRO_DropboxClient'))
 
     }
 
+if (!class_exists('DropboxException'))
+{
     class DropboxException extends Exception
     {
         public function __construct($err = null, $isDebug = FALSE)
@@ -937,6 +947,5 @@ if (!class_exists('DUP_PRO_DropboxClient'))
         }
 
     }
-
 }
-?>
+}

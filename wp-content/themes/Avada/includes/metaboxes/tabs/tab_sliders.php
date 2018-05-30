@@ -1,4 +1,13 @@
 <?php
+/**
+ * Sliders Metabox options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -11,7 +20,7 @@ $this->select(
 	array(
 		'no'      => esc_attr__( 'No Slider', 'Avada' ),
 		'layer'   => 'LayerSlider',
-		'flex'    => 'Fusion Slider',
+		'flex'    => esc_attr__( 'Fusion Slider', 'Avada' ),
 		'rev'     => 'Slider Revolution',
 		'elastic' => 'Elastic Slider',
 	),
@@ -30,7 +39,7 @@ if ( class_exists( 'LS_Sliders' ) ) {
 
 	if ( ! empty( $sliders ) ) {
 		foreach ( $sliders as $key => $item ) {
-			$slides[ $item->id ] = $item->name;
+			$slides[ $item->id ] = $item->name . ' (#' . $item->id . ')';
 		}
 	}
 
@@ -55,40 +64,34 @@ $this->select(
 	)
 );
 
-$slides_array    = array();
-$slides          = array();
-$slides_array[0] = esc_html__( 'Select a slider', 'Avada' );
-$slides          = get_terms( 'slide-page' );
-if ( $slides && ! isset( $slides->errors ) ) {
-	$slides = maybe_unserialize( $slides );
-	foreach ( $slides as $key => $val ) {
-		$slides_array[ $val->slug ] = $val->name;
-	}
-}
-$this->select(
-	'wooslider',
-	esc_attr__( 'Select Fusion Slider', 'Avada' ) ,
-	$slides_array,
-	esc_html__( 'Select the unique name of the slider.', 'Avada' ),
-	array(
+if ( method_exists( 'FusionCore_Plugin', 'get_fusion_sliders' ) ) {
+	$slides_array = FusionCore_Plugin::get_fusion_sliders( esc_html__( 'Select a slider', 'Avada' ) );
+
+	$this->select(
+		'wooslider',
+		esc_attr__( 'Select Fusion Slider', 'Avada' ),
+		$slides_array,
+		esc_html__( 'Select the unique name of the slider.', 'Avada' ),
 		array(
-			'field'      => 'slider_type',
-			'value'      => 'flex',
-			'comparison' => '==',
-		),
-	)
-);
+			array(
+				'field'      => 'slider_type',
+				'value'      => 'flex',
+				'comparison' => '==',
+			),
+		)
+	);
+}
 
 global $wpdb;
 $revsliders[0] = esc_attr__( 'Select a slider', 'Avada' );
 
 if ( function_exists( 'rev_slider_shortcode' ) ) {
-	$get_sliders = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'revslider_sliders' );
-	if ( $get_sliders ) {
-		foreach ( $get_sliders as $slider ) {
-			if ( 'template' !== $slider->type ) {
-				$revsliders[ $slider->alias ] = $slider->title;
-			}
+	$slider_object = new RevSliderSlider();
+	$sliders_array = $slider_object->getArrSliders();
+
+	if ( $sliders_array ) {
+		foreach ( $sliders_array as $slider ) {
+			$revsliders[ $slider->getAlias() ] = $slider->getTitle() . ' (#' . $slider->getID() . ')';
 		}
 	}
 }
@@ -113,7 +116,7 @@ $slides          = get_terms( 'themefusion_es_groups' );
 if ( $slides && ! isset( $slides->errors ) ) {
 	$slides = maybe_unserialize( $slides );
 	foreach ( $slides as $key => $val ) {
-		$slides_array[ $val->slug ] = $val->name;
+		$slides_array[ $val->slug ] = $val->name . ' (#' . $val->term_id . ')';
 	}
 }
 $this->select(
@@ -138,7 +141,9 @@ $this->radio_buttonset(
 		'below'   => esc_attr__( 'Below', 'Avada' ),
 		'above'   => esc_attr__( 'Above', 'Avada' ),
 	),
-	esc_html__( 'Select if the slider shows below or above the header. Only works for top header position.', 'Avada' ) . Avada()->settings->get_default_description( 'slider_position', '', 'select' ),
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Select if the slider shows below or above the header. Only works for top header position. %s', 'Avada' ), Avada()->settings->get_default_description( 'slider_position', '', 'select' ) ),
+	'',
 	array(
 		array(
 			'field'      => 'slider_type',
@@ -156,7 +161,9 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Yes', 'Avada' ),
 		'no'      => esc_attr__( 'No', 'Avada' ),
 	),
-	esc_html__( 'Choose to enable or disable Avada styles for Slider Revolution.', 'Avada' ) . Avada()->settings->get_default_description( 'avada_rev_styles', '', 'reverseyesno' ),
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to enable or disable Avada styles for Slider Revolution. %s', 'Avada' ), Avada()->settings->get_default_description( 'avada_rev_styles', '', 'reverseyesno' ) ),
+	'',
 	array(
 		array(
 			'field'      => 'slider_type',
@@ -179,11 +186,6 @@ $this->upload(
 		array(
 			'field'      => 'slider_type',
 			'value'      => '',
-			'comparison' => '!=',
-		),
-		array(
-			'field'      => 'slider_type',
-			'value'      => 'flex',
 			'comparison' => '!=',
 		),
 	)

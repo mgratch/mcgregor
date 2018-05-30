@@ -16,13 +16,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 get_header();
 ?>
-<div id="content" <?php Avada()->layout->add_style( 'content_style' ); ?>>
+<section id="content" <?php Avada()->layout->add_style( 'content_style' ); ?>>
 	<div id="tribe-events-pg-template">
 		<?php tribe_events_before_html(); ?>
 		<?php tribe_get_view(); ?>
 		<?php tribe_events_after_html(); ?>
 	</div> <!-- #tribe-events-pg-template -->
-</div>
-<?php do_action( 'fusion_after_content' ); ?>
+</section>
+<?php do_action( 'avada_after_content' ); ?>
 <?php
 get_footer();

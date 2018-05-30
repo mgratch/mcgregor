@@ -3,7 +3,7 @@
  * Plugin Name: Admin Tools
  * Plugin URI: http://www.madadim.co.il
  * Description: Preparing your customer management interface easily
- * Version: 1.3.6
+ * Version: 1.3.7
  * Author: Yehi Co
  * Author URI: http://www.madadim.co.il
  * License: GPL2
@@ -25,7 +25,7 @@ along with Admin Tools. If not, see http://www.gnu.org/licenses/gpl-2.0.html.
 */
 
 define( 'YC_ADMIN_TOOLS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'YC_ADMIN_TOOLS_PLUGIN_URL', plugin_basename(__FILE__) );
+define( 'YC_ADMIN_TOOLS_PLUGIN_URL', plugin_basename( __FILE__ ) );
 
 /*-------------------class start------------------*/
 
@@ -69,9 +69,6 @@ function __construct() {
 	}
 	add_filter( 'auto_update_plugin', array( $this, 'auto_update_specific_plugins' ), 10, 2 );
 	add_filter( 'plugin_action_links_' . YC_ADMIN_TOOLS_PLUGIN_URL, array( $this, 'admin_tools_action_links' ) );
-
-	
-	
 }
 
 public function ycat_admin_menu() {

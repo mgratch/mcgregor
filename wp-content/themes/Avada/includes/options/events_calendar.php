@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -125,6 +135,48 @@ function avada_options_section_events_calendar( $sections ) {
 						'id'          => 'events_social_sharing_box',
 						'default'     => 1,
 						'type'        => 'switch',
+					),
+					'ec_sidebar_layouts_info' => array(
+						'label'           => esc_html__( 'Events Single Sidebar Layout', 'Avada' ),
+						'description'     => '',
+						'id'              => 'ec_sidebar_layouts_info',
+						'type'            => 'info',
+					),
+					'ec_sidebar_width' => array(
+						'label'       => esc_html__( 'Events Single Sidebar Width', 'Avada' ),
+						'description' => esc_html__( 'Controls the width of the sidebar when only one sidebar is present.', 'Avada' ),
+						'id'          => 'ec_sidebar_width',
+						'default'     => '32%',
+						'type'        => 'dimension',
+						'choices'     => array( 'px', '%' ),
+					),
+					'ec_dual_sidebar_layouts_info' => array(
+						'label'           => esc_html__( 'Events Dual Sidebar Layout', 'Avada' ),
+						'description'     => '',
+						'id'              => 'ec_dual_sidebar_layouts_info',
+						'type'            => 'info',
+					),
+					'ec_sidebar_2_1_width' => array(
+						'label'       => esc_html__( 'Events Dual Sidebar Width 1', 'Avada' ),
+						'description' => esc_html__( 'Controls the width of sidebar 1 when dual sidebars are present.', 'Avada' ),
+						'id'          => 'ec_sidebar_2_1_width',
+						'default'     => '21%',
+						'type'        => 'dimension',
+						'choices'     => array( 'px', '%' ),
+					),
+					'ec_sidebar_2_2_width' => array(
+						'label'       => esc_html__( 'Events Dual Sidebar Width 2', 'Avada' ),
+						'description' => esc_html__( 'Controls the width of sidebar 2 when dual sidebars are present.', 'Avada' ),
+						'id'          => 'ec_sidebar_2_2_width',
+						'default'     => '21%',
+						'type'        => 'dimension',
+						'choices'     => array( 'px', '%' ),
+					),
+					'ec_sidebar_sidebar_styling_info' => array(
+						'label'           => esc_html__( 'Events Single Post Sidebar Styling', 'Avada' ),
+						'description'     => '',
+						'id'              => 'ec_sidebar_sidebar_styling_info',
+						'type'            => 'info',
 					),
 					'ec_sidebar_bg_color' => array(
 						'label'       => esc_html__( 'Events Sidebar Background Color', 'Avada' ),

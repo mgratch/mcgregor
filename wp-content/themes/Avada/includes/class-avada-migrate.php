@@ -1,4 +1,14 @@
 <?php
+/**
+ * Handles migrations.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -7,8 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Handles migrations.
- *
- * @since 4.0.0
  */
 class Avada_Migrate extends Avada_Upgrade {
 
@@ -116,12 +124,22 @@ class Avada_Migrate extends Avada_Upgrade {
 		Avada::$is_updating = true;
 
 		// Raise the memory limit and max_execution_time time.
-		@ini_set( 'memory_limit', '256M' );
-		@set_time_limit( 0 );
+		if ( function_exists( 'ini_get' ) ) {
 
-		$this->available_languages = Avada_Multilingual::get_available_languages();
-		$this->active_language     = Avada_Multilingual::get_active_language();
-		$this->default_language    = Avada_Multilingual::get_default_language();
+			$memory = ini_get( 'memory_limit' );
+			if ( 256000000 > $memory ) {
+				@ini_set( 'memory_limit', '256M' );
+			}
+
+			$time_limit = ini_get( 'max_execution_time' );
+			if ( 300 > $time_limit && 0 != $time_limit ) {
+				@set_time_limit( 0 );
+			}
+		}
+
+		$this->available_languages = Fusion_Multilingual::get_available_languages();
+		$this->active_language     = Fusion_Multilingual::get_active_language();
+		$this->default_language    = Fusion_Multilingual::get_default_language();
 
 		// If English is used then make this first in array order.  Also set starting language so that it is migrated first.
 		if ( in_array( 'en', $this->available_languages ) ) {
@@ -160,8 +178,9 @@ class Avada_Migrate extends Avada_Upgrade {
 				$this->proceed = false;
 			}
 
-			if ( isset( $_GET['lang'] ) && ! in_array( $_GET['lang'], array( '', 'en', 'all', null ) ) ) {
-				Avada_Multilingual::set_active_language( $_GET['lang'] );
+			$_get_lang = ( isset( $_GET['lang'] ) ) ? sanitize_text_field( wp_unslash( $_GET['lang'] ) ) : '';
+			if ( isset( $_GET['lang'] ) && ! in_array( $_get_lang, array( '', 'en', 'all', null ) ) ) {
+				Fusion_Multilingual::set_active_language( $_get_lang );
 			}
 
 			$this->options = get_option( Avada::get_option_name(), array() );
@@ -207,10 +226,9 @@ class Avada_Migrate extends Avada_Upgrade {
 			<head>
 				<meta name="viewport" content="width=device-width" />
 				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-				<title><?php esc_html_e( 'Avada Theme Option Migration', 'Avada' ); ?></title>
+				<title ><?php esc_html_e( 'Avada Theme Option Migration', 'Avada' ); ?></title >
 				<?php do_action( 'admin_print_styles' ); ?>
 				<?php do_action( 'admin_head' ); ?>
-				<link href='https://fonts.googleapis.com/css?family=Roboto:400,300,100' rel='stylesheet' type='text/css'>
 				<style>
 				.avada-setup {
 					padding: 3% 20%;
@@ -356,21 +374,21 @@ class Avada_Migrate extends Avada_Upgrade {
 			<body class="avada-setup wp-core-ui">
 				<div class="update-content">
 					<div class="avada-logo">
-						<img src="<?php echo Avada::$template_dir_url; ?>/assets/images/logo_migration.png" alt="<?php esc_html_e( 'Avada Logo', 'Avada' ); ?>" width="453" height="95">
+						<img src="<?php echo esc_url_raw( Avada::$template_dir_url ); ?>/assets/images/logo_migration.png" alt="<?php esc_html_e( 'Avada Logo', 'Avada' ); ?>" width="453" height="95">
 						<span class="avada-version">
-							<span class="avada-version-inner"><?php echo $version; ?></span>
-							<!-- <script src='<?php echo trailingslashit( Avada::$template_dir_url ) . 'assets/admin/js/avada-beta-testing.js'; ?>' type='text/javascript'></script> -->
+							<span class="avada-version-inner"><?php echo esc_attr( $version ); ?></span>
 						</span>
 					</div>
 					<div class="avada-content-wrapper">
 						<div class="avada-welcome-msg">
 							<?php
-							$migration_link = sprintf( '<a class="avada-migration-link" href="https://theme-fusion.com/knowledgebase/avada-v4-migration" target="_blank" rel="noopener noreferrer" title="%s">%s</a>', esc_html__( 'Migration Information' ), esc_html__( 'link' ) );
 
 							if ( ! empty( $this->available_languages ) ) {
-								printf( esc_html__( 'We have an amazing new update in store for you! Avada %s includes our completely new Theme Options Panel and the brand new Fusion Builder. To enjoy the full experience, two primary conversion steps need to be performed. First your Theme Options database entries need to be converted (sequentially for each language, if you have a multi-lingual site). In a second step your shortcodes will be converted for the new builder. Thank you for choosing Avada!', 'Avada' ), $version );
+								/* translators: Version number. */
+								printf( esc_html__( 'We have an amazing new update in store for you! Avada %s includes our completely new Theme Options Panel and the brand new Fusion Builder. To enjoy the full experience, two primary conversion steps need to be performed. First your Theme Options database entries need to be converted (sequentially for each language, if you have a multi-lingual site). In a second step your shortcodes will be converted for the new builder. Thank you for choosing Avada!', 'Avada' ), esc_attr( $version ) );
 							} else {
-								printf( esc_html__( 'We have an amazing new update in store for you! Avada %s includes our completely new Theme Options Panel and the brand new Fusion Builder. To enjoy the full experience, two primary conversion steps need to be performed. First your Theme Options database entries need to be converted. In a second step your shortcodes will be converted for the new builder. Thank you for choosing Avada!', 'Avada' ), $version );
+								/* translators: Version number. */
+								printf( esc_html__( 'We have an amazing new update in store for you! Avada %s includes our completely new Theme Options Panel and the brand new Fusion Builder. To enjoy the full experience, two primary conversion steps need to be performed. First your Theme Options database entries need to be converted. In a second step your shortcodes will be converted for the new builder. Thank you for choosing Avada!', 'Avada' ), esc_attr( $version ) );
 							}
 							?>
 						</div>
@@ -379,7 +397,8 @@ class Avada_Migrate extends Avada_Upgrade {
 								<?php esc_html_e( 'Updating Avada Database Entries', 'Avada' ); ?>
 							</h1>
 							<?php if ( ! empty( $this->available_languages ) ) : ?>
-								<?php printf( esc_html__( 'Currently migrating language: %s', 'Avada' ), '<strong>' . esc_attr( $this->active_language ) . '</strong>' ); ?>
+								<?php /* translators: Language label. */ ?>
+								<?php printf( esc_html__( 'Currently converting language: %s', 'Avada' ), '<strong>' . esc_attr( $this->active_language ) . '</strong>' ); ?>
 							<?php endif; ?>
 							<?php if ( $current_step >= count( $this->steps ) ) : ?>
 								<p><?php esc_html_e( 'Done!', 'Avada' ); ?></p>
@@ -395,23 +414,25 @@ class Avada_Migrate extends Avada_Upgrade {
 								<?php $current_lang_step = 0; ?>
 								<?php $current_lang_step = array_search( $this->active_language, $this->available_languages ) + 1; ?>
 								<div class="avada-update-progress-bar"><span style="width: <?php echo intval( 100 * $current_lang_step / count( $this->available_languages ) ); ?>%"></span></div>
-								<p><?php printf( esc_html__( 'Migrating language: %1$s of %2$s.', 'Avada' ), $current_lang_step, count( $this->available_languages ) ); ?></p>
+								<?php /* translators: %1$s, %2$s: Numbers. */ ?>
+								<p><?php printf( esc_html__( 'Converting language: %1$s of %2$s.', 'Avada' ), absint( $current_lang_step ), count( $this->available_languages ) ); ?></p>
 							<?php endif; ?>
 
 							<?php if ( $current_step <= count( $this->steps ) && isset( $this->steps[ $this->step ] ) ) : ?>
 								<div class="avada-update-progress-bar"><span style="width: <?php echo intval( 100 * ( $current_step + 1 ) / count( $this->steps ) ); ?>%"></span></div>
+								<?php /* translators: %1$s, %2$s: Numbers. */ ?>
 								<p><?php printf( esc_html__( 'Updating Avada Database options: step %1$s of %2$s.', 'Avada' ), intval( $this->step + 1 ), count( $this->steps ) ); ?></p>
 								<ul class="tasks-list">
 									<?php foreach ( $this->steps as $key => $step ) : ?>
 										<?php
 										$li_class = '';
 										if ( $key <= $current_step - 1 ) {
-											$li_class = ' class="done"';
+											$li_class = 'done';
 										} elseif ( $key == $current_step ) {
-											$li_class = ' class="doing"';
+											$li_class = 'doing';
 										}
 										?>
-										<li<?php echo $li_class; ?>>
+										<li class="<?php echo esc_attr( $li_class ); ?>">
 											<span class="content"><?php echo esc_html( $step['description'] ); ?></span>
 										</li>
 									<?php endforeach; ?>
@@ -426,15 +447,16 @@ class Avada_Migrate extends Avada_Upgrade {
 
 							<?php if ( intval( $this->step ) >= count( $this->steps ) ) : ?>
 								<?php if ( empty( $this->available_languages ) || count( $this->available_languages ) == array_search( $this->active_language, $this->available_languages ) + 1 ) : ?>
-									<a class="avada-save-options" href="<?php echo admin_url( 'index.php?fusion_builder_migrate=1&ver=500' ); ?>">
-										<?php _e( 'Take Me To Shortcode Conversion', 'Avada' ); ?>
+									<a class="avada-save-options" href="<?php echo esc_url_raw( admin_url( 'index.php?fusion_builder_migrate=1&ver=500' ) ); ?>">
+										<?php esc_attr_e( 'Take Me To Shortcode Conversion', 'Avada' ); ?>
 									</a>
 								<?php endif; ?>
 							<?php endif; ?>
 						</div>
+						<?php /* translators: (heart) icon. */ ?>
 						<div class="avada-footer"><a class="avada-themefusion-link" href="https://theme-fusion.com" target="_blank" rel="noopener noreferrer" title="ThemeFusion">ThemeFusion</a><span class="avada-separator">|</span><?php printf( esc_html__( 'Created with %s', 'Avada' ), '<span class="avada-heart"></span>' ); ?></div>
 					</div>
-					<?php echo $this->redirect_script(); ?>
+					<?php echo $this->redirect_script(); // WPCS: XSS ok. ?>
 				</div>
 			</body>
 		</html>
@@ -446,7 +468,7 @@ class Avada_Migrate extends Avada_Upgrade {
 	 */
 	public function finished() {
 		// Reset the CSS.
-		update_option( 'avada_dynamic_css_posts', array() );
+		update_option( 'fusion_dynamic_css_posts', array() );
 	}
 
 	/**
@@ -460,14 +482,14 @@ class Avada_Migrate extends Avada_Upgrade {
 		$delay = 500;
 		if ( ( $current_step + 1 ) <= count( $this->steps ) && $this->proceed ) {
 			// Redirect to next step.
-			$lang = ( $_GET && isset( $_GET['lang'] ) ) ? $_GET['lang'] : $this->starting_language;
+			$lang = ( isset( $_GET['lang'] ) ) ? sanitize_text_field( wp_unslash( $_GET['lang'] ) ) : '';
 			return '<script type="text/javascript">setTimeout(function () {window.location.href = "' . admin_url( 'index.php?avada_update=1&ver=400&lang=' . $lang . '&step=' . $next_step ) . '";}, ' . $delay . ');</script>';
 		} else {
 			// Check if this is a multilingual site.
 			if ( ! empty( $languages ) ) {
 				// Get the next language code.
 				$next_lang = $this->get_next_language();
-				if ( 'finished' == $next_lang ) {
+				if ( 'finished' === $next_lang ) {
 					return;
 				}
 				return '<script type="text/javascript">setTimeout(function () {window.location.href = "' . admin_url( 'index.php?avada_update=1&ver=400&new=1&lang=' . $next_lang ) . '";}, ' . $delay . ');</script>';
@@ -486,7 +508,7 @@ class Avada_Migrate extends Avada_Upgrade {
 		$languages = $this->available_languages;
 		// Get the current language key.
 		if ( $_GET && isset( $_GET['lang'] ) ) {
-			$current_lang_code = $_GET['lang'];
+			$current_lang_code = ( isset( $_GET['lang'] ) ) ? sanitize_text_field( wp_unslash( $_GET['lang'] ) ) : '';
 			$current_lang_key  = (int) array_search( $current_lang_code, $languages );
 			if ( false === $current_lang_key ) {
 				$current_lang_key = null;
@@ -553,6 +575,7 @@ class Avada_Migrate extends Avada_Upgrade {
 				$debug_content = file_get_contents( $debug_file_path );
 			}
 			$debug_content .= $debug_log;
+			// @codingStandardsIgnoreLine
 			file_put_contents( $debug_file_path, $debug_content );
 		}
 	}

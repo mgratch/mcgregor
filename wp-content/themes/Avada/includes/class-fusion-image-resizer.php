@@ -3,7 +3,12 @@
  * On the fly image resizer.
  * Script from the Shoestrap theme by @aristath
  *
- * @since 3.8.0
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      3.8.0
  */
 
 // Do not allow directly accessing this file.
@@ -32,12 +37,13 @@ class Fusion_Image_Resizer {
 			'resize' => true,
 		);
 		$settings = wp_parse_args( $data, $defaults );
+
 		if ( empty( $settings['url'] ) ) {
 			return;
 		}
 		// Generate the @2x file if retina is enabled.
 		if ( $settings['retina'] ) {
-			self::_resize( $settings['url'], $settings['width'], $settings['height'], $settings['crop'], true );
+			return self::_resize( $settings['url'], $settings['width'], $settings['height'], $settings['crop'], true );
 		}
 		return self::_resize( $settings['url'], $settings['width'], $settings['height'], $settings['crop'], false );
 	}
@@ -59,28 +65,52 @@ class Fusion_Image_Resizer {
 			return new WP_Error( 'no_image_url', __( 'No image URL has been entered.', 'Avada' ), $url );
 		}
 		// Get default size from database.
-		$width  = ( $width )  ? $width  : get_option( 'thumbnail_size_w' );
+		$width  = ( $width ) ? $width : get_option( 'thumbnail_size_w' );
 		$height = ( $height ) ? $height : get_option( 'thumbnail_size_h' );
 		// Allow for different retina sizes.
 		$retina = ( true === $retina ) ? 2 : $retina;
 		$retina = $retina ? $retina : 1;
 		// Get the image file path.
 		$upload_dir_paths = wp_upload_dir();
+		$upload_dir_paths_baseurl = $upload_dir_paths['baseurl'];
+
+		if ( substr( $url, 0, 2 ) === '//' ) {
+			$upload_dir_paths_baseurl = set_url_scheme( $upload_dir_paths_baseurl );
+		}
 
 		// Make sure the upload path base directory exists in the attachment URL, to verify that we're working with a media library image.
-		if ( false !== strpos( $url, $upload_dir_paths['baseurl'] ) ) {
+		if ( false !== strpos( $url, $upload_dir_paths_baseurl ) ) {
+
 			// If this is the URL of an auto-generated thumbnail, get the URL of the original image.
-			$attachment_url = preg_replace( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif)$)/i', '', $url );
+			$attachment_url = preg_replace( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif|tiff|svg)$)/i', '', $url );
+
 			// Remove the upload path base directory from the attachment URL.
-			$attachment_url = str_replace( $upload_dir_paths['baseurl'] . '/', '', $attachment_url );
-			// Run a custom database query to get the attachment ID from the modified attachment URL.
+			$attachment_url = str_replace( $upload_dir_paths_baseurl . '/', '', $attachment_url );
+
+			// Run a custom database query to get the attachment ID from the modified attachment URL. @codingStandardsIgnoreLine
 			$attachment_id = $wpdb->get_var( $wpdb->prepare( "SELECT wposts.ID FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta WHERE wposts.ID = wpostmeta.post_id AND wpostmeta.meta_key = '_wp_attached_file' AND wpostmeta.meta_value = '%s' AND wposts.post_type = 'attachment'", $attachment_url ) );
+
+			// If the image contains -\d+x\d part as original file name, the above did not yield an attachment ID, so let's try with the original name.
+			if ( ! $attachment_id ) {
+				// Remove the upload path base directory from the attachment URL.
+				$attachment_url = str_replace( $upload_dir_paths_baseurl . '/', '', $url );
+
+				// Run a custom database query to get the attachment ID from the modified attachment URL. @codingStandardsIgnoreLine
+				$attachment_id = $wpdb->get_var( $wpdb->prepare( "SELECT wposts.ID FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta WHERE wposts.ID = wpostmeta.post_id AND wpostmeta.meta_key = '_wp_attached_file' AND wpostmeta.meta_value = '%s' AND wposts.post_type = 'attachment'", $attachment_url ) );
+			}
+
+			$wpml_object_id = apply_filters( 'wpml_object_id', $attachment_id, 'attachment' );
+			$attachment_id = $wpml_object_id ? $wpml_object_id : $attachment_id;
 			// Get the file path.
 			$file_path = get_attached_file( $attachment_id );
 		}
 
 		if ( ! isset( $file_path ) ) {
-			return array( 'url' => $url, 'width' => $width, 'height' => $height );
+			return array(
+				'url' => $url,
+				'width' => $width,
+				'height' => $height,
+			);
 		}
 
 		// Destination width and height variables.
@@ -109,19 +139,28 @@ class Fusion_Image_Resizer {
 			 *  We only want to resize Media Library images, so we can be sure they get deleted correctly when appropriate.
 			 */
 			if ( ! isset( $attachment_id ) || ! $attachment_id ) {
-				return array( 'url' => $url, 'width' => $width, 'height' => $height );
+				return array(
+					'url' => $url,
+					'width' => $width,
+					'height' => $height,
+				);
 			}
 			// Load Wordpress Image Editor.
 			$editor = wp_get_image_editor( $file_path );
 			if ( is_wp_error( $editor ) ) {
-				return array( 'url' => $url, 'width' => $width, 'height' => $height );
+				return array(
+					'url' => $url,
+					'width' => $width,
+					'height' => $height,
+				);
 			}
 
 			// Get the original image size.
 			$size = $editor->get_size();
 			$orig_width  = $size['width'];
 			$orig_height = $size['height'];
-			$src_x = $src_y = 0;
+			$src_x = 0;
+			$src_y = 0;
 			$src_w = $orig_width;
 			$src_h = $orig_height;
 			if ( $crop ) {
@@ -138,13 +177,14 @@ class Fusion_Image_Resizer {
 			}
 			// Check if the file is writable before proceeding.
 			global $wp_filesystem;
-			if ( empty( $wp_filesystem ) ) {
-				require_once( ABSPATH . '/wp-admin/includes/file.php' );
-				WP_Filesystem();
-			}
+			Avada_Helper::init_filesystem();
 
 			if ( ! $wp_filesystem->put_contents( $dest_file_name, '', FS_CHMOD_FILE ) ) {
-				return array( 'url' => $url, 'width' => $orig_width, 'height' => $orig_height );
+				return array(
+					'url' => $url,
+					'width' => $orig_width,
+					'height' => $orig_height,
+				);
 			}
 			// Time to crop the image!
 			$editor->crop( $src_x, $src_y, $src_w, $src_h, $dest_width, $dest_height );
@@ -152,7 +192,11 @@ class Fusion_Image_Resizer {
 			$saved = $editor->save( $dest_file_name );
 			// If saving fails, return the original image.
 			if ( is_wp_error( $saved ) ) {
-				return array( 'url' => $url, 'width' => $width, 'height' => $height );
+				return array(
+					'url' => $url,
+					'width' => $width,
+					'height' => $height,
+				);
 			}
 			// Get resized image information.
 			$resized_url    = str_replace( basename( $url ), basename( $saved['path'] ), $url );
@@ -185,7 +229,7 @@ class Fusion_Image_Resizer {
 			);
 			$image_array['retina_url'] = ( file_exists( "{$dir}/{$name}-{$suffix}{$suffix_retina}.{$ext}" ) ) ? rtrim( $image_array['url'], ".{$ext}" ) . "@2x.{$ext}" : false;
 
-		}
+		} // End if().
 		// Return image array.
 		return $image_array;
 	}

@@ -1,4 +1,13 @@
 <?php
+/**
+ * Handles upgrades.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -77,23 +86,30 @@ class Avada_Upgrade {
 
 	/**
 	 * Constructor.
+	 *
+	 * @access private
 	 */
-	private function __construct() {
+	protected function __construct() {
 
-		$this->database_theme_version = get_option( 'avada_version', false );
+		$this->previous_theme_versions = get_option( 'avada_previous_version', array() );
+		// Previous version only really needed, because through the upgrade loop, the database_theme_version will be altered.
+		$this->previous_theme_version  = $this->get_previous_theme_version();
+		$this->database_theme_version  = get_option( 'avada_version', false );
+		$this->database_theme_version  = Avada_Helper::normalize_version( $this->database_theme_version );
+		$this->current_theme_version   = Avada::get_theme_version();
+		$this->current_theme_version   = Avada_Helper::normalize_version( $this->current_theme_version );
 
-		// Check if previous versions of avada are installed
-		// by checking the 'avada_version' setting.
-		// If it doesn't exist, then this is a fresh installation
-		// and we can safely exit without doing anything further.
-		if ( false === $this->database_theme_version ) {
+		// Check through all options names that were available for Theme Options in databse.
+		$theme_options = get_option( Avada::get_option_name(), get_option( 'avada_theme_options', get_option( 'Avada_options', false ) ) );
+
+		// If no old version is in database or there are no saved options,
+		// this is a new install, nothing to do, but to copy version to db.
+		if ( false === $this->database_theme_version || ! $theme_options ) {
 			$this->fresh_installation();
 			return;
-		}
 
-		// Don't do anything if this is coming from an AJAX call.
-		// This avoids issues with the HeartBeat API.
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			// If on front-end and user intervention necessary, do not continue.
+		} elseif ( ! is_admin() && version_compare( $this->database_theme_version, '5.0.1', '<' ) ) {
 			return;
 		}
 
@@ -107,6 +123,15 @@ class Avada_Upgrade {
 			'402' => array( '4.0.2', false ),
 			'403' => array( '4.0.3', false ),
 			'500' => array( '5.0.0', true ),
+			'503' => array( '5.0.3', false ),
+			'510' => array( '5.1.0', false ),
+			'516' => array( '5.1.6', false ),
+			'520' => array( '5.2.0', false ),
+			'521' => array( '5.2.1', false ),
+			'530' => array( '5.3.0', false ),
+			'540' => array( '5.4.0', false ),
+			'541' => array( '5.4.1', false ),
+			'542' => array( '5.4.2', false ),
 		);
 
 		$upgraded = false;
@@ -117,16 +142,25 @@ class Avada_Upgrade {
 			if ( $this->database_theme_version && version_compare( $this->database_theme_version, $version[0], '<' ) ) {
 				$upgraded = true;
 				// Instantiate the class if migration is needed.
-				new $classname();
+				if ( class_exists( $classname ) ) {
+					new $classname();
+				}
 			} elseif ( true === $version[1] ) {
 				// Instantiate the class if force-instantiation is set to true.
-				new $classname();
+				if ( class_exists( $classname ) ) {
+					new $classname( true );
+				}
 			}
 		}
 
-		// If we run an upgrade then reset the dynamic-css.
 		if ( true === $upgraded ) {
-			update_option( 'avada_dynamic_css_posts', array() );
+			// Reset all Fusion caches.
+			if ( ! class_exists( 'Fusion_Cache' ) ) {
+				include_once Avada::$template_dir_path . '/includes/lib/inc/class-fusion-cache.php';
+			}
+
+			$fusion_cache = new Fusion_Cache();
+			$fusion_cache->reset_all_caches();
 		}
 
 		/**
@@ -137,35 +171,8 @@ class Avada_Upgrade {
 			return;
 		}
 
-		$this->previous_theme_versions = get_option( 'avada_previous_version', array() );
-		$this->current_theme_version   = Avada::get_theme_version();
-		$this->avada_options = get_option( Avada::get_option_name(), array() );
+		add_action( 'init', array( $this, 'update_installation' ) );
 
-		if ( is_array( $this->previous_theme_versions ) && ! empty( $this->previous_theme_versions ) ) {
-			$this->previous_theme_version = end( $this->previous_theme_versions );
-			reset( $this->previous_theme_versions );
-		} else {
-			$this->previous_theme_version = $this->previous_theme_versions;
-		}
-
-		// Make sure the theme version has 3 digits.
-		$this->previous_theme_version = Avada_Helper::normalize_version( $this->previous_theme_version );
-		$this->database_theme_version = Avada_Helper::normalize_version( $this->database_theme_version );
-		$this->current_theme_version  = Avada_Helper::normalize_version( $this->current_theme_version );
-
-		if ( empty( $this->avada_options ) ) {
-			// Fallback to previous options.
-			$this->avada_options = get_option( 'avada_options', array() );
-		}
-
-		add_action( 'init', array( $this, 'set_user_data' ) );
-		add_action( 'after_setup_theme', array( $this, 'migrate' ) );
-
-		// Change the method to be used depending on whether this is
-		// a fresh installation or an update on an existing installation.
-		$action_method = ( empty( $this->avada_options ) ) ? 'fresh_installation' : 'update_installation';
-
-		add_action( 'init', array( $this, $action_method ) );
 	}
 
 	/**
@@ -183,40 +190,36 @@ class Avada_Upgrade {
 	}
 
 	/**
+	 * Get the previous theme version from database.
+	 *
+	 * @access public
+	 * @return string The previous theme version.
+	 */
+	public function get_previous_theme_version() {
+		if ( is_array( $this->previous_theme_versions ) && ! empty( $this->previous_theme_versions ) ) {
+			$this->previous_theme_version = end( $this->previous_theme_versions );
+			reset( $this->previous_theme_versions );
+		} else {
+			$this->previous_theme_version = $this->previous_theme_versions;
+		}
+
+		// Make sure the theme version has 3 digits.
+		return Avada_Helper::normalize_version( $this->previous_theme_version );
+	}
+
+	/**
 	 * Actions to run on a fresh installation.
 	 */
 	public function fresh_installation() {
 		update_option( 'avada_version', $this->current_theme_version );
+		$this->clear_update_theme_transient();
 	}
 
 	/**
-	 * Migrate script to decode theme options.
+	 * Clear update_themes transient after update. Fix for #5048.
 	 */
-	public function migrate() {
-		if ( 'done' !== get_option( 'avada_38_migrate' ) ) {
-			$theme_version = get_option( 'avada_theme_version' );
-
-			if ( '1.0.0' == $theme_version ) { // Child theme check failure.
-				Avada()->init->set_theme_version();
-			}
-
-			if ( version_compare( $theme_version, '3.8', '>=' ) && version_compare( $theme_version, '3.8.5', '<' ) ) {
-				$smof_data_to_decode = get_option( 'Avada_options' );
-
-				$encoded_field_names = array( 'google_analytics', 'space_head', 'space_body', 'custom_css' );
-
-				foreach ( $encoded_field_names as $field_name ) {
-					$decoded_field_value = rawurldecode( $smof_data_to_decode[ $field_name ] );
-
-					if ( $decoded_field_value ) {
-						$smof_data_to_decode[ $field_name ] = $decoded_field_value;
-					}
-				}
-
-				update_option( 'Avada_options', $smof_data_to_decode );
-				update_option( 'avada_38_migrate', 'done' );
-			}
-		}
+	public function clear_update_theme_transient() {
+		delete_site_transient( 'update_themes' );
 	}
 
 	/**
@@ -225,6 +228,12 @@ class Avada_Upgrade {
 	 * @param  bool $skip400 Skips the migration to 4.0 if set to true.
 	 */
 	public function update_installation( $skip400 = false ) {
+		global $current_user;
+
+		$this->current_user = $current_user;
+
+		$this->debug();
+
 		if ( version_compare( $this->current_theme_version, $this->database_theme_version, '>' ) ) {
 			// Delete the update notice dismiss flag, so that the flag is reset.
 			if ( ! $skip400 ) {
@@ -245,7 +254,7 @@ class Avada_Upgrade {
 		}
 
 		// Show upgrade notices.
-		if ( version_compare( $this->current_theme_version, '4.0.0', '<' ) ) {
+		if ( version_compare( $this->current_theme_version, '5.1.0', '<=' ) ) {
 			add_action( 'admin_notices', array( $this, 'upgrade_notice' ) );
 		}
 	}
@@ -254,13 +263,11 @@ class Avada_Upgrade {
 	 * Update the avada version in the database and reset flags.
 	 */
 	public function update_version() {
-		// Only update the version in the db when in the dashboard.
-		if ( ! is_admin() ) {
-			return;
-		}
 		if ( version_compare( $this->current_theme_version, $this->database_theme_version, '>' ) ) {
 			// Update the stored theme versions.
 			update_option( 'avada_version', $this->current_theme_version );
+			$this->clear_update_theme_transient();
+
 			if ( $this->previous_theme_versions ) {
 				if ( is_array( $this->previous_theme_versions ) ) {
 					$versions_array   = $this->previous_theme_versions;
@@ -277,21 +284,7 @@ class Avada_Upgrade {
 			}
 
 			update_option( 'avada_previous_version', $versions_array );
-
-			// Make sure previous version is set, before the update notice action is called.
-			$this->previous_theme_version = $this->database_theme_version;
 		}
-	}
-
-	/**
-	 * Set the WP user data, done on init hook.
-	 */
-	public function set_user_data() {
-		global $current_user;
-
-		$this->current_user = $current_user;
-
-		$this->debug();
 	}
 
 	/**
@@ -340,9 +333,9 @@ class Avada_Upgrade {
 				</ol>
 				<?php
 			}
-			if ( version_compare( $this->previous_theme_version, '4.0.0', '<' ) ) {
+			if ( version_compare( $this->previous_theme_version, '5.1.0', '<' ) ) {
 				?>
-				<p><strong>Please view the important update information for Avada 4.0:</strong></p>
+				<p><strong>Please view the important update information for Avada 5.1:</strong></p>
 
 				You can view all update information here: <a href="http://theme-fusion.com/avada-doc/install-update/important-update-information/" target="_blank" rel="noopener noreferrer">Important Update Information</a>
 				<?php
@@ -350,13 +343,13 @@ class Avada_Upgrade {
 			?>
 			<p>
 				<strong>
-					<a href="http://theme-fusion.com/avada-documentation/changelog.txt" class="view-changelog button-primary" target="_blank" rel="noopener noreferrer"><?php esc_attr_e( 'View Changelog', 'Avada' ); ?></a>
-					<a href="<?php echo esc_url( add_query_arg( 'avada_update_notice', '1' ) ); ?>" class="dismiss-notice button-secondary" style="margin:0 4px;"><?php esc_attr_e( 'Dismiss this notice', 'Avada' ); ?></a>
+					<a href="http://theme-fusion.com/avada-documentation/changelog.txt" class="view-changelog button-primary" style="margin-top:1em;" target="_blank" rel="noopener noreferrer"><?php esc_attr_e( 'View Changelog', 'Avada' ); ?></a>
+					<a href="<?php echo esc_url( add_query_arg( 'avada_update_notice', '1' ) ); ?>" class="dismiss-notice button-secondary" style="margin:1em 4px 0 4px;"><?php esc_attr_e( 'Dismiss this notice', 'Avada' ); ?></a>
 				</strong>
 			</p>
 			</div>
 			<?php
-		}
+		} // End if().
 	}
 
 	/**
@@ -364,7 +357,7 @@ class Avada_Upgrade {
 	 */
 	public function notices_action() {
 		// Set update notice dismissal, so that the notice is no longer shown.
-		if ( isset( $_GET['avada_update_notice'] ) && $_GET['avada_update_notice'] ) {
+		if ( isset( $_GET['avada_update_notice'] ) && sanitize_key( wp_unslash( $_GET['avada_update_notice'] ) ) ) {
 			add_user_meta( $this->current_user->ID, 'avada_update_notice', '1', true );
 		}
 	}
@@ -412,7 +405,7 @@ class Avada_Upgrade {
 
 			delete_user_meta( $current_user->ID, 'avada_update_notice' );
 			delete_option( 'avada_version' );
-			update_option( 'avada_version', '3.9' );
+			update_option( 'avada_version', '5.1' );
 			delete_option( 'avada_previous_version' );
 			delete_option( Avada::get_option_name() );
 
@@ -426,6 +419,7 @@ class Avada_Upgrade {
 
 		return;
 	}
+
 }
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

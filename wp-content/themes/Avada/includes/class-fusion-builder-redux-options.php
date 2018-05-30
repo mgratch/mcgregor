@@ -1,4 +1,14 @@
 <?php
+/**
+ * Adds fusion-builder options in redux.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -7,8 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Adds fusion-builder options in Redux.
- *
- * @since 5.0.0
  */
 class Fusion_Builder_Redux_Options {
 
@@ -28,7 +36,7 @@ class Fusion_Builder_Redux_Options {
 	public function __construct() {
 
 		// Include the options file.
-		include_once dirname( __FILE__ ) . '/options/shortcode_styling.php';
+		include_once wp_normalize_path( dirname( __FILE__ ) . '/options/shortcode_styling.php' );
 
 		// Determine if we're using the Avada theme.
 		add_action( 'after_setup_theme', array( $this, 'is_avada' ) );
@@ -126,7 +134,7 @@ class Fusion_Builder_Redux_Options {
 				'fusion_woo_shortcodes'           => 'Woo Shortcodes',
 				'fusion_youtube'                  => 'Youtube',
 			);
-		}
+		} // End if().
 
 		$option_name = 'fusion_builder_options';
 		if ( ! function_exists( 'fusion_builder_redux_shortcode_styling' ) ) {

@@ -4,7 +4,7 @@
 	<table>
 		<thead class="ls-layer-options-thead">
 			<tr>
-				<td colspan="4">
+				<td colspan="5">
 					<i class="dashicons dashicons-welcome-write-blog"></i>
 					<h4><?php _e('Slide Options', 'LayerSlider') ?>
 						<button type="button" class="button ls-layer-duplicate"><span class="dashicons dashicons-admin-page"></span><?php _e('Duplicate slide', 'LayerSlider') ?></button>
@@ -19,20 +19,20 @@
 			<input type="hidden" name="custom_3d_transitions">
 			<input type="hidden" name="custom_2d_transitions">
 			<tr>
-				<td class="slide-image">
+				<td class="slide-image" colspan="2">
 					<h3 class="subheader"><?php _e('Slide Background Image', 'LayerSlider') ?></h3>
 					<div class="inner">
 						<div class="float">
 							<input type="hidden" name="backgroundId">
 							<input type="hidden" name="background">
-							<div class="ls-image ls-upload ls-bulk-upload ls-slide-image not-set" data-help="<?php echo $lsDefaults['slides']['image']['tooltip'] ?>">
+							<div class="ls-image ls-upload ls-bulk-upload ls-slide-image not-set" data-l10n-set="<?php _e('Click to set', 'LayerSlider') ?>" data-l10n-change="<?php _e('Click to change', 'LayerSlider') ?>" data-help="<?php echo $lsDefaults['slides']['image']['tooltip'] ?>">
 								<div><img src="<?php echo LS_ROOT_URL.'/static/admin/img/blank.gif' ?>" alt=""></div>
 								<a href="#" class="aviary"></a>
 								<a href="#" class="dashicons dashicons-dismiss"></a>
 							</div>
 							<span class="indent">
 								<?php _e('or', 'LayerSlider') ?> <a href="#" class="ls-url-prompt"><?php _e('enter URL', 'LayerSlider') ?></a>
-								<?php _e('|', 'LayerSlider') ?> <a href="#" class="ls-post-image"><?php _e('use post image', 'LayerSlider') ?></a>
+								| <a href="#" class="ls-post-image"><?php _e('use post image', 'LayerSlider') ?></a>
 							</span>
 						</div>
 						<div class="float">
@@ -56,7 +56,7 @@
 					<div class="inner">
 						<input type="hidden" name="thumbnailId">
 						<input type="hidden" name="thumbnail">
-						<div class="ls-image ls-upload ls-slide-thumbnail not-set" data-help="<?php echo $lsDefaults['slides']['thumbnail']['tooltip'] ?>">
+						<div class="ls-image ls-upload ls-slide-thumbnail not-set" data-l10n-set="<?php _e('Click to set', 'LayerSlider') ?>" data-l10n-change="<?php _e('Click to change', 'LayerSlider') ?>" data-help="<?php echo $lsDefaults['slides']['thumbnail']['tooltip'] ?>">
 							<div><img src="<?php echo LS_ROOT_URL.'/static/admin/img/blank.gif' ?>" alt=""></div>
 							<a href="#" class="aviary"></a>
 							<a href="#" class="dashicons dashicons-dismiss"></a>
@@ -82,7 +82,7 @@
 				<td class="slide-transition">
 					<h3 class="subheader"><?php _e('Slide Transition', 'LayerSlider') ?></h3>
 					<div class="inner">
-						<button type="button" class="button ls-select-transitions new" data-help="<?php _e('You can select your desired slide transitions by clicking on this button.', 'LayerSlider') ?>">Select transitions</button> <br>
+						<button type="button" class="button ls-select-transitions new" data-help="<?php _e('You can select your desired slide transitions by clicking on this button.', 'LayerSlider') ?>"><?php _e('Select transitions', 'LayerSlider') ?></button> <br>
 						<div class="row-helper">
 							<?php lsGetInput($lsDefaults['slides']['transitionDuration'], null, array('class' => 'slideprop')) ?>
 							<span>ms</span>
@@ -91,17 +91,39 @@
 				</td>
 			</tr>
 			<tr class="ls-advanced ls-hidden">
-				<td class="slide-link">
+				<td class="ls-slide-link" colspan="2">
 					<h3 class="subheader"><?php _e('Slide Linking', 'LayerSlider') ?></h3>
 					<div class="inner">
 						<div class="row-helper">
-							<?php lsGetInput($lsDefaults['slides']['linkUrl'], null, array('class' => 'slideprop', 'placeholder' => $lsDefaults['slides']['linkUrl']['name'] )) ?>
+							<?php lsGetInput($lsDefaults['slides']['linkUrl'], null, array('class' => 'slideprop url', 'placeholder' => $lsDefaults['slides']['linkUrl']['name'] )) ?>
+							<input type="hidden" name="linkId">
+							<input type="hidden" name="linkName">
+							<input type="hidden" name="linkType">
+							<div class="ls-insert-link ls-pointer ls-box ls-hidden">
+								<ul class="inner">
+									<li>
+										<a href="#" class="post">
+											<?php _e('Choose Post or Page', 'LayerSlider') ?>
+										</a>
+									</li>
+									<li>
+										<a href="#" class="dyn">
+											<?php _e('Use Dynamic post URL', 'LayerSlider') ?>
+										</a>
+									</li>
+								</ul>
+							</div>
+							<span>
+								<a href="#" class="ls-insert-link-button"><?php _e('insert ...', 'LayerSlider') ?></a>
+							</span>
+							<a href="#" class="change">
+								<i class="dashicons dashicons-editor-unlink"></i>
+								<?php _e('change', 'LayerSlider') ?>
+							</a>
 						</div>
 						<div class="row-helper">
-							<span class="indent">
-								<?php _e('or', 'LayerSlider') ?> <a href="#"><?php _e('use post URL', 'LayerSlider') ?></a>
-							</span>
 							<?php lsGetSelect($lsDefaults['slides']['linkTarget'], null, array('class' => 'slideprop')) ?>
+							<?php lsGetSelect($lsDefaults['slides']['linkPosition'], null, array('class' => 'slideprop')) ?>
 						</div>
 					</div>
 				</td>
@@ -118,6 +140,20 @@
 							<?php echo $lsDefaults['slides']['deeplink']['name'] ?>
 							<?php lsGetInput($lsDefaults['slides']['deeplink'], null, array('class' => 'slideprop')) ?>
 						</div>
+
+						<?php if( ! LS_Config::get('theme_bundle') || $lsActivated ) : ?>
+						<div class="row-helper ls-global-hover">
+							<div class="ls-premium">
+								<?php if( ! $lsActivated ) : ?>
+								<a class="dashicons dashicons-lock" target="_blank" href="<?php echo admin_url('admin.php?page=layerslider-addons' ) ?>" data-help="<?php _e('This feature requires product activation. Click on the padlock icon to learn more.', 'LayerSlider') ?>"></a>
+								<?php endif ?>
+							</div>
+							<a href="https://layerslider.kreaturamedia.com/sliders/global-hover-example/" target="_blank">
+								<?php echo $lsDefaults['slides']['globalHover']['name'] ?>
+							</a>
+							<?php lsGetCheckbox($lsDefaults['slides']['globalHover'], null, array('class' => 'slideprop')) ?>
+						</div>
+						<?php endif ?>
 					</div>
 				</td>
 				<td class="slide-actions">
@@ -127,7 +163,7 @@
 							<span>
 								<?php _e('Hide this slide', 'LayerSlider') ?>
 							</span>
-							<input type="checkbox" name="skip" class="checkbox large slideprop" data-help="<?php _e("If you don't want to use this slide in your front-page, but you want to keep it, you can hide it with this switch.", "LayerSlider") ?>">
+							<input type="checkbox" name="skip" class="checkbox large slideprop" data-help="<?php _e('If you don’t want to use this slide in your front-page, but you want to keep it, you can hide it with this switch.', 'LayerSlider') ?>">
 						</div>
 						<div class="row-helper">
 							<span>
@@ -139,6 +175,21 @@
 				</td>
 			</tr>
 			<tr class="ls-advanced ls-hidden">
+				<td>
+					<h3 class="subheader"><?php _e('Custom Slide Properties', 'LayerSlider') ?></h3>
+					<div class="ls-custom-slide-properties">
+						<table>
+							<tr>
+								<td>
+									<input type="text" placeholder="<?php _e('Key', 'LayerSlider') ?>">
+								</td>
+								<td>
+									<input type="text" placeholder="<?php _e('Value', 'LayerSlider') ?>">
+								</td>
+							</tr>
+						</table>
+					</div>
+				</td>
 				<td class="slide-ken-burns">
 					<h3 class="subheader"><?php _e('Ken Burns Effect', 'LayerSlider') ?></h3>
 					<div class="inner">
@@ -266,23 +317,77 @@
 							<?php _e('Align Layer to...', 'LayerSlider') ?>
 						</button>
 						<div class="ls-su-data">
-							<table id="ls-layer-alignment">
-								<tr>
-									<td data-move="top left"><i><?php _e('top left', 'LayerSlider') ?></i></td>
-									<td data-move="top center"><i><?php _e('top center', 'LayerSlider') ?></i></td>
-									<td data-move="top right"><i><?php _e('top right', 'LayerSlider') ?></i></td>
-								</tr>
-								<tr>
-									<td data-move="middle left"><i><?php _e('middle left', 'LayerSlider') ?></i></td>
-									<td data-move="middle center"><i><?php _e('middle center', 'LayerSlider') ?></i></td>
-									<td data-move="middle right"><i><?php _e('middle right', 'LayerSlider') ?></i></td>
-								</tr>
-								<tr>
-									<td data-move="bottom left"><i><?php _e('bottom left', 'LayerSlider') ?></i></td>
-									<td data-move="bottom center"><i><?php _e('bottom center', 'LayerSlider') ?></i></td>
-									<td data-move="bottom right"><i><?php _e('bottom right', 'LayerSlider') ?></i></td>
-								</tr>
-							</table>
+							<div id="ls-layer-alignment" class="ls-layer-alignment">
+
+								<table class="ls-grid">
+									<tr>
+										<td data-move="top left">
+											<i><?php _e('top left', 'LayerSlider') ?></i>
+										</td>
+										<td data-move="top center">
+											<i><?php _e('top center', 'LayerSlider') ?></i>
+										</td>
+										<td data-move="top right">
+											<i><?php _e('top right', 'LayerSlider') ?></i>
+										</td>
+									</tr>
+									<tr>
+										<td data-move="middle left">
+											<i><?php _e('center left', 'LayerSlider') ?></i>
+										</td>
+										<td data-move="middle center">
+											<i><?php _e('center center', 'LayerSlider') ?></i>
+										</td>
+										<td data-move="middle right">
+											<i><?php _e('center right', 'LayerSlider') ?></i>
+										</td>
+									</tr>
+									<tr>
+										<td data-move="bottom left">
+											<i><?php _e('bottom left', 'LayerSlider') ?></i>
+										</td>
+										<td data-move="bottom center">
+											<i><?php _e('bottom center', 'LayerSlider') ?></i>
+										</td>
+										<td data-move="bottom right">
+											<i><?php _e('bottom right', 'LayerSlider') ?></i>
+										</td>
+									</tr>
+								</table>
+
+
+								<table class="ls-edges">
+									<tr>
+										<td data-move="left" class="ls-align-left">
+											<i><?php _e('Left Edge', 'LayerSlider') ?></i>
+											<span class="dashicons dashicons-align-left"></span>
+										</td>
+										<td data-move="center" class="ls-align-center">
+											<i><?php _e('H. Center', 'LayerSlider') ?></i>
+											<span class="dashicons dashicons-align-center"></span>
+										</td>
+										<td data-move="right" class="ls-align-right">
+											<i><?php _e('Right Edge', 'LayerSlider') ?></i>
+											<span class="dashicons dashicons-align-right"></span>
+										</td>
+									</tr>
+									<tr>
+										<td data-move="top" class="ls-align-top">
+											<i><?php _e('Top Edge', 'LayerSlider') ?></i>
+											<span class="dashicons dashicons-align-left"></span>
+										</td>
+										<td data-move="middle" class="ls-align-middle">
+											<i><?php _e('V. Center', 'LayerSlider') ?></i>
+											<span class="dashicons dashicons-align-center"></span>
+										</td>
+										<td data-move="bottom" class="ls-align-bottom">
+											<i><?php _e('Bottom Edge', 'LayerSlider') ?></i>
+											<span class="dashicons dashicons-align-right"></span>
+										</td>
+									</tr>
+								</table>
+
+							</div>
 						</div>
 					</div>
 					<div class="ls-editor-undo-redo">
@@ -308,14 +413,14 @@
  -->
  					<div class="ls-editor-preview">
 						<?php _e('Preview', 'LayerSlider') ?>
-						<button type="button" class="button ls-preview-button"><?php _e('Slide', 'LayerSlider') ?></button><!--
+						<button type="button" class="button ls-preview-button"><?php _ex('Slide', 'noun', 'LayerSlider') ?></button><!--
 					 --><button type="button" class="button ls-layer-preview-button"><?php _e('Layer', 'LayerSlider') ?></button>
 					</div>
 
 
 					<div class="ls-editor-layouts">
 						<button data-type="desktop" class="button dashicons dashicons-desktop playing" data-help="<?php _e('Show layers that are visible on desktop.', 'LayerSlider') ?>"></button><!--
-					--><button data-type="tablet" class="button dashicons dashicons-tablet" data-help="<?php _e('Show layers that are visible on tables.', 'LayerSlider') ?>"></button><!--
+					--><button data-type="tablet" class="button dashicons dashicons-tablet" data-help="<?php _e('Show layers that are visible on tablets.', 'LayerSlider') ?>"></button><!--
 					--><button data-type="phone"  class="button dashicons dashicons-smartphone" data-help="<?php _e('Show layers that are visible on mobile phones.', 'LayerSlider') ?>"></button>
 					</div>
 				</td>
@@ -325,8 +430,9 @@
 	<div class="ls-preview-td">
 		<div class="ls-preview-wrapper ls-preview-size" data-dragover="<?php _e('Drop image(s) here', 'LayerSlider') ?>">
 			<div class="ls-preview ls-preview-size">
-				<div id="ls-static-preview" class="ls-preview-transform"></div>
-				<div id="ls-preview-layers" class="draggable ls-layer ls-preview-transform"></div>
+				<div id="ls-preview-layers" class="draggable ls-layer ls-preview-transform">
+					<div id="ls-static-preview" class="disabled"></div>
+				</div>
 			</div>
 			<div class="ls-real-time-preview ls-preview-size"></div>
 		</div>
@@ -339,6 +445,53 @@
 			<a href="#" class="ls-add-sublayer">
 				<span class="dashicons dashicons-plus"></span><?php _e('Add New', 'LayerSlider') ?>
 			</a>
+			<div class="ls-layer-types-wrapper">
+				<div class="ls-box ls-layer-types">
+					<div>
+						<!-- <div class="subheader"><?php _e('Choose a layer type', 'LayerSlider') ?></div> -->
+						<ul class="inner">
+							<li data-type="img">
+								<i class="dashicons dashicons-format-image"></i>
+								<?php _e('Image', 'LayerSlider') ?>
+							</li>
+							<li data-type="icon">
+								<i class="dashicons dashicons-flag"></i>
+								<?php _e('Icon', 'LayerSlider') ?>
+							</li>
+							<li data-type="text">
+								<i class="dashicons dashicons-text"></i>
+								<?php _e('Text', 'LayerSlider') ?>
+							</li>
+							<li data-type="button">
+								<i class="dashicons dashicons-marker"></i>
+								<?php _e('Button', 'LayerSlider') ?>
+							</li>
+							<li data-type="media">
+								<i class="dashicons dashicons-video-alt3"></i>
+								<?php _e('Video / Audio', 'LayerSlider') ?>
+							</li>
+							<li data-type="html">
+								<i class="dashicons dashicons-editor-code"></i>
+								<?php _e('HTML', 'LayerSlider') ?>
+							</li>
+							<li data-type="post">
+								<i class="dashicons dashicons-admin-post"></i>
+								<?php _e('Dynamic Layer', 'LayerSlider') ?>
+							</li>
+							<li data-type="import">
+								<i class="dashicons dashicons-upload"></i>
+								<?php _e('Import Layer', 'LayerSlider') ?>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="ls-empty-layer-notification">
+				<div class="ls-line"></div>
+				<div class="ls-spot"></div>
+				<h3><?php _e('This slide has no layers') ?></h3>
+				<h5><?php printf(__('Click %sAdd New%s to add your first layer.', 'LayerSlider'), '<span><span class="dashicons dashicons-plus"></span>', '</span>') ?></h5>
+			</div>
 			<div class="ls-timeline-switch filters">
 				<ul>
 					<li class="active"><?php _e('Layer options', 'LayerSlider') ?></li>
@@ -360,7 +513,7 @@
 					<div id="ls-layers-settings-popout" data-km-ui-resize="600,950,1300">
 
 						<div id="ls-layers-settings-popout-handler"
-							data-help="You can grab me here and drag where you need."
+							data-help="<?php _e('You can grab me here and drag where you need.', 'LayerSlider') ?>"
 							data-km-ui-popover-once="true"
 							data-km-ui-popover-autoclose="3"
 							data-km-ui-popover-distance="20"
@@ -372,9 +525,14 @@
 							</b>
 						</div>
 
-						<div class="ls-multiple-selection ls-hidden">
-							<h5><?php _e('Multiple selection', 'LayerSlider') ?></h5>
-							<span><?php _e('Editing multiple layers feature is coming soon.', 'LayerSlider') ?></span>
+						<div class="ls-multi-select-notice">
+							<h5>
+								<span class="dashicons dashicons-info"></span>
+								<?php _e('Multiple Selection Mode', 'LayerSlider') ?>
+								<sup><?php _e('BETA', 'LayerSlider') ?></sup>
+							</h5>
+							<span><?php _e('In Multiple Selection Mode you can override specific options on all selected layers. Each option field has been reset, only the options you change will be updated on the selected layers. This feature is currently in beta phase, use it cautiously.', 'LayerSlider') ?></span>
+							<small><?php _e('Changes will be applied on all selected layers.', 'LayerSlider') ?></small>
 						</div>
 						<div class="ls-sublayer-pages-wrapper">
 							<div class="ls-sublayer-nav">

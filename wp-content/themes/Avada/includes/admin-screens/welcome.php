@@ -1,4 +1,13 @@
 <?php
+/**
+ * Welcome Admin page.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -8,63 +17,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap about-wrap avada-wrap">
 	<?php $this->get_admin_screens_header( 'welcome' ); ?>
 
-	<!-- <p class="about-description"><span class="dashicons dashicons-admin-network avada-icon-key"></span><?php _e( 'Your Purchase Must Be Registered To Receive Theme Support & Auto Updates', 'Avada' ); ?></p> -->
-	<div class="feature-section">
-		<div class="avada-important-notice">
-			<p class="about-description"><?php _e( 'Thank you for choosing Avada! Your product must be registered to receive the Avada demos, auto theme updates and included premium plugins. The instructions below in toggle format must be followed exactly.', 'Avada' ); ?></p>
-		</div>
+	<?php
+	$welcome_html = '<div class="avada-welcome-tour">';
+	$welcome_html .= '<iframe width="1120" height="630" src="https://www.youtube.com/embed/X92mpPz1COM?rel=0" frameborder="0" allowfullscreen></iframe>';
+	$welcome_html .= '<div class="col three-col">';
+	$welcome_html .= '<div class="col"><h3>' . esc_html__( 'Welcome To Avada', 'Avada' ) . '</h3><p>' . esc_html__( 'In 2012 we set out to make the perfect theme and Avada was born. Since then it has been the #1 selling theme with an ever growing user base of nearly 300,000 customers. We are thrilled you chose Avada and feel it will change your outlook on what a Wordpress theme can do.', 'Avada' ) . '</p></div>';
+	$welcome_html .= '<div class="col"><h3>' . esc_html__( 'Powerful Customization Tools', 'Avada' ) . '</h3><p>' . esc_html__( 'Avada includes an incredibly advanced options network. This network consists of Fusion Theme Options, Fusion Page Options and Fusion Builder. Together these tools, along with other included assets allow you to build professional websites without having to code.', 'Avada' ) . '</p></div>';
+	$welcome_html .= '<div class="col last-feature last">';
+	if ( ! defined( 'ENVATO_HOSTED_SITE' ) ) {
+		$welcome_html .= '<h3>' . esc_html__( '5 Star Customer Support', 'Avada' ) . '</h3><p>' . esc_html__( 'ThemeFusion understands that there can be no product success, without excellent customer support. We strive to always provide 5 star support and to treat you as we would want to be treated. This helps form a relationship between us that benefits all Avada customers.', 'Avada' ) . '</p>';
+	} else {
+		/* translators: URL. */
+		$welcome_html .= '<h3>' . esc_html__( 'Envato Hosted Customer Support', 'Avada' ) . '</h3><p>' . sprintf( __( 'Envato Hosted offers full support for your Hosted account, webspace and WordPress install. Additionally, they offer support for Avada as outlined here: <a href="%s" target="_blank">Envato Hosted Support Policy</a>', 'Avada' ), esc_url( 'https://envatohosted.zendesk.com/hc/en-us/articles/115001666945-Envato-Hosted-Support-Policy' ) ) . '</p>';
+	}
+	$welcome_html .= '</div>';
+	$welcome_html .= '</div>';
+	$welcome_html .= '</div>';
 
-		<div class="avada-important-notice registration-form-container">
-			<?php if ( Avada()->registration->is_registered() ) : ?>
-				<p class="about-description"><?php _e( 'Congratulations! Your product is registered now.', 'Avada' ); ?></p>
-			<?php else : ?>
-				<p class="about-description"><?php _e( 'Please enter your Envato token to complete registration.', 'Avada' ); ?></p>
-			<?php endif; ?>
-			<div class="avada-registration-form">
-				<form id="avada_product_registration" method="post" action="options.php">
-					<?php
-					$invalid_token = false;
-					$token = Avada()->registration->get_token();
-					settings_fields( Avada()->registration->get_option_group_slug() );
-					?>
-					<?php if ( $token && ! empty( $token ) ) : ?>
-						<?php if ( Avada()->registration->is_registered() ) : ?>
-							<span class="dashicons dashicons-yes avada-icon-key"></span>
-						<?php else : ?>
-							<?php $invalid_token = true; ?>
-							<span class="dashicons dashicons-no avada-icon-key"></span>
-						<?php endif; ?>
-					<?php else : ?>
-						<span class="dashicons dashicons-admin-network avada-icon-key"></span>
-					<?php endif; ?>
-					<input type="text" name="avada_registration[token]" value="<?php echo esc_attr( $token ); ?>" />
-					<?php submit_button( esc_attr__( 'Submit', 'Avada' ), array( 'primary', 'large', 'avada-large-button', 'avada-register' ) ); ?>
-				</form>
-				<?php if ( $invalid_token ) : ?>
-					<p class="error-invalid-token"><?php esc_attr_e( 'Invalid token, or corresponding Envato account does not have Avada purchased.', 'Avada' ); ?></p>
-				<?php endif; ?>
+	echo apply_filters( 'avada_admin_welcome_screen_content', $welcome_html ); // WPCS: XSS ok.
+	?>
 
-				<?php if ( ! Avada()->registration->is_registered() ) : ?>
-
-					<div style="font-size:17px;line-height:27px;margin-top:1em;padding-top:1em">
-						<hr>
-
-						<h3><?php _e( 'Instructions For Generating A Token', 'Avada' ); ?></h3>
-						<ol>
-							<li><?php printf( __( 'Click on this <a href="%s" target="_blank">Generate A Personal Token</a> link. <strong>IMPORTANT:</strong> You must be logged into the same Themeforest account that purchased Avada. If you are logged in already, look in the top menu bar to ensure it is the right account. If you are not logged in, you will be directed to login then directed back to the Create A Token Page.', 'Avada' ), 'https://build.envato.com/create-token/?purchase:download=t&purchase:verify=t&purchase:list=t' ); ?></li>
-							<li><?php _e( 'Enter a name for your token, then check the boxes for <strong>View Your Envato Account Username, Download Your Purchased Items, Verify Purchases You\'ve Made</strong> and <strong>List Purchases You\'ve Made</strong> from the permissions needed section. Check the box to agree to the terms and conditions, then click the <strong>Create Token button</strong>', 'Avada' ); ?></li>
-							<li><?php _e( 'A new page will load with a token number in a box. Copy the token number then come back to this registration page and paste it into the field below and click the <strong>Submit</strong> button.', 'Avada' ); ?></li>
-							<li><?php printf( __( 'You will see a green check mark for success, or a failure message if something went wrong. If it failed, please make sure you followed the steps above correctly. You can also view our <a %s>documentation post</a> for various fallback methods.', 'Avada' ), 'href="https://theme-fusion.com/avada-doc/getting-started/how-to-register-your-purchase/" target="_blank"' ); ?></li>
-						</ol>
-
-					</div>
-
-				<?php endif; ?>
-			</div>
-		</div>
-
-	</div>
 	<div class="avada-thanks">
-		<p class="description"><?php _e( 'Thank you for choosing Avada. We are honored and are fully dedicated to making your experience perfect.', 'Avada' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Thank you for choosing Avada. We are honored and are fully dedicated to making your experience perfect.', 'Avada' ); ?></p>
 	</div>
 </div>

@@ -1,4 +1,15 @@
 <?php
+/**
+ * Converts shortcode names from Fusion Core
+ * to a format that Fusion Builder will accept.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -8,8 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Converts shortcode names from Fusion Core
  * to a format that Fusion Builder will accept.
- *
- * @since 5.0.0
  */
 class Fusion_Builder_Migrate {
 
@@ -42,6 +51,16 @@ class Fusion_Builder_Migrate {
 	 * @var string
 	 */
 	private static $avada_database_version = '';
+
+	/**
+	 * The Avada Theme Options option name.
+	 *
+	 * @static
+	 * @access private
+	 * @since 5.1.0
+	 * @var string
+	 */
+	private static $avada_option_name = '';
 
 	/**
 	 * The value of the $option_name setting.
@@ -216,6 +235,16 @@ class Fusion_Builder_Migrate {
 	private static $shortcodes_for_conversion = array();
 
 	/**
+	 * Columns that need conversion.
+	 *
+	 * @static
+	 * @access  private
+	 * @since 5.0.0
+	 * @var  array
+	 */
+	private static $columns_for_conversion = array();
+
+	/**
 	 * From->To names for shortcodes
 	 *
 	 * @static
@@ -230,30 +259,21 @@ class Fusion_Builder_Migrate {
 	 *
 	 * @access public
 	 * @since 5.0.0
-	 * @param string $avada_version The Avada Theme Version.
+	 * @param string $avada_version     The Avada Theme Version.
+	 * @param string $avada_option_name The option-name.
 	 */
-	public function __construct( $avada_version ) {
-
-		// Make sure the options group is non-persistent.
-		// Fixes issues with options getting cached on certain hosting environments.
-		if ( ! class_exists( 'WpeCommon' ) ) {
-			wp_cache_add_non_persistent_groups( 'options' );
-		}
+	public function __construct( $avada_version, $avada_option_name ) {
 
 		if ( isset( $_GET['revert'] ) && '1' == $_GET['revert'] ) {
 			self::$revert = true;
 		}
 
 		self::$avada_database_version = $avada_version;
+		self::$avada_option_name = $avada_option_name;
 
 		if ( self::needs_migration() ) {
 
-			// If builder is disabled, set post types in settings to prevent defaults being used.
-			$builder_status = Avada()->settings->get( 'disable_builder' );
-			if ( isset( $builder_status ) && '0' === $builder_status ) {
-				$builder_settings = array( 'post_types' => ' ' );
-				update_option( 'fusion_builder_settings', $builder_settings );
-			}
+			add_action( 'save_post', array( $this, 'save_post_actions' ), 999, 2 );
 
 			// Initialize the object.
 			add_action( 'init', array( $this, 'init' ), 20 );
@@ -274,6 +294,7 @@ class Fusion_Builder_Migrate {
 		$this->set_posts_per_page();
 		$this->set_self_enclosing_shortcodes();
 		$this->set_shortcodes_for_conversion();
+		$this->set_columns_for_conversion();
 		$this->remove_conflicting_shortcodes();
 		$this->set_from_to_shortcode_names();
 
@@ -334,7 +355,7 @@ class Fusion_Builder_Migrate {
 			} elseif ( 'theme_options' === $_GET['type'] ) {
 				$this->convert_shortcode_names_in_theme_options();
 			}
-		}
+		} // End if().
 	}
 
 	/**
@@ -347,7 +368,7 @@ class Fusion_Builder_Migrate {
 	 */
 	public static function needs_migration() {
 
-		// Convert later was clicked on the spals screen.
+		// Convert later was clicked on the splash screen.
 		if ( is_admin() && isset( $_GET[ self::$slug ] ) && '0' == $_GET[ self::$slug ] && isset( $_GET['migrate_later'] ) && '1' == $_GET['migrate_later'] ) {
 			update_option( self::$option_name . '_converted', '1' );
 			return false;
@@ -389,7 +410,7 @@ class Fusion_Builder_Migrate {
 	 */
 	private function next_step_redirection( $advance = false ) {
 		// Set the post-type if not already set.
-		if ( ! isset( $_GET['step'] ) || ! in_array( $_GET['step'], array( 'query', 'convert', 'done' ) ) ) {
+		if ( ! isset( $_GET['step'] ) || ! in_array( wp_unslash( $_GET['step'] ), array( 'query', 'convert', 'done' ) ) ) {
 			return;
 		}
 
@@ -428,7 +449,7 @@ class Fusion_Builder_Migrate {
 			}
 		} elseif ( 'convert' === $_GET['step'] ) {
 			$revert = ( self::$revert ) ? '&revert=1' : '';
-			if ( 'posts' === $_GET['type'] ) {
+			if ( isset( $_GET['type'] ) && 'posts' === $_GET['type'] ) {
 				if ( empty( self::$option ) ) {
 					// It is now safe to remove the option.
 					delete_option( self::$option_name );
@@ -448,7 +469,16 @@ class Fusion_Builder_Migrate {
 		} elseif ( 'done' === $_GET['step'] ) {
 			// Conversion is finished.
 			update_option( self::$option_name . '_converted', '1' );
-		}
+
+			// If builder is disabled, set post types in settings to prevent defaults being used.
+			$builder_status = get_option( 'avada_disable_builder', '1' );
+			if ( isset( $builder_status ) && '0' === $builder_status ) {
+				$builder_settings = array(
+					'post_types' => ' ',
+				);
+				update_option( 'fusion_builder_settings', $builder_settings );
+			}
+		} // End if().
 
 		if ( $url ) {
 			header( "Refresh:0; url=$url" );
@@ -464,14 +494,16 @@ class Fusion_Builder_Migrate {
 	 * @return void
 	 */
 	private function post_types() {
-		$post_types = apply_filters( 'fusion_builder_shortcode_migration_post_types', array(
-			'page',
-			'post',
-			'avada_faq',
-			'avada_portfolio',
-			'product',
-			'tribe_events',
-		) );
+		$post_types = apply_filters(
+			'fusion_builder_shortcode_migration_post_types', array(
+				'page',
+				'post',
+				'avada_faq',
+				'avada_portfolio',
+				'product',
+				'tribe_events',
+			)
+		);
 
 		foreach ( $post_types as $key => $post_type ) {
 			if ( ! post_type_exists( $post_type ) ) {
@@ -496,7 +528,7 @@ class Fusion_Builder_Migrate {
 			return;
 		}
 		if ( $_GET && isset( $_GET['post_type'] ) ) {
-			$this->current_post_type = $_GET['post_type'];
+			$this->current_post_type = sanitize_text_field( wp_unslash( $_GET['post_type'] ) );
 		}
 	}
 
@@ -654,7 +686,7 @@ class Fusion_Builder_Migrate {
 			'post_status'      => 'any',
 		);
 
-		$this->posts = avada_cached_get_posts( $args );
+		$this->posts = fusion_cached_get_posts( $args );
 	}
 
 	/**
@@ -677,7 +709,8 @@ class Fusion_Builder_Migrate {
 				}
 			} else {
 				$page_template = get_page_template_slug( $post->ID );
-				foreach ( self::$shortcodes_for_conversion as $sc ) {
+				$shortcodes_to_check_for = array_merge( self::$columns_for_conversion, self::$shortcodes_for_conversion );
+				foreach ( $shortcodes_to_check_for as $sc ) {
 					if ( false !== strpos( $post->post_content, $sc ) || false !== strpos( $post->post_excerpt, $sc ) || 'faqs.php' === $page_template || false !== strpos( $page_template, 'portfolio' ) ) {
 						$convert_post_ids[] = $post->ID;
 					}
@@ -790,10 +823,9 @@ class Fusion_Builder_Migrate {
 			<head>
 				<meta name="viewport" content="width=device-width" />
 				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-				<title><?php echo $this->migration_page_title ?></title>
+				<title ><?php echo esc_attr( $this->migration_page_title ); ?></title >
 				<?php do_action( 'admin_print_styles' ); ?>
 				<?php do_action( 'admin_head' ); ?>
-				<link href='https://fonts.googleapis.com/css?family=Roboto:400,300,100' rel='stylesheet' type='text/css'>
 				<style>
 					<?php $this->get_migration_page_styles(); ?>
 				</style>
@@ -802,10 +834,9 @@ class Fusion_Builder_Migrate {
 			<body class="avada-setup wp-core-ui">
 				<div class="update-content">
 					<div class="avada-logo">
-						<img src="<?php echo Avada::$template_dir_url; ?>/assets/images/logo_migration.png" alt="<?php esc_html_e( 'Avada Logo', 'Avada' ); ?>" width="453" height="95">
+						<img src="<?php echo esc_url_raw( Avada::$template_dir_url ); ?>/assets/images/logo_migration.png" alt="<?php esc_html_e( 'Avada Logo', 'Avada' ); ?>" width="453" height="95">
 						<span class="avada-version">
-							<span class="avada-version-inner"><?php echo $version; ?></span>
-							<!-- <script src='<?php echo trailingslashit( Avada::$template_dir_url ) . 'assets/admin/js/avada-beta-testing.js'; ?>' type='text/javascript'></script> -->
+							<span class="avada-version-inner"><?php echo esc_attr( $version ); ?></span>
 						</span>
 					</div>
 					<div class="avada-content-wrapper">
@@ -831,6 +862,7 @@ class Fusion_Builder_Migrate {
 								<?php $this->get_migration_page_buttons(); ?>
 							</div>
 						</div>
+						<?php /* translators: Icon. */ ?>
 						<div class="avada-footer"><a class="avada-themefusion-link" href="https://theme-fusion.com" target="_blank" rel="noopener noreferrer" title="ThemeFusion">ThemeFusion</a><span class="avada-separator">|</span><?php printf( esc_html__( 'Created with %s', 'Avada' ), '<span class="avada-heart"></span>' ); ?></div>
 					</div>
 				</div>
@@ -986,6 +1018,12 @@ class Fusion_Builder_Migrate {
 		.avada-button.needs-update:hover {
 			background-color: #f44336;
 		}
+		.deny-conversion {
+			background-color: #333333;
+		}
+		.deny-conversion:hover {
+			background-color: #555555;
+		}
 		.avada-footer {
 			padding: 23px 35px;
 			background: #f2f2f2;
@@ -1036,9 +1074,10 @@ class Fusion_Builder_Migrate {
 	 */
 	private function get_migration_page_welcome_message() {
 		if ( ! self::$revert ) {
-			printf( esc_html__( 'Avada 5.0 is an amazing update with new features, improvements and our brand new Fusion Builder. To enjoy Avada 5.0, conversion steps need to be performed. Please see below. Thank you for choosing Avada!', 'Avada' ),  Avada()->get_theme_version() );
+			/* translators: Version number. */
+			printf( esc_html__( 'Avada 5.0 is an amazing update with new features, improvements and our brand new Fusion Builder. To enjoy Avada 5.0, conversion steps need to be performed. Please see below. Thank you for choosing Avada!', 'Avada' ), esc_attr( Avada()->get_theme_version() ) );
 		} else {
-			esc_html_e( 'This is the reversion process. Please see below for further information.', 'avada' );
+			esc_html_e( 'This is the reversion process. Please see below for further information.', 'Avada' );
 		}
 	}
 
@@ -1050,20 +1089,24 @@ class Fusion_Builder_Migrate {
 	 * @return void
 	 */
 	private function get_pre_action_heading_content() {
-		$query_class = $convert_class = $done_class = '';
+		$query_class   = '';
+		$convert_class = '';
+		$done_class    = '';
 		if ( isset( $_GET['step'] ) && 'query' === $_GET['step'] ) {
 			$query_class = ' avada-filled';
 		} elseif ( isset( $_GET['step'] ) && 'convert' === $_GET['step'] ) {
-			$query_class = $convert_class = ' avada-filled';
-			$slides_li_class = ' class="doing"';
+			$query_class   = ' avada-filled';
+			$convert_class = ' avada-filled';
 		} elseif ( isset( $_GET['step'] ) && 'done' === $_GET['step'] ) {
-			$query_class = $convert_class = $done_class = ' avada-filled';
+			$query_class   = ' avada-filled';
+			$convert_class = ' avada-filled';
+			$done_class    = ' avada-filled';
 		}
 		?>
 		<div class="avada-overall-progress">
-			<div class="avada-progress-badge<?php echo $query_class; ?>"></div>
-			<div class="avada-progress-badge<?php echo $convert_class; ?>"></div>
-			<div class="avada-progress-badge<?php echo $done_class; ?>"></div>
+			<div class="avada-progress-badge<?php echo esc_attr( $query_class ); ?>"></div>
+			<div class="avada-progress-badge<?php echo esc_attr( $convert_class ); ?>"></div>
+			<div class="avada-progress-badge<?php echo esc_attr( $done_class ); ?>"></div>
 		</div>
 		<?php
 	}
@@ -1111,33 +1154,43 @@ class Fusion_Builder_Migrate {
 		<?php if ( ! isset( $_GET['step'] ) ) : ?>
 			<?php if ( ! self::$revert ) : ?>
 				<p><?php esc_html_e( 'Our newly built Fusion Builder is amazing and up to 5x faster. It needs to convert your old shortcodes to the new syntax. This will ensure all shortcodes use unique names, so there will be no conflicts with other plugins.', 'Avada' ); ?></p>
-				<p><?php echo wp_kses_post( __( 'Avada will search through your posts and pages and collect IDs of all pages using the old shortcodes and convert them to our new syntax. A backup is created of those pages and posts, to ensure all your data is fully secure.', 'Avada' ) ); ?></p>
+				<p><?php esc_html_e( 'Avada will search through your posts and pages and collect IDs of all pages using the old shortcodes and convert them to our new syntax. A backup is created of those pages and posts, to ensure all your data is fully secure.', 'Avada' ); ?></p>
 				<p><strong><?php esc_html_e( 'The process can take time, please be patient during conversion and DO NOT CLOSE THIS SCREEN!', 'Avada' ); ?></strong></p>
-				<p><?php printf( esc_html__( 'If the migration is not performed, you won\'t be able to use Avada %s unless you manually trigger the conversion at a later time through the WP admin area.', 'Avada' ), Avada()->get_normalized_theme_version() ); ?></p>
-				<p><?php printf( __( 'If you don\'t want your pages converted then please delete the new Avada folder and copy the old Avada folder to your server. If you did not backup your previous Avada theme folder, you can %s.', 'Avada' ), '<a href="https://theme-fusion.com/forums/topic/downloading-avada-4-0-3/" target="_blank">download Avada 4.0.3 here</a>' ); ?></p>
+				<?php /* translators: Version number. */ ?>
+				<p><?php printf( esc_html__( 'If the migration is not performed, you won\'t be able to use Avada %s unless you manually trigger the conversion at a later time through the WP admin area.', 'Avada' ), esc_attr( Avada()->get_normalized_theme_version() ) ); ?></p>
+				<?php /* translators: Download link containing the "download Avada 4.0.3 here" string. */ ?>
+				<p><?php printf( esc_attr__( 'If you don\'t want your pages converted then please delete the new Avada folder and copy the old Avada folder to your server. If you did not backup your previous Avada theme folder, you can %s.', 'Avada' ), '<a href="https://theme-fusion.com/forums/topic/downloading-avada-4-0-3/" target="_blank">' . esc_attr__( 'download Avada 4.0.3 here', 'Avada' ) . '</a>' ); ?></p>
 				<p><strong><?php esc_html_e( 'We recommend doing a full database backup before proceeding with conversion.', 'Avada' ); ?></strong></p>
-				<p><?php printf( esc_html__( 'By pressing the "Start Conversion" button below, you confirm that Avada should convert your posts and pages to the new shortcode syntax.', 'Avada' ), Avada()->get_theme_version() ); ?></p>
+				<?php /* translators: Version number. */ ?>
+				<p><?php printf( esc_html__( 'By pressing the "Start Conversion" button below, you confirm that Avada should convert your posts and pages to the new shortcode syntax.', 'Avada' ), esc_attr( Avada()->get_theme_version() ) ); ?></p>
 				<p><form><label><input id="confirm-reading" type="checkbox" name="confirm_reading" value="confirm_reading"><?php esc_html_e( 'I have read the above.', 'Avada' ); ?></label></form></p>
 			<?php else : ?>
 				<p><?php esc_html_e( 'You have already converted your shortcodes to the new Avada 5.0 structure, but have chosen to revert back to their previous state before you installed Avada 5.0. This process does not downgrade you to the previous version of Avada.', 'Avada' ); ?></p>
-				<p><?php printf( __( 'Once reversion is done, you can load a previous version of Avada onto your server. You can download %s here if you do not have a backup of your previous theme.', 'Avada' ), '<a href="https://theme-fusion.com/forums/topic/downloading-avada-4-0-3/">' . esc_attr__( 'Avada 4.0.3', 'avada' ) . '</a>' ); ?></p>
+				<?php /* translators: "Avada 4.0.3" text string & link. */ ?>
+				<p><?php printf( esc_attr__( 'Once reversion is done, you can load a previous version of Avada onto your server. You can download %s here if you do not have a backup of your previous theme.', 'Avada' ), '<a href="https://theme-fusion.com/forums/topic/downloading-avada-4-0-3/">' . esc_attr__( 'Avada 4.0.3', 'Avada' ) . '</a>' ); ?></p>
 				<p><strong><?php esc_html_e( 'The process can take time, please be patient during reversion and DO NOT CLOSE THIS SCREEN!', 'Avada' ); ?></strong></p>
-				<p><?php printf( esc_html__( 'By pressing the "Start Reversion" button below, you confirm that Avada should revert your posts and pages to the previous syntax.', 'Avada' ), Avada()->get_theme_version() ); ?></p>
+				<?php /* translators: Version number. */ ?>
+				<p><?php printf( esc_html__( 'By pressing the "Start Reversion" button below, you confirm that Avada should revert your posts and pages to the previous syntax.', 'Avada' ), esc_attr( Avada()->get_theme_version() ) ); ?></p>
 				<p><form><label><input id="confirm-reading" type="checkbox" name="confirm_reading" value="confirm_reading"><?php esc_html_e( 'I have read the above.', 'Avada' ); ?></label></form></p>
 			<?php endif; ?>
 		<?php elseif ( isset( $_GET['step'] ) && 'query' === $_GET['step'] ) : ?>
 			<p>
-			<?php printf(
+			<?php
+			printf(
+				/* translators: %1$s: post-type label. %2$s, %3%s, %4%s: Numbers. */
 				esc_attr__( 'Currently scanning posts of post type "%1$s" (items %2$s to %3$s of %4$s total).', 'Avada' ),
 				esc_attr( $this->current_post_type ),
 				absint( $this->from_offset ),
 				absint( $this->to_offset ),
 				absint( $this->total_posts_count[ $this->current_post_type ] )
-			); ?>
+			);
+			?>
 			</p>
 			<?php if ( ! self::$revert ) : ?>
+				<?php /* translators: Number. */ ?>
 				<p><?php printf( esc_attr__( 'Posts that need to be converted: %s', 'Avada' ), absint( count( self::$option ) ) ); ?></p>
 			<?php else : ?>
+				<?php /* translators: Number. */ ?>
 				<p><?php printf( esc_attr__( 'Posts that need to be reverted: %s', 'Avada' ), absint( count( self::$option ) ) ); ?></p>
 			<?php endif; ?>
 		<?php elseif ( isset( $_GET['step'] ) && 'convert' === $_GET['step'] ) : ?>
@@ -1154,17 +1207,21 @@ class Fusion_Builder_Migrate {
 			}
 			?>
 			<?php if ( ! self::$revert ) : ?>
-				<?php printf( esc_attr__( 'Remaining items to convert: %s', 'Avada' ), $still_to_convert ); ?>
+				<?php /* translators: Number. */ ?>
+				<?php printf( esc_attr__( 'Remaining items to convert: %s', 'Avada' ), (int) $still_to_convert ); ?>
 			<?php else : ?>
-				<?php printf( esc_attr__( 'Remaining items to revert: %s', 'Avada' ), $still_to_convert ); ?>
+				<?php /* translators: Number. */ ?>
+				<?php printf( esc_attr__( 'Remaining items to revert: %s', 'Avada' ), (int) $still_to_convert ); ?>
 			<?php endif; ?>
 		<?php elseif ( isset( $_GET['step'] ) && 'done' === $_GET['step'] ) : ?>
 			<?php if ( ! self::$revert ) : ?>
 				<?php esc_attr_e( 'All needed posts have been converted to the new Fusion Builder syntax. You can now update Fusion Core and install Fusion Builder plugin.', 'Avada' ); ?>
 			<?php else : ?>
-				<?php printf( __( 'All needed posts have been reverted to the previous syntax. You can now roll-back to <a href="%s" target="_blank">Avada 4.0.3</a>.', 'Avada' ), 'https://theme-fusion.com/forums/topic/downloading-avada-4-0-3/' ); ?>
+				<?php /* translators: "Avada 4.0.3" link & string. */ ?>
+				<?php printf( esc_attr__( 'All needed posts have been reverted to the previous syntax. You can now roll-back to %s.', 'Avada' ), '<a href="https://theme-fusion.com/forums/topic/downloading-avada-4-0-3/" target="_blank">' . esc_attr__( 'Avada 4.0.3', 'Avada' ) . '</a>' ); ?>
 			<?php endif; ?>
-		<?php endif;
+		<?php
+		endif;
 	}
 
 	/**
@@ -1192,7 +1249,8 @@ class Fusion_Builder_Migrate {
 			}
 			?>
 			<progress class="fusion-builder-migration-progress-bar" max="100" value="<?php echo absint( ( 1 - $still_to_convert / $total ) * 100 ); ?>"></progress>
-		<?php endif;
+		<?php
+		endif;
 	}
 
 	/**
@@ -1203,18 +1261,20 @@ class Fusion_Builder_Migrate {
 	 * @return void
 	 */
 	private function get_migration_page_more_info() {
-		if ( isset( $_GET['step'] ) && 'query' === $_GET['step'] ) : ?>
+		if ( isset( $_GET['step'] ) && 'query' === $_GET['step'] ) :
+		?>
 			<ul class="tasks-list">
 				<?php foreach ( $this->post_types as $post_type ) : ?>
 					<?php
 					$li_class = '';
 					if ( array_search( $post_type, $this->post_types ) < array_search( $this->current_post_type, $this->post_types ) ) {
-						$li_class = ' class="done"';
+						$li_class = 'done';
 					} elseif ( array_search( $post_type, $this->post_types ) == array_search( $this->current_post_type, $this->post_types ) ) {
-						$li_class = ' class="doing"';
+						$li_class = 'doing';
 					}
 					?>
-					<li<?php echo $li_class; ?>>
+					<li class="<?php echo esc_attr( $li_class ); ?>">
+						<?php /* translators: %1%s: post-type label. %2$s: Number. */ ?>
 						<span class="content"><?php printf( esc_attr__( 'Scanning posts of post type "%1$s". Total posts: %2$s.', 'Avada' ), esc_attr( $post_type ), absint( $this->total_posts_count[ $post_type ] ) ); ?></span>
 					</li>
 				<?php endforeach; ?>
@@ -1222,37 +1282,41 @@ class Fusion_Builder_Migrate {
 
 		<?php elseif ( isset( $_GET['step'] ) && 'convert' === $_GET['step'] ) : ?>
 			<?php
-			$posts_li_class = $slides_li_class = $widgets_li_class = $theme_options_li_class = '';
-			if ( 'posts' === $_GET['type'] ) {
-				$posts_li_class = ' class="doing"';
-			} elseif ( 'slides' === $_GET['type'] ) {
-				$posts_li_class = ' class="done"';
-				$slides_li_class = ' class="doing"';
-			} elseif ( 'widgets' === $_GET['type'] ) {
-				$posts_li_class = ' class="done"';
-				$slides_li_class = ' class="done"';
-				$widgets_li_class = ' class="doing"';
+			$posts_li_class         = '';
+			$slides_li_class        = '';
+			$widgets_li_class       = '';
+			$theme_options_li_class = '';
+			if ( isset( $_GET['type'] ) && 'posts' === $_GET['type'] ) {
+				$posts_li_class = 'doing';
+			} elseif ( isset( $_GET['type'] ) && 'slides' === $_GET['type'] ) {
+				$posts_li_class  = 'done';
+				$slides_li_class = 'doing';
+			} elseif ( isset( $_GET['type'] ) && 'widgets' === $_GET['type'] ) {
+				$posts_li_class   = 'done';
+				$slides_li_class  = 'done';
+				$widgets_li_class = 'doing';
 			} else {
-				$posts_li_class = ' class="done"';
-				$slides_li_class = ' class="done"';
-				$widgets_li_class = ' class="done"';
-				$theme_options_li_class = ' class="doing"';
+				$posts_li_class         = 'done';
+				$slides_li_class        = 'done';
+				$widgets_li_class       = 'done';
+				$theme_options_li_class = 'doing';
 			}
 			?>
 			<ul class="tasks-list">
 				<?php if ( ! self::$revert ) : ?>
-					<li<?php echo $posts_li_class; ?>><span class="content"><?php esc_html_e( 'Converting posts.' ,'Avada' ); ?></span></li>
-					<li<?php echo $slides_li_class; ?>><span class="content"><?php esc_html_e( 'Converting slides.' ,'Avada' ); ?></span></li>
-					<li<?php echo $widgets_li_class; ?>><span class="content"><?php esc_html_e( 'Converting widgets.' ,'Avada' ); ?></span></li>
-					<li<?php echo $theme_options_li_class; ?>><span class="content"><?php esc_html_e( 'Converting theme options.' ,'Avada' ); ?></span></li>
+					<li class="<?php echo esc_attr( $posts_li_class ); ?>"><span class="content"><?php esc_html_e( 'Converting posts.', 'Avada' ); ?></span></li>
+					<li class="<?php echo esc_attr( $slides_li_class ); ?>"><span class="content"><?php esc_html_e( 'Converting slides.', 'Avada' ); ?></span></li>
+					<li class="<?php echo esc_attr( $widgets_li_class ); ?>"><span class="content"><?php esc_html_e( 'Converting widgets.', 'Avada' ); ?></span></li>
+					<li class="<?php echo esc_attr( $theme_options_li_class ); ?>"><span class="content"><?php esc_html_e( 'Converting theme options.', 'Avada' ); ?></span></li>
 				<?php else : ?>
-					<li<?php echo $posts_li_class; ?>><span class="content"><?php esc_html_e( 'Reverting posts.' ,'Avada' ); ?></span></li>
-					<li<?php echo $slides_li_class; ?>><span class="content"><?php esc_html_e( 'Reverting slides.' ,'Avada' ); ?></span></li>
-					<li<?php echo $widgets_li_class; ?>><span class="content"><?php esc_html_e( 'Reverting widgets.' ,'Avada' ); ?></span></li>
-					<li<?php echo $theme_options_li_class; ?>><span class="content"><?php esc_html_e( 'Reverting theme options.' ,'Avada' ); ?></span></li>
+					<li class="<?php echo esc_attr( $posts_li_class ); ?>"><span class="content"><?php esc_html_e( 'Reverting posts.', 'Avada' ); ?></span></li>
+					<li class="<?php echo esc_attr( $slides_li_class ); ?>"><span class="content"><?php esc_html_e( 'Reverting slides.', 'Avada' ); ?></span></li>
+					<li class="<?php echo esc_attr( $widgets_li_class ); ?>"><span class="content"><?php esc_html_e( 'Reverting widgets.', 'Avada' ); ?></span></li>
+					<li class="<?php echo esc_attr( $theme_options_li_class ); ?>"><span class="content"><?php esc_html_e( 'Reverting theme options.', 'Avada' ); ?></span></li>
 				<?php endif; ?>
 			</ul>
-		<?php endif;
+		<?php
+		endif;
 	}
 
 	/**
@@ -1305,12 +1369,12 @@ class Fusion_Builder_Migrate {
 				$bundled_plugins = Avada::get_bundled_plugins();
 				$fusion_core_latest = false;
 				if ( class_exists( 'FusionCore_Plugin' ) ) {
-					$fusion_core_latest = version_compare( FusionCore_Plugin::VERSION, $bundled_plugins['fusion_core']['version'], '>=' );
+					$fusion_core_latest = version_compare( FusionCore_Plugin::VERSION, $bundled_plugins['fusion-core']['version'], '>=' );
 				}
 
 				$fusion_builder_latest = false;
 				if ( defined( 'FUSION_BUILDER_VERSION' ) ) {
-					$fusion_builder_latest = version_compare( FUSION_BUILDER_VERSION, $bundled_plugins['fusion_builder']['version'], '>=' );
+					$fusion_builder_latest = version_compare( FUSION_BUILDER_VERSION, $bundled_plugins['fusion-builder']['version'], '>=' );
 				}
 				?>
 				<?php if ( $fusion_core_latest && $fusion_builder_latest ) : ?>
@@ -1323,7 +1387,8 @@ class Fusion_Builder_Migrate {
 					</a>
 				<?php endif; ?>
 			<?php endif; ?>
-		<?php endif;
+		<?php
+		endif;
 	}
 
 	/**
@@ -1424,9 +1489,20 @@ class Fusion_Builder_Migrate {
 			'featured_products_slider',
 			'products_slider',
 			'youtube',
+		);
 
-			/*
-			TODO: check if we need to process shortcodes below outside of page conversion
+		self::$shortcodes_for_conversion = $shortcodes_for_conversion;
+	}
+
+	/**
+	 * Sets column names that need converted.
+	 *
+	 * @access private
+	 * @since 5.0.0
+	 * @return void
+	 */
+	private function set_columns_for_conversion() {
+		$columns_for_conversion = array(
 			'five_sixth',
 			'fullwidth',
 			'four_fifth',
@@ -1440,10 +1516,9 @@ class Fusion_Builder_Migrate {
 			'three_fourth',
 			'two_fifth',
 			'two_third',
-			 */
 		);
 
-		self::$shortcodes_for_conversion = $shortcodes_for_conversion;
+		self::$columns_for_conversion = $columns_for_conversion;
 	}
 
 	/**
@@ -1476,18 +1551,21 @@ class Fusion_Builder_Migrate {
 		foreach ( self::$shortcodes_for_conversion as $shortcode ) {
 			if ( 'accordian' === $shortcode ) {
 				$from_to_shortcode_names[ '[' . $shortcode . ' ' ] = '[fusion_accordion ';
+				$from_to_shortcode_names[ '[' . $shortcode . ']' ] = '[fusion_accordion]';
 				$from_to_shortcode_names[ '[/' . $shortcode . ']' ] = '[/fusion_accordion]';
 			} elseif ( 'recent_works' === $shortcode ) {
 				$from_to_shortcode_names[ '[' . $shortcode . ' ' ] = '[fusion_portfolio ';
+				$from_to_shortcode_names[ '[' . $shortcode . ']' ] = '[fusion_portfolio]';
 				$from_to_shortcode_names[ '[/' . $shortcode . ']' ] = '[/fusion_portfolio]';
-			} elseif (  'vimeo' === $shortcode || 'youtube' === $shortcode ) {
-				$from_to_shortcode_names[ '[' . $shortcode . ' ' ] = '[fusion_' . $shortcode . ' ';
-				$from_to_shortcode_names[ '[/' . $shortcode . ']' ] = '';
-			} elseif (  'tabs' === $shortcode || 'tab' === $shortcode ) {
+			} elseif ( 'tabs' === $shortcode || 'tab' === $shortcode ) {
 				$from_to_shortcode_names[ '[' . $shortcode . ' ' ] = '[fusion_old_' . $shortcode . ' ';
 				$from_to_shortcode_names[ '[/' . $shortcode . ']' ] = '[/fusion_old_' . $shortcode . ']';
+			} elseif ( 'vimeo' === $shortcode || 'youtube' === $shortcode ) {
+				$from_to_shortcode_names[ '[' . $shortcode . ' ' ] = '[fusion_' . $shortcode . ' ';
+				$from_to_shortcode_names[ '[/' . $shortcode . ']' ] = '';
 			} else {
 				$from_to_shortcode_names[ '[' . $shortcode . ' ' ] = '[fusion_' . $shortcode . ' ';
+				$from_to_shortcode_names[ '[' . $shortcode . ']' ] = '[fusion_' . $shortcode . ']';
 				$from_to_shortcode_names[ '[/' . $shortcode . ']' ] = '[/fusion_' . $shortcode . ']';
 			}
 		}
@@ -1606,18 +1684,18 @@ class Fusion_Builder_Migrate {
 
 					// Pricing shortcode inside text shortcode fix.
 					// TODO: expand to include woo, layer, etc ?
-					$string_from_to = array(
+					$second_string_from_to = array(
 						'[fusion_text][fusion_pricing_table'    => '[fusion_pricing_table',
 						'[/fusion_pricing_table][/fusion_text]' => '[/fusion_pricing_table]',
 					);
-					$content = strtr( $content, $string_from_to );
+					$content = strtr( $content, $second_string_from_to );
 
 					$needle = '[fullwidth';
 					$last_pos = -1;
 					$position_change = 0;
 					$positions = array();
 
-					// Get all positions of [fullwidth shortcode.
+					// Get all positions of [fullwidth shortcode. @codingStandardsIgnoreLine
 					while ( ( $last_pos = strpos( $content, $needle, $last_pos + 1 ) ) !== false ) {
 						$positions[] = $last_pos;
 					}
@@ -1636,18 +1714,18 @@ class Fusion_Builder_Migrate {
 					}
 
 					// Replace old [fullwidth shortcode with new [fusion_builder_section.
-					$string_from_to = array(
+					$third_string_from_to = array(
 						'[fullwidth' => '[fusion_builder_container',
 					);
 
-					$content = strtr( $content, $string_from_to );
+					$content = strtr( $content, $third_string_from_to );
 
 					// Convert outer elements and columns.
 					$content = $this->convert_outside_elements( $content );
 
 					// Convert rows.
 					$content = $this->convert_rows( $content );
-				}
+				} // End if().
 
 				if ( 'faqs.php' === $page_template ) {
 					$content .= $this->convert_faqs_template( $id );
@@ -1662,20 +1740,18 @@ class Fusion_Builder_Migrate {
 
 				// For each content type, add converted contents to update array.
 				$updated_post[ $content_type ] = $content;
-			}
+			} // End foreach().
 
-			wp_update_post( add_magic_quotes( $updated_post ), true );
+			$updated = wp_update_post( add_magic_quotes( $updated_post ), true );
 
-			if ( is_wp_error( $id ) ) {
-				$errors = $id->get_error_messages();
+			if ( is_wp_error( $updated ) ) {
+				$errors = $updated->get_error_messages();
 
-				foreach ( $errors as $error ) {
-					echo wp_kses_post( $error );
-				}
+				update_post_meta( $id, 'fusion_builder_converted', $errors );
 			} else {
 				update_post_meta( $id, 'fusion_builder_converted', 'yes' );
 			}
-		}
+		} // End if().
 	}
 
 	/**
@@ -1734,6 +1810,7 @@ class Fusion_Builder_Migrate {
 		// Get all positions of self enclosing shortcode beginnings.
 		if ( '' !== $content ) {
 			foreach ( self::$self_enclosing_shortcodes as $key => $needle ) {
+				// @codingStandardsIgnoreLine
 				while ( ( $last_pos = strpos( $content, '[' . $needle, $last_pos + 1 ) ) !== false ) {
 
 					$allowed_chars = array( ' ', ']' );
@@ -1743,6 +1820,9 @@ class Fusion_Builder_Migrate {
 					}
 				}
 			}
+
+			// Sort to make sure we go through them in order.
+			asort( $positions );
 
 			foreach ( $positions as $position ) {
 				// Get closing position.
@@ -1754,7 +1834,7 @@ class Fusion_Builder_Migrate {
 				}
 
 				// Change in position.
-				$position_change += 1;
+				$position_change++;
 			}
 		}
 		return $content;
@@ -1809,7 +1889,7 @@ class Fusion_Builder_Migrate {
 		$position_change = 0;
 		$positions = array();
 
-		// Get all positions of [fusion_builder_row shortcode.
+		// Get all positions of [fusion_builder_row shortcode. @codingStandardsIgnoreLine
 		while ( ( $last_pos = strpos( $content, $needle, $last_pos + 1 ) ) !== false ) {
 			$positions[] = $last_pos;
 		}
@@ -1825,6 +1905,7 @@ class Fusion_Builder_Migrate {
 			$range = $row_closing_position - $position + 1;
 			// Row content.
 			$row_content = substr( $content, $position + strlen( $needle ), $range );
+
 			$original_row_content = $row_content;
 
 			$element_needle = '[';
@@ -1839,16 +1920,17 @@ class Fusion_Builder_Migrate {
 			$outside_column_element_close_position = 0;
 			$element_position_change = 0;
 
-			// Get all positions for shortcode opening tag "[".
+			// Get all positions for shortcode opening tag "[". @codingStandardsIgnoreLine
 			while ( ( $row_last_pos = strpos( $row_content, $element_needle, $row_last_pos + 1 ) ) !== false ) {
 				$element_positions[] = $row_last_pos;
 			}
 
 			foreach ( $element_positions as $element_position ) {
 
-				$shortcode_name = substr( $row_content, $element_position + $element_position_change, 40 );
-
-				if ( strlen( $shortcode_name_space = strtok( $shortcode_name, ' ' ) ) < strlen( $shortcode_name_bracket = strtok( $shortcode_name, ']' ) ) ) {
+				$shortcode_name         = substr( $row_content, $element_position + $element_position_change, 40 );
+				$shortcode_name_space   = strtok( $shortcode_name, ' ' );
+				$shortcode_name_bracket = strtok( $shortcode_name, ']' );
+				if ( strlen( $shortcode_name_space ) < strlen( $shortcode_name_bracket ) ) {
 					$shortcode_name = $shortcode_name_space;
 				} else {
 					$shortcode_name = $shortcode_name_bracket;
@@ -1881,6 +1963,7 @@ class Fusion_Builder_Migrate {
 
 							$row_content = substr_replace( $row_content, $inner_row_container . '[fusion_builder_column_inner', $element_position + $element_position_change, strlen( $shortcode_name ) );
 							$element_position_change += $inner_row_container_position_change + 6;
+							$outside_column_element_close_position += $inner_row_container_position_change + 6;
 
 							$inner_column_opened = true;
 						}
@@ -1905,28 +1988,26 @@ class Fusion_Builder_Migrate {
 						$row_content = substr_replace( $row_content, '[/fusion_builder_column_inner]' . $inner_row_container, $element_position + $element_position_change, strlen( $shortcode_name ) + 1 );
 
 						$element_position_change += $inner_row_container_position_change + 6;
+						$outside_column_element_close_position += $inner_row_container_position_change + 6;
 						$inner_column_opened = false;
 					} elseif ( $main_column_opened ) {
 						$main_column_opened = false;
 					}
-
-					// If end of row.
-				} elseif ( '[/fusion_builder_row' == $shortcode_name ) {
+				} elseif ( '[/fusion_builder_row' == $shortcode_name ) { // If end of row.
 					if ( $main_column_opened ) {
 						$row_content = substr_replace( $row_content, '[/fusion_builder_column]', $element_position + $element_position_change, 0 );
 
 						$main_column_opened = false;
 						$element_position_change = $element_position_change + 24;
 					}
-
-					// If it's an element opening tag.
-				} elseif ( '1' != strpos( $shortcode_name, '/' ) ) {
+				} elseif ( '1' != strpos( $shortcode_name, '/' ) ) { // If it's an element opening tag.
 
 					$set_outside_column_element_close_position = false;
 
-					$shortcode_name = substr( $row_content, $element_position + $element_position_change, 40 );
-
-					if ( strlen( $shortcode_name_space = strtok( $shortcode_name, ' ' ) ) < strlen( $shortcode_name_bracket = strtok( $shortcode_name, ']' ) ) ) {
+					$shortcode_name         = substr( $row_content, $element_position + $element_position_change, 40 );
+					$shortcode_name_space   = strtok( $shortcode_name, ' ' );
+					$shortcode_name_bracket = strtok( $shortcode_name, ']' );
+					if ( strlen( $shortcode_name_space ) < strlen( $shortcode_name_bracket ) ) {
 						$shortcode_name = str_replace( '[', '', $shortcode_name_space );
 					} else {
 						$shortcode_name = str_replace( '[', '', $shortcode_name_bracket );
@@ -1945,6 +2026,7 @@ class Fusion_Builder_Migrate {
 						$set_outside_column_element_close_position = true;
 
 					} elseif ( $main_column_opened && $outside_column_element_close_position && $element_position + $element_position_change > $outside_column_element_close_position ) {
+
 						$column_close_open_tag = '[/fusion_builder_column][fusion_builder_column type="1_1" background_position="left top" background_color="" border_size="" border_color="" border_style="solid" spacing="yes" background_image="" background_repeat="no-repeat" padding="" margin_top="0px" margin_bottom="0px" class="" id="" animation_type="" animation_speed="0.3" animation_direction="left" hide_on_mobile="no" center_content="no" min_height="none"]';
 
 						if ( 'fusion_button' === $shortcode_name || 'fusion_fontawesome' === $shortcode_name || 'fusion_imageframe' === $shortcode_name || 'fusion_separator' === $shortcode_name || 'fusion_text' === $shortcode_name ) {
@@ -1973,8 +2055,8 @@ class Fusion_Builder_Migrate {
 
 						$set_outside_column_element_close_position = false;
 					}
-				}
-			}
+				} // End if().
+			} // End foreach().
 
 			// Replace unprocessed row content with processed one.
 			$content = substr_replace( $content, $row_content, $position + 20, strlen( $original_row_content ) );
@@ -1983,7 +2065,7 @@ class Fusion_Builder_Migrate {
 			$content_difference = strlen( $row_content ) - strlen( $original_row_content );
 			$position_change = $position_change + $content_difference;
 
-		}
+		} // End foreach().
 
 		return $content;
 	}
@@ -2006,7 +2088,7 @@ class Fusion_Builder_Migrate {
 		$section_opened = false;
 		$column_opened = false;
 
-		// Get all positions for shortcode opening tag "[".
+		// Get all positions for shortcode opening tag "[". @codingStandardsIgnoreLine
 		while ( ( $last_pos = strpos( $content, $element_needle, $last_pos + 1 ) ) !== false ) {
 			$element_positions[] = $last_pos;
 		}
@@ -2038,9 +2120,10 @@ class Fusion_Builder_Migrate {
 				// This is an element. Add column.
 			} else {
 				if ( false == $section_opened ) {
-					$shortcode_name = substr( $content, $element_position + $element_position_change, 40 );
-
-					if ( strlen( $shortcode_name_space = strtok( $shortcode_name, ' ' ) ) < strlen( $shortcode_name_bracket = strtok( $shortcode_name, ']' ) ) ) {
+					$shortcode_name         = substr( $content, $element_position + $element_position_change, 40 );
+					$shortcode_name_space   = strtok( $shortcode_name, ' ' );
+					$shortcode_name_bracket = strtok( $shortcode_name, ']' );
+					if ( strlen( $shortcode_name_space ) < strlen( $shortcode_name_bracket ) ) {
 						$shortcode_name = str_replace( '[', '', $shortcode_name_space );
 					} else {
 						$shortcode_name = str_replace( '[', '', $shortcode_name_bracket );
@@ -2068,19 +2151,19 @@ class Fusion_Builder_Migrate {
 						if ( isset( $top_margin[2] ) ) {
 							$section_top_margin = self::validate_shortcode_attr_value( $top_margin[2], 'px' );
 
-							$separator_tag = str_replace( $top_margin[0], '',  $separator_tag );
+							$separator_tag = str_replace( $top_margin[0], '', $separator_tag );
 						}
 
 						if ( isset( $bottom_margin[2] ) ) {
 							$section_bottom_margin = self::validate_shortcode_attr_value( $bottom_margin[2], 'px' );
 
-							$separator_tag = str_replace( $bottom_margin[0], '',  $separator_tag );
+							$separator_tag = str_replace( $bottom_margin[0], '', $separator_tag );
 						}
 
 						if ( isset( $top[2] ) ) {
 							$section_top_margin = $top[2];
 
-							$separator_tag = str_replace( $top[0], '',  $separator_tag );
+							$separator_tag = str_replace( $top[0], '', $separator_tag );
 
 							if ( ! isset( $bottom[2] ) && isset( $stlye[2] ) && 'none' !== $style[2] ) {
 								$section_bottom_margin = self::validate_shortcode_attr_value( $top_[2], 'px' );
@@ -2090,7 +2173,7 @@ class Fusion_Builder_Migrate {
 						if ( isset( $bottom[2] ) ) {
 							$section_bottom_margin = self::validate_shortcode_attr_value( $bottom[2], 'px' );
 
-							$separator_tag = str_replace( $bottom[0], '',  $separator_tag );
+							$separator_tag = str_replace( $bottom[0], '', $separator_tag );
 						}
 
 						$section_top_margin = ' margin_top="' . $section_top_margin . '"';
@@ -2101,7 +2184,7 @@ class Fusion_Builder_Migrate {
 						$wrapped_shortcode .= $separator_tag;
 						$wrapped_shortcode .= '[/fusion_builder_row][/fusion_builder_container]';
 
-						$content = substr_replace( $content, '', $element_position + $element_position_change  , $separator_tag_length );
+						$content = substr_replace( $content, '', $element_position + $element_position_change, $separator_tag_length );
 
 						$content = substr_replace( $content, $wrapped_shortcode, $element_position + $element_position_change, 0 );
 
@@ -2119,10 +2202,10 @@ class Fusion_Builder_Migrate {
 						$section_opened = true;
 
 						$element_position_change = $element_position_change + strlen( $open_section_tag );
-					}
-				}
-			}
-		}
+					} // End if().
+				} // End if().
+			} // End if().
+		} // End foreach().
 
 		// Close section if it was not closed.
 		if ( true == $section_opened ) {
@@ -2187,7 +2270,15 @@ class Fusion_Builder_Migrate {
 			$layout = 'grid-with-text';
 		}
 		// Columns.
-		$columns_mapping     = array( 'one' => '1', 'two' => '2', 'three' => '3', 'grid' => '3', 'four' => '4', 'five' => '5', 'six' => '6' );
+		$columns_mapping     = array(
+			'one' => '1',
+			'two' => '2',
+			'three' => '3',
+			'grid' => '3',
+			'four' => '4',
+			'five' => '5',
+			'six' => '6',
+		);
 		$template_name_array = explode( '-', $template_name );
 		$columns             = $columns_mapping[ $template_name_array[1] ];
 
@@ -2229,9 +2320,9 @@ class Fusion_Builder_Migrate {
 		}
 
 		$excerpt_length = fusion_get_page_option( 'pyre_portfolio_excerpt', $id );
-	    if ( ! $excerpt_length ) {
+		if ( ! $excerpt_length ) {
 			$excerpt_length = Avada()->settings->get( 'excerpt_length_portfolio' );
-	    }
+		}
 
 		// If single grid, make sure to set to grid with text, text on side.
 		if ( '1' === $columns && 'grid' === $layout ) {
@@ -2323,7 +2414,8 @@ class Fusion_Builder_Migrate {
 
 		if ( $query->have_posts() ) {
 
-			while ( $query->have_posts() ) : $query->the_post();
+			while ( $query->have_posts() ) :
+				$query->the_post();
 				global $post;
 
 				if ( self::$revert ) {
@@ -2356,7 +2448,7 @@ class Fusion_Builder_Migrate {
 			endwhile;
 
 			wp_reset_postdata();
-		}
+		} // End if().
 
 		$this->next_step_redirection( true );
 	}
@@ -2405,7 +2497,7 @@ class Fusion_Builder_Migrate {
 					$slide->saveLayers();
 				}
 			}
-		}
+		} // End if().
 	}
 
 	/**
@@ -2460,7 +2552,7 @@ class Fusion_Builder_Migrate {
 					}
 					// Save the backed-up data.
 					update_option( 'avada_500_backup_layerslider', $backup_options );
-				}
+				} // End if().
 				$id    = $slider['id'];
 				$title = $slider['data']['properties']['title'];
 				$data  = $slider['data'];
@@ -2468,8 +2560,8 @@ class Fusion_Builder_Migrate {
 
 				// Update slider with changed content.
 				LS_Sliders::update( $id, $title, $data, $slug );
-			}
-		}
+			} // End foreach().
+		} // End if().
 	}
 
 	/**
@@ -2491,8 +2583,8 @@ class Fusion_Builder_Migrate {
 						$option_name = $wp_registered_widgets[ $widget_id ]['callback'][0]->option_name;
 					}
 
-					// Only change text widgets.
-					if ( 'widget_text' === $option_name ) {
+					// Change text widget and black studio TinyMCE widget. Fix for #4253.
+					if ( 'widget_text' === $option_name || 'widget_black-studio-tinymce' === $option_name ) {
 
 						if ( self::$revert ) {
 							// Revert backup.
@@ -2505,7 +2597,11 @@ class Fusion_Builder_Migrate {
 							// Convert.
 							$key = $wp_registered_widgets[ $widget_id ]['params'][0]['number'];
 							$widget_data = get_option( $option_name );
-							$widget_content = $widget_data[ $key ]['text'];
+							if ( isset( $widget_data[ $key ]['text'] ) ) {
+								$widget_content = $widget_data[ $key ]['text'];
+							} else {
+								$widget_content = '';
+							}
 
 							// Backup data.
 							$backup_options = get_option( 'avada_500_backup_widget_text', array() );
@@ -2567,7 +2663,7 @@ class Fusion_Builder_Migrate {
 							$position_change = 0;
 							$positions = array();
 
-							// Get all positions of [fullwidth shortcode.
+							// Get all positions of [fullwidth shortcode. @codingStandardsIgnoreLine
 							while ( false !== ( $last_pos = strpos( $widget_content, $needle, $last_pos + 1 ) ) ) {
 								$positions[] = $last_pos;
 							}
@@ -2599,7 +2695,7 @@ class Fusion_Builder_Migrate {
 							$positions = array();
 							$row_open = false;
 
-							// Get all positions of opening and closing column tag.
+							// Get all positions of opening and closing column tag. @codingStandardsIgnoreLine
 							while ( ( $last_pos = strpos( $widget_content, $needle, $last_pos + 1 ) ) !== false ) {
 								$positions[] = $last_pos;
 							}
@@ -2612,8 +2708,8 @@ class Fusion_Builder_Migrate {
 								// Check if opening or closing and if row is open yet.
 								$tag_type = ( '[/' === substr( $widget_content, $position - 2, 2 ) ) ? 'closing' : 'opening';
 								$column_next = strpos( substr( $widget_content, $position + 20, 30 ), '[fusion_builder_column' );
-								$existing_row = strpos( substr( $widget_content, $position - 30 , 30 ), '[fusion_builder_row]' );
-								$existing_row_closed = strpos( substr( $widget_content, $position + 20 , 30 ), '[/fusion_builder_row]' );
+								$existing_row = strpos( substr( $widget_content, $position - 30, 30 ), '[fusion_builder_row]' );
+								$existing_row_closed = strpos( substr( $widget_content, $position + 20, 30 ), '[/fusion_builder_row]' );
 
 								if ( $existing_row ) {
 									$row_open = true;
@@ -2630,14 +2726,16 @@ class Fusion_Builder_Migrate {
 								}
 							}
 
-							$widget_data[ $key ]['text'] = $widget_content;
+							if ( isset( $widget_data[ $key ]['text'] ) ) {
+								$widget_data[ $key ]['text'] = $widget_content;
+							}
 
 							update_option( $option_name, $widget_data );
-						}
-					}
-				}
-			}
-		}
+						} // End if().
+					} // End if().
+				} // End foreach().
+			} // End if().
+		} // End foreach().
 
 		$this->next_step_redirection( true );
 	}
@@ -2687,18 +2785,19 @@ class Fusion_Builder_Migrate {
 	 */
 	private function convert_shortcode_names_in_theme_options() {
 
-		// Get the original option name.
-		$original_option_name = Avada::get_original_option_name();
+		global $fusion_library;
 
-		// The $original_option_name will be used
-		// regardless if this is a multilingual site or not
-		// so the first thing we'll be converting is that.
-		$option_name = Avada::get_option_name();
+		$option_name = self::$avada_option_name;
 		$options     = get_option( $option_name, array() );
 
 		// Revert options?
 		if ( self::$revert ) {
 			$backed_up_options = get_option( $option_name . '_500_backup', array() );
+
+			if ( ! $backed_up_options && 'fusion_options' === $option_name ) {
+				$backed_up_options = get_option( 'avada_theme_options_500_backup', false );
+			}
+
 			if ( ! empty( $backed_up_options ) ) {
 				update_option( $option_name, $backed_up_options );
 			}
@@ -2721,12 +2820,12 @@ class Fusion_Builder_Migrate {
 
 		// Is this a multilingual site?
 		// If it is, then we need to convert options on a per-language basis.
-		$available_languages = Avada_Multilingual::get_available_languages();
+		$available_languages = Fusion_Multilingual::get_available_languages();
 		if ( ! empty( $available_languages ) ) {
 			foreach ( $available_languages as $language ) {
 
 				// The option name.
-				$option_name = $original_option_name . '_' . $language;
+				$option_name = self::$avada_option_name . '_' . $language;
 
 				// Get the options for that language.
 				$options = get_option( $option_name, array() );
@@ -2766,12 +2865,12 @@ class Fusion_Builder_Migrate {
 	 * @return string $content The page contents.
 	 */
 	private function convert_container_paddings( $content, $id ) {
-		$needle = '[fusion_builder_container';
-		$last_pos = -1;
+		$needle          = '[fusion_builder_container';
+		$last_pos        = -1;
 		$position_change = 0;
-		$positions = array();
+		$positions       = array();
 
-		// Get all positions of [fullwidth shortcode.
+		// Get all positions of [fullwidth shortcode. @codingStandardsIgnoreLine
 		while ( ( $last_pos = strpos( $content, $needle, $last_pos + 1 ) ) !== false ) {
 			$positions[] = $last_pos;
 		}
@@ -2787,7 +2886,7 @@ class Fusion_Builder_Migrate {
 			foreach ( array( 'left', 'right' ) as $direction ) {
 				if ( strpos( $attributes, 'padding' . $direction . '=' ) ) {
 					$content = substr_replace( $content, 'padding_' . $direction . '=', $position + $position_change + strpos( $attributes, 'padding' . $direction . '=' ), strlen( 'padding' . $direction . '=' ) );
-					$position_change = $position_change + 1;
+					$position_change = $position_change++;
 				}
 			}
 
@@ -2798,10 +2897,8 @@ class Fusion_Builder_Migrate {
 						$content = substr_replace( $content, 'padding_' . $direction . '=""   ', $position + $position_change + strpos( $attributes, 'padding_' . $direction . '="0px"' ), strlen( 'padding_' . $direction . '="0px"' ) );
 					}
 				}
-
-				// If it is 100% internal, look for empty, replace with either PO/TO left and right padding.
 			} else {
-
+				// If it is 100% internal, look for empty, replace with either PO/TO left and right padding.
 				foreach ( array( 'left', 'right' ) as $direction ) {
 					$padding_value = ( fusion_get_page_option( 'pyre_hundredp_padding', $id ) ) ? fusion_get_page_option( 'pyre_hundredp_padding', $id ) : Avada()->settings->get( 'hundredp_padding' );
 
@@ -2817,7 +2914,7 @@ class Fusion_Builder_Migrate {
 					}
 				}
 			}
-		}
+		} // End foreach().
 		return $content;
 	}
 
@@ -2857,14 +2954,16 @@ class Fusion_Builder_Migrate {
 		} else {
 
 			// The post types we'll need to check.
-			$post_types = apply_filters( 'fusion_builder_shortcode_migration_post_types', array(
-				'page',
-				'post',
-				'avada_faq',
-				'avada_portfolio',
-				'product',
-				'tribe_events',
-			) );
+			$post_types = apply_filters(
+				'fusion_builder_shortcode_migration_post_types', array(
+					'page',
+					'post',
+					'avada_faq',
+					'avada_portfolio',
+					'product',
+					'tribe_events',
+				)
+			);
 			foreach ( $post_types as $key => $post_type ) {
 				if ( ! post_type_exists( $post_type ) ) {
 					unset( $post_types[ $key ] );
@@ -2882,7 +2981,7 @@ class Fusion_Builder_Migrate {
 			);
 
 			// The query to get posts that meet our criteria.
-			$posts = avada_cached_get_posts( $args );
+			$posts = fusion_cached_get_posts( $args );
 
 			if ( $posts ) {
 				// Remove backup data for those posts.
@@ -2906,6 +3005,24 @@ class Fusion_Builder_Migrate {
 				delete_option( 'scheduled_avada_fusionbuilder_migration_cleanups' );
 				delete_option( 'avada_migration_cleanup_id' );
 			}
+		} // End if().
+	}
+
+	/**
+	 * WPML Hack.
+	 *
+	 * @param int     $pidd The post ID.
+	 * @param WP_Post $post The post object.
+	 */
+	public function save_post_actions( $pidd, $post ) {
+
+		global $wpml_root_page_actions, $wpml_post_translations;
+
+		if ( $wpml_root_page_actions ) {
+			remove_action( 'save_post', array( $wpml_root_page_actions, 'wpml_home_url_save_post_actions' ), 0, 2 );
+		}
+		if ( $wpml_post_translations ) {
+			remove_action( 'save_post', array( $wpml_post_translations, 'save_post_actions' ), 100, 2 );
 		}
 	}
 }

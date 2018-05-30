@@ -1,11 +1,15 @@
 	<#
 		min = ( ( param.min ) ? param.min : 0 );
 		max = ( ( param.max ) ? param.max : 100 );
-		step = ( ( param.step ) ? param.step : 1 );
+		step = ( ( param.step ) ? param.step : '1' );
 		defaultStatus = ( ( param.default ) ? 'fusion-with-default' : '' );
 		isChecked = ( ( '' == option_value ) ? 'checked' : '' );
 		regularId = ( ( ! param.default ) ? param.param_name : 'slider' + param.param_name );
 		displayValue = ( ( '' == option_value ) ? param.default : option_value );
+
+		if ( '.' === step.charAt( 0 ) ) {
+			step = '0' + step;
+		}
 	#>
 	<input
 		type="text"

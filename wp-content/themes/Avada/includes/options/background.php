@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -124,7 +134,7 @@ function avada_options_section_background( $sections ) {
 				'fields'      => array(
 					'boxed_mode_backgrounds_important_note_info' => ( '0' === Avada()->settings->get( 'dependencies_status' ) ) ? array() : array(
 						'label'       => '',
-						'description' => '<div class="avada-avadaredux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> The layout is set to "Wide" on the Layout tab. However, there are boxed mode options below that are still visible due to having a fusion page option dependency. Click the link in the option description to learn more.', 'Avada' ) . '</div>',
+						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> The layout is set to "Wide" on the Layout tab. However, there are boxed mode options below that are still visible due to having a fusion page option dependency. Click the link in the option description to learn more.', 'Avada' ) . '</div>',
 						'id'          => 'boxed_mode_backgrounds_important_note_info',
 						'type'        => 'custom',
 						'required'    => array(

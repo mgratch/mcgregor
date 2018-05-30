@@ -21,7 +21,7 @@ $event_id = get_the_ID();
 
 ?>
 
-<div id="tribe-events-content" class="tribe-events-single vevent hentry">
+<div id="tribe-events-content" class="tribe-events-single">
 
 	<!-- Notices -->
 	<?php
@@ -59,11 +59,9 @@ $event_id = get_the_ID();
 			<!-- Event meta -->
 			<?php do_action( 'tribe_events_single_event_after_the_meta' ); ?>
 		</div> <!-- #post-x -->
-		<?php
 
-		avada_render_social_sharing( 'events' );
+		<?php avada_render_social_sharing( 'events' ); ?>
 
-		?>
 		<?php
 		if ( get_post_type() == Tribe__Events__Main::POSTTYPE && tribe_get_option( 'showComments', false ) ) {
 

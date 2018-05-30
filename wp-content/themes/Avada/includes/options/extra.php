@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -68,6 +78,13 @@ function avada_options_section_extra( $sections ) {
 						'id'          => 'link_read_more',
 						'default'     => '0',
 						'type'        => 'switch',
+						'required'    => array(
+							array(
+								'setting'  => 'disable_excerpts',
+								'operator' => '==',
+								'value'    => '1',
+							),
+						),
 					),
 					'comments_pages' => array(
 						'label'       => esc_html__( 'Comments on Pages', 'Avada' ),
@@ -397,7 +414,7 @@ function avada_options_section_extra( $sections ) {
 				'fields'      => array(
 					'pagination_important_note_info' => array(
 						'label'       => '',
-						'description' => '<div class="avada-avadaredux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> The options on this tab apply to all pagination throughout the site, including the 3rd party plugins that Avada has design integration with.', 'Avada' ) . '</div>',
+						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> The options on this tab apply to all pagination throughout the site, including the 3rd party plugins that Avada has design integration with.', 'Avada' ) . '</div>',
 						'id'          => 'pagination_important_note_info',
 						'type'        => 'custom',
 					),
@@ -405,7 +422,7 @@ function avada_options_section_extra( $sections ) {
 						'label'       => esc_html__( 'Pagination Box Padding', 'Avada' ),
 						'description' => esc_html__( 'Controls the padding inside the pagination box.', 'Avada' ),
 						'id'          => 'pagination_box_padding',
-						'units'		  => false,
+						'units'       => false,
 						'default'     => array(
 							'width'   => '6px',
 							'height'  => '2px',
@@ -425,13 +442,6 @@ function avada_options_section_extra( $sections ) {
 						'id'          => 'pagination_font_size',
 						'default'     => '12px',
 						'type'        => 'dimension',
-						'required'        => array(
-							array(
-								'setting'  => 'pagination_text_display',
-								'operator' => '==',
-								'value'    => '1',
-							),
-						),
 					),
 				),
 			),
@@ -443,7 +453,7 @@ function avada_options_section_extra( $sections ) {
 				'fields'      => array(
 					'forms_styling_important_note_info' => array(
 						'label'       => '',
-						'description' => '<div class="avada-avadaredux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> The options on this tab apply to all forms throughout the site, including the 3rd party plugins that Avada has design integration with.', 'Avada' ) . '</div>',
+						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> The options on this tab apply to all forms throughout the site, including the 3rd party plugins that Avada has design integration with.', 'Avada' ) . '</div>',
 						'id'          => 'forms_styling_important_note_info',
 						'type'        => 'custom',
 					),
@@ -486,7 +496,7 @@ function avada_options_section_extra( $sections ) {
 				'fields'      => array(
 					'gridbox_styling_important_note_info' => array(
 						'label'       => '',
-						'description' => '<div class="avada-avadaredux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> The options on this tab apply to grid boxes throughout the site; blog grid and timeline, portfolio boxed layout and WooCommerce boxes.', 'Avada' ) . '</div>',
+						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> The options on this tab apply to grid boxes throughout the site; blog grid and timeline, portfolio boxed layout and WooCommerce boxes.', 'Avada' ) . '</div>',
 						'id'          => 'gridbox_styling_important_note_info',
 						'type'        => 'custom',
 					),
@@ -499,8 +509,32 @@ function avada_options_section_extra( $sections ) {
 					),
 					'timeline_color' => array(
 						'label'       => esc_html__( 'Grid Element Color', 'Avada' ),
-						'description' => esc_html__( 'Controls the color of borders/divider lines/date box/timeline dots and arrows for the grid boxes.', 'Avada' ),
+						'description' => esc_html__( 'Controls the color of borders/date box/timeline dots and arrows for the grid boxes.', 'Avada' ),
 						'id'          => 'timeline_color',
+						'default'     => '#ebeaea',
+						'type'        => 'color-alpha',
+					),
+					'grid_separator_style_type' => array(
+						'label'       => esc_html__( 'Grid Separator Style', 'Avada' ),
+						'description' => __( 'Controls the line style of grid separators. <strong>Note:</strong> For blog and portfolio grids at least one meta data field must be enabled and excerpt or full content must be shown in order that the separator will be displayed.', 'Avada' ),
+						'id'          => 'grid_separator_style_type',
+						'default'     => 'double|solid',
+						'type'        => 'select',
+						'choices'       => array(
+							'none'          => esc_attr__( 'No Style', 'Avada' ),
+							'single|solid'  => esc_attr__( 'Single Border Solid', 'Avada' ),
+							'double|solid'  => esc_attr__( 'Double Border Solid', 'Avada' ),
+							'single|dashed' => esc_attr__( 'Single Border Dashed', 'Avada' ),
+							'double|dashed' => esc_attr__( 'Double Border Dashed', 'Avada' ),
+							'single|dotted' => esc_attr__( 'Single Border Dotted', 'Avada' ),
+							'double|dotted' => esc_attr__( 'Double Border Dotted', 'Avada' ),
+							'shadow'        => esc_attr__( 'Shadow', 'Avada' ),
+						),
+					),
+					'grid_separator_color' => array(
+						'label'       => esc_html__( 'Grid Separator Color', 'Avada' ),
+						'description' => esc_html__( 'Controls the line style color of grid separators.', 'Avada' ),
+						'id'          => 'grid_separator_color',
 						'default'     => '#ebeaea',
 						'type'        => 'color-alpha',
 					),

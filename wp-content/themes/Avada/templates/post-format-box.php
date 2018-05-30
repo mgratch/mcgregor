@@ -1,4 +1,13 @@
 <?php
+/**
+ * Post-format template.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -34,5 +43,5 @@ switch ( get_post_format() ) {
 }
 ?>
 <div class="fusion-format-box">
-	<i class="fusion-icon-<?php echo $format_class; ?>"></i>
+	<i class="fusion-icon-<?php echo esc_attr( $format_class ); ?>"></i>
 </div>

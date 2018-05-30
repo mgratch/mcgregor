@@ -1,3 +1,4 @@
+/* global FusionPageBuilderApp, FusionPageBuilderViewManager, fusionAllElements */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function( $ ) {
@@ -26,7 +27,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					dialogClass: 'fusion-builder-dialog',
 					autoOpen: false,
 					modal: true,
-					height: 410,
+					height: 420,
 					width: 590
 				} );
 
@@ -54,14 +55,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				FusionPageBuilderApp.activeModal = 'container';
 
-				moduleID = FusionPageBuilderViewManager.generateCid(),
-				defaultParams = fusionAllElements.fusion_builder_container.params,
-				params = {};
+				moduleID      = FusionPageBuilderViewManager.generateCid();
+				defaultParams = fusionAllElements.fusion_builder_container.params;
+				params        = {};
 
 				// Process default options for shortcode.
 				_.each( defaultParams, function( param )  {
 					if ( _.isObject( param.value ) ) {
-						value = param.default;
+						value = param['default'];
 					} else {
 						value = param.value;
 					}
@@ -98,9 +99,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				this.remove();
 			}
-
 		} );
-
 	} );
-
 } )( jQuery );

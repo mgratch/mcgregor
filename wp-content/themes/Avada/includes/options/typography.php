@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,7 +37,7 @@ function avada_options_section_typography( $sections ) {
 				'fields'      => array(
 					'body_typography_important_note_info' => array(
 						'label'       => '',
-						'description' => '<div class="avada-avadaredux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> This tab contains general typography options. Additional typography options for specific areas can be found within other tabs. Example: For menu typography options go to the menu tab.', 'Avada' ) . '</div>',
+						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> This tab contains general typography options. Additional typography options for specific areas can be found within other tabs. Example: For menu typography options go to the menu tab.', 'Avada' ) . '</div>',
 						'id'          => 'body_typography_important_note_info',
 						'type'        => 'custom',
 					),
@@ -69,7 +79,7 @@ function avada_options_section_typography( $sections ) {
 				'fields'      => array(
 					'headers_typography_important_note_info' => array(
 						'label'       => '',
-						'description' => '<div class="avada-avadaredux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> This tab contains general typography options. Additional typography options for specific areas can be found within other tabs. Example: For menu typography options go to the menu tab.', 'Avada' ) . '</div>',
+						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> This tab contains general typography options. Additional typography options for specific areas can be found within other tabs. Example: For menu typography options go to the menu tab.', 'Avada' ) . '</div>',
 						'id'          => 'headers_typography_important_note_info',
 						'type'        => 'custom',
 					),
@@ -259,7 +269,7 @@ function avada_options_section_typography( $sections ) {
 				'fields'      => array(
 					'custom_fonts_info' => array(
 						'label'       => '',
-						'description' => '<div class="avada-avadaredux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> Please upload your custom fields below. Once you upload a custom font, <strong>you will have to save your options and reload this page on your browser</strong>. After you reload the page you will be able to select your new fonts - they will be available at the top of the fonts-list in the typography controls.', 'Avada' ) . '</div>',
+						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> Please upload your custom fields below. Once you upload a custom font, <strong>you will have to save your options and reload this page on your browser</strong>. After you reload the page you will be able to select your new fonts - they will be available at the top of the fonts-list in the typography controls.', 'Avada' ) . '</div>',
 						'id'          => 'custom_fonts_info',
 						'type'        => 'custom',
 					),
@@ -270,6 +280,7 @@ function avada_options_section_typography( $sections ) {
 						'default'     => array(),
 						'type'        => 'repeater',
 						'bind_title'  => 'name',
+						'limit'       => 50,
 						'fields'      => array(
 							'name' => array(
 								'label'       => esc_html__( 'Font Name (this will be used in the font-family dropdown)', 'Avada' ),
@@ -277,7 +288,7 @@ function avada_options_section_typography( $sections ) {
 								'id'          => 'name',
 								'default'     => '',
 								'type'        => 'text',
-								'class'		  => 'avada-custom-font-name',
+								'class'       => 'avada-custom-font-name',
 							),
 							'woff' => array(
 								'label'       => 'WOFF',
@@ -285,7 +296,7 @@ function avada_options_section_typography( $sections ) {
 								'id'          => 'woff',
 								'default'     => '',
 								'type'        => 'upload',
-								'mode'        => 'woff',
+								'mode'        => false,
 							),
 							'woff2' => array(
 								'label'       => 'WOFF2',
@@ -301,7 +312,7 @@ function avada_options_section_typography( $sections ) {
 								'id'          => 'ttf',
 								'default'     => '',
 								'type'        => 'upload',
-								'mode'        => 'ttf',
+								'mode'        => false,
 							),
 							'svg' => array(
 								'label'       => 'SVG',
@@ -309,7 +320,7 @@ function avada_options_section_typography( $sections ) {
 								'id'          => 'svg',
 								'default'     => '',
 								'type'        => 'upload',
-								'mode'        => 'svg',
+								'mode'        => false,
 							),
 							'eot' => array(
 								'label'       => 'EOT',
@@ -317,7 +328,7 @@ function avada_options_section_typography( $sections ) {
 								'id'          => 'eot',
 								'default'     => '',
 								'type'        => 'upload',
-								'mode'        => 'eot',
+								'mode'        => false,
 							),
 						),
 					),

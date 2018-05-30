@@ -25,7 +25,7 @@ spl_autoload_register(function ($class) {
      */
     $path = dirname(__FILE__).'/'.$class.'.php';
     if (is_readable($path)) {
-        require_once $path;
+        require_once wp_normalize_path( $path );
     }
 
     /* If we didn't find what we're looking for already, maybe it's
@@ -33,6 +33,6 @@ spl_autoload_register(function ($class) {
      */
     $path = dirname(__FILE__).'/../tests/'.$class.'.php';
     if (is_readable($path)) {
-        require_once $path;
+        require_once wp_normalize_path( $path );
     }
 });

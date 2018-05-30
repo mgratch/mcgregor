@@ -1,4 +1,15 @@
 <?php
+/**
+ * The main class to alter bbPress output.
+ * Anything that does not need a template override, should be added here.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      3.8.6
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -8,8 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The main class to alter bbPress output.
  * Anything that does not need a template override, should be added here.
- *
- * @since 3.8.6
  */
 class Avada_Layout_bbPress extends Avada_Layout {
 
@@ -46,7 +55,8 @@ class Avada_Layout_bbPress extends Avada_Layout {
 		add_filter( 'bbp_get_forum_pagination_links', array( $this, 'get_forum_pagination_links' ), 1 );
 		add_filter( 'bbp_get_topic_pagination_links', array( $this, 'get_topic_pagination_links' ), 1 );
 		add_filter( 'bbp_get_search_pagination_links', array( $this, 'get_search_pagination_links' ), 1 );
-		add_filter( 'bbp_get_reply_admin_links', array( $this, 'remove_empty_reply_admin_links_sep' ), 10, 3 );
+		add_filter( 'bbp_get_topic_admin_links', array( $this, 'remove_empty_admin_links_sep' ), 10, 3 );
+		add_filter( 'bbp_get_reply_admin_links', array( $this, 'remove_empty_admin_links_sep' ), 10, 3 );
 	}
 
 	/**
@@ -89,8 +99,8 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	public function add_author_post_date_count_ip() {
 		?>
 		<div class="bbp-reply-post-date"><?php bbp_reply_post_date( bbp_get_reply_id() ); ?></div>
-
-		<div class="bbps-post-count"><?php printf( __( 'Post count: %s', 'Avada' ), bbp_get_user_reply_count_raw( bbp_get_reply_author_id() ) + bbp_get_user_topic_count_raw( bbp_get_reply_author_id() ) ); ?></div>
+		<?php /* translators: Number. */ ?>
+		<div class="bbps-post-count"><?php printf( esc_attr__( 'Post count: %s', 'Avada' ), absint( bbp_get_user_reply_count_raw( bbp_get_reply_author_id() ) + bbp_get_user_topic_count_raw( bbp_get_reply_author_id() ) ) ); ?></div>
 
 		<?php if ( bbp_is_user_keymaster() ) : ?>
 
@@ -100,23 +110,21 @@ class Avada_Layout_bbPress extends Avada_Layout {
 
 			<?php do_action( 'bbp_theme_after_topic_author_admin_details' ); ?>
 
-		<?php endif;
+		<?php
+		endif;
 	}
 
 	/**
 	 * Render the search form.
 	 */
 	public function add_search_form() {
-
-		if ( bbp_allow_search() ) :  ?>
-
+		?>
+		<?php if ( bbp_allow_search() ) : ?>
 			<div class="bbp-search-form">
-
 				<?php bbp_get_template_part( 'form', 'search' ); ?>
-
 			</div>
-
-		<?php endif;
+		<?php endif; ?>
+		<?php
 	}
 
 	/**
@@ -125,14 +133,14 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	public function add_search_page_search_form() {
 		?>
 		<div class="search-page-search-form search-page-search-form-top">
-			<h2><?php _e( 'Need a new search?', 'Avada' ); ?></h2>
-			<p><?php _e( 'If you didn\'t find what you were looking for, try a new search!', 'Avada' ); ?></p>
+			<h2><?php esc_attr_e( 'Need a new search?', 'Avada' ); ?></h2>
+			<p><?php esc_attr_e( 'If you didn\'t find what you were looking for, try a new search!', 'Avada' ); ?></p>
 			<form role="search" method="get" class="bbp-search-form seach-form searchform" action="<?php bbp_search_url(); ?>">
 				<div class="search-table">
-					<label class="screen-reader-text hidden" for="bbp_search"><?php _e( 'Search for:', 'bbpress' ); ?></label>
+					<label class="screen-reader-text hidden" for="bbp_search"><?php esc_attr_e( 'Search for:', 'bbpress' ); ?></label>
 					<input type="hidden" name="action" value="bbp-search-request" />
 					<div class="search-field">
-						<input tabindex="<?php bbp_tab_index(); ?>" type="text" value="<?php echo esc_attr( bbp_get_search_terms() ); ?>" placeholder="<?php _e( 'Search the Forum...', 'Avada' ); ?>" name="bbp_search" id="bbp_search" />
+						<input tabindex="<?php bbp_tab_index(); ?>" type="text" value="<?php echo esc_attr( bbp_get_search_terms() ); ?>" placeholder="<?php esc_attr_e( 'Search the Forum...', 'Avada' ); ?>" name="bbp_search" id="bbp_search" />
 					</div>
 					<div class="search-button">
 						<input tabindex="<?php bbp_tab_index(); ?>" class="fusion-button button submit" type="submit" id="bbp_search_submit" value="&#xf002;" />
@@ -147,10 +155,11 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	 * Open the additional container wrapper for the top pagination.
 	 */
 	public function open_pagination_wrapper() {
-
-		if ( 0 == $this->pagination_counter ) : ?>
+		?>
+		<?php if ( 0 == $this->pagination_counter ) : ?>
 			<div class="top-pagination">
-		<?php endif;
+		<?php endif; ?>
+		<?php
 
 	}
 
@@ -158,8 +167,8 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	 * Close the additional container for the top pagination.
 	 */
 	public function close_pagination_wrapper() {
-
-		if ( 0 == $this->pagination_counter ) :  ?>
+		?>
+		<?php if ( 0 == $this->pagination_counter ) : ?>
 			</div>
 			<div class="fusion-clearfix"></div>
 
@@ -177,10 +186,10 @@ class Avada_Layout_bbPress extends Avada_Layout {
 					<div class="fusion-clearfix"></div>
 
 				</div><!-- .bbp-header -->
-			<?php endif;
+			<?php endif; ?>
 
-		endif;
-
+		<?php endif; ?>
+		<?php
 		$this->pagination_counter++;
 
 	}
@@ -226,9 +235,9 @@ class Avada_Layout_bbPress extends Avada_Layout {
 		$bbp = bbpress();
 
 		$pagination_links = $bbp->reply_query->pagination_links;
-		$permalink		  = get_permalink( $bbp->current_topic_id );
-		$max_num_pages	  = $bbp->reply_query->max_num_pages;
-		$paged			  = $bbp->reply_query->paged;
+		$permalink        = get_permalink( $bbp->current_topic_id );
+		$max_num_pages    = $bbp->reply_query->max_num_pages;
+		$paged            = $bbp->reply_query->paged;
 
 		$pagination_links = str_replace( 'page-numbers current', 'current', $pagination_links );
 		$pagination_links = str_replace( 'page-numbers', 'inactive', $pagination_links );
@@ -264,7 +273,7 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	}
 
 	/**
-	 * Filters out the | if the reply admin links are empty
+	 * Filters out the | if the reply admin links are empty.
 	 *
 	 * @access  public
 	 * @since 3.9
@@ -273,8 +282,8 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	 * @param  array  $args   Not used.
 	 * @return string Avada style pagination markup.
 	 */
-	public function remove_empty_reply_admin_links_sep( $retval, $r, $args ) {
-		if ( '<span class="bbp-admin-links"><span class="admin_links_sep"> | </span></span>' == $retval ) {
+	public function remove_empty_admin_links_sep( $retval, $r, $args ) {
+		if ( '<span class="bbp-admin-links"><span class="admin_links_sep"> | </span></span>' === $retval ) {
 			$retval = '<span class="bbp-admin-links"></span>';
 		}
 

@@ -63,7 +63,7 @@ class KM_UpdatesV3 {
 		}
 
 		// Bug fix in v5.3.0: WPLANG is not always defined
-		if(!defined('WPLANG')) { define('WPLANG', ''); }
+		if( ! defined('WPLANG')) { define('WPLANG', ''); }
 
 		// Build config
 		$this->config = array_merge($config, array(
@@ -72,8 +72,9 @@ class KM_UpdatesV3 {
 			'channel' => get_option($config['channelKey'], 'stable'),
 			'license' => get_option($config['codeKey'], ''),
 			'domain' => $_SERVER['SERVER_NAME'],
+			'siteurl' => esc_url( site_url() ),
 			'option' => strtolower(basename(dirname($config['root']))) . '_update_info',
-			'locale' => WPLANG
+			'locale' => get_locale()
 		));
 	}
 
@@ -161,12 +162,60 @@ class KM_UpdatesV3 {
 			( isset( $skin->plugin_info ) && $skin->plugin_info['Name'] === $this->config['name'] ) ) {
 
 				// Check validity
-				if( $GLOBALS['lsAutoUpdateBox'] && ! get_option( $this->config['authKey'], false ) ) {
-					return new WP_Error('ls_update_error', __('License activation is required to receive updates. Please read our <a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#activation" target="_blank">online documentation</a> to learn more.', 'LayerSlider'));
+				if( LS_Config::get('autoupdate') && ! get_option( $this->config['authKey'], false ) ) {
+					return new WP_Error('ls_update_error', sprintf(
+						__('License activation is required to receive updates. Please read our %sonline documentation%s to learn more.', 'LayerSlider'),
+						'<a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#activation" target="_blank">',
+						'</a>')
+					);
 				}
 		}
 
 		return $reply;
+	}
+
+
+
+	/**
+	 * Provide an update message in the Plugins list row.
+	 *
+	 * @since 6.1.5
+	 * @access public
+	 * @return string The update message
+	 */
+	public function update_message() {
+
+		// Provide license activation warning on non-activated sites
+		if( ! get_option( $this->config['authKey'], false ) ) {
+			printf(__('License activation is required in order to receive updates for LayerSlider. %sPurchase a license%s or %sread the documentation%s to learn more. %sGot LayerSlider in a theme?%s', 'installer'),
+							'<a href="'.LS_Config::get('purchase_url').'" target="_blank">', '</a>', '<a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#activation" target="_blank">', '</a>', '<a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#activation-bundles" target="_blank">', '</a>');
+		}
+	}
+
+
+
+	/**
+	 *  In case of receiving a "Not activated" flag, make sure to display
+	 *	the "Canceled activation" notification to let users know about
+	 *	potential issues if their site is still in an activated state.
+	 *
+	 *	This usually happens due to remote deactivation via our online tools,
+	 *	or because users ask us to reset their purchase code on their behalf.
+	 *	Alternatively, the purhcase code might no longer be valid due to a
+	 *	refund, sale reversal, or any other undisclosed reason by Envato.
+	 *
+	 * @since 6.1.5
+	 * @access public
+	 */
+	public function check_activation_state() {
+
+		if( get_option( $this->config['authKey'], false ) ) {
+
+			update_option( $this->config['authKey'], 0 );
+			update_option( $this->config['codeKey'], '' );
+			update_option( 'ls-show-canceled_activation_notice', 1);
+			update_option('layerslider_cancellation_update_info', $this->data);
+		}
 	}
 
 
@@ -177,9 +226,10 @@ class KM_UpdatesV3 {
 	 *
 	 * @since 4.6.3
 	 * @access protected
+	 * @param boolean $forceCheck Ignore the update interval and force refreshing update info
 	 * @return void
 	 */
-	protected function _check_updates() {
+	protected function _check_updates( $forceCheck = false ) {
 
 		// Get data
 		if(empty($this->data)) {
@@ -194,8 +244,7 @@ class KM_UpdatesV3 {
 		}
 
 		// Check for updates
-		if($this->data->checked < time() - self::TIMEOUT) {
-
+		if( $forceCheck || $this->data->checked < time() - self::TIMEOUT) {
 			$response = $this->sendApiRequest($this->config['repoUrl'].'updates/');
 
 			if(!empty($response) && $newData = maybe_unserialize($response)) {
@@ -208,8 +257,21 @@ class KM_UpdatesV3 {
 
 			// Store version number of the latest release
 			// to notify unauthorized site owners
-			if(!empty($this->data->_latest_version)) {
+			if( ! empty( $this->data->_latest_version ) ) {
 				update_option('ls-latest-version', $this->data->_latest_version);
+			}
+
+
+			// Check activation state on client side in
+			// case of receiving a "Not Activated" flag
+			if( ! empty( $this->data->_not_activated ) ) {
+				$this->check_activation_state();
+			}
+
+			if( ! empty( $this->data->full->p_url ) ) {
+				update_option('ls-p-url', $this->data->full->p_url );
+			} else {
+				delete_option('ls-p-url');
 			}
 		}
 
@@ -244,6 +306,7 @@ class KM_UpdatesV3 {
 				'license' => $this->config['license'],
 				'item_id' => $this->config['itemID'],
 				'domain' => $this->config['domain'],
+				'siteurl' => $this->config['siteurl'],
 				'locale' => $this->config['locale'],
 				'api_version' => self::API_VERSION
 			)
@@ -328,7 +391,27 @@ class KM_UpdatesV3 {
 			$json->code = base64_encode($_POST['purchase_code']);
 			update_option($this->config['authKey'], 1);
 			update_option($this->config['codeKey'], $_POST['purchase_code']);
+
+
+			// v6.1.5: Make sure to empty the stored update data from cache,
+			// so we can avoid issues caused by outdated and potentially
+			// unreliable information like special flags set by the update server.
+			//
+			// Force checking updates to immediately replace the missing update info
+			// with fresh data. Suppressing error reporting to make sure that nothing
+			// can break the JSON output, as user feedback is crucial here.
+			delete_option($this->config['option']);
+			@$this->_check_updates( true );
+
+			// v6.2.0: Automatically hide the "Canceled activation" notice when
+			// re-activating the plugin for the sake of clarity and consistency.
+			update_option('ls-show-canceled_activation_notice', 0);
+
+			// v6.6.3: Empty slider caches (if any) to immediately hide the premium
+			// notice displayed above sliders on the front-end after activation.
+			layerslider_delete_caches();
 		}
+
 
 		die(json_encode($json));
 	}
@@ -351,6 +434,10 @@ class KM_UpdatesV3 {
 		// Deauthorize
 		delete_option($this->config['codeKey']);
 		delete_option($this->config['authKey']);
+
+		// v6.6.3: Empty slider caches (if any) to re-enable displaying the premium
+		// notice above sliders on the front-end after deactivation.
+		layerslider_delete_caches();
 
 		die($response);
 	}

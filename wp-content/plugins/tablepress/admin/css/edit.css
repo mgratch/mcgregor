@@ -116,6 +116,11 @@ body #wp-link-backdrop {
 	width: 120px;
 }
 
+#table-information-shortcode,
+#tablepress-page .button {
+	vertical-align: middle;
+}
+
 /* Table cells */
 #edit-form-body td {
 	padding: 2px 1px;
@@ -151,8 +156,8 @@ body #wp-link-backdrop {
 #tablepress-page select {
 	-webkit-box-shadow: none;
 	box-shadow: none;
-	-webkit-transition: all 0 ease 0;
-	transition: all 0 ease 0;
+	-webkit-transition: none;
+	transition: none;
 }
 
 #edit-form-foot input[type="checkbox"] {
@@ -204,7 +209,6 @@ body #wp-link-backdrop {
 	margin-right: 2px;
 }
 #edit-form-head .sorting-indicator {
-	display: block; /* BC for WP 4.3, can be removed later */
 	visibility: visible;
 }
 #edit-form-head .sort-asc .sorting-indicator:before {

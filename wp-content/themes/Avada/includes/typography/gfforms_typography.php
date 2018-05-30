@@ -1,6 +1,13 @@
 <?php
 /**
- * This file contains typography styles for GFForms plugin
+ * This file contains typography styles for GFForms plugin.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.0.0
  */
 
 // Do not allow directly accessing this file.

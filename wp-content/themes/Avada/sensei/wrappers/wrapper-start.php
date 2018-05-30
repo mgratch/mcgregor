@@ -21,4 +21,4 @@ $content_css = ob_get_clean();
 
 ?>
 <div class="sensei-container">
-	<div id="content"<?php echo $content_class; ?> <?php echo $content_css; ?>>
+	<section id="content"<?php echo $content_class; ?> <?php echo $content_css; ?>>

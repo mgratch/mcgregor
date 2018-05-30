@@ -1,4 +1,13 @@
 <?php
+/**
+ * Autoloader for Avada classes.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -41,6 +50,15 @@ class Avada_Autoload {
 	private static $update_cache = false;
 
 	/**
+	 * The path to the "includes" folder inside the theme.
+	 *
+	 * @access protected
+	 * @since 5.2.0
+	 * @var string
+	 */
+	protected $avada_includes_path;
+
+	/**
 	 * The class constructor.
 	 *
 	 * @access public
@@ -52,6 +70,8 @@ class Avada_Autoload {
 			self::$transient_name = 'avada_autoloader_paths_' . md5( __FILE__ );
 		}
 
+		$this->avada_includes_path = Avada::$template_dir_path . '/includes/';
+
 		// Get the cached paths array.
 		$this->get_cached_paths();
 
@@ -60,6 +80,15 @@ class Avada_Autoload {
 
 		// Update caches.
 		add_action( 'shutdown', array( $this, 'update_cached_paths' ) );
+
+		// Make sure caches are reset when needed.
+		$database_version = get_option( 'avada_version', false );
+		$current_version  = Avada::get_theme_version();
+		if ( ! $database_version || version_compare( $database_version, $current_version, '<' ) ) {
+			$this->reset_cached_paths();
+		}
+		add_action( 'after_switch_theme', array( $this, 'reset_cached_paths' ) );
+		add_action( 'switch_theme', array( $this, 'reset_cached_paths' ) );
 
 	}
 
@@ -89,10 +118,9 @@ class Avada_Autoload {
 		$paths = array();
 		if ( 0 === stripos( $class_name, 'Avada' ) || 0 === stripos( $class_name, 'Fusion' ) ) {
 
-			$path     = wp_normalize_path( Avada::$template_dir_path . '/includes/' );
 			$filename = 'class-' . strtolower( str_replace( '_', '-', $class_name ) ) . '.php';
 
-			$paths[] = $path . $filename;
+			$paths[] = $this->avada_includes_path . $filename;
 
 			$substr   = str_replace( array( 'Avada_', 'Fusion_' ), '', $class_name );
 			$exploded = explode( '_', $substr );
@@ -100,7 +128,7 @@ class Avada_Autoload {
 
 			$previous_path = '';
 			for ( $i = 0; $i < $levels; $i++ ) {
-				$paths[] = $path . $previous_path . strtolower( $exploded[ $i ] ) . '/' . $filename;
+				$paths[] = $this->avada_includes_path . $previous_path . strtolower( $exploded[ $i ] ) . '/' . $filename;
 				$previous_path .= strtolower( $exploded[ $i ] ) . '/';
 			}
 
@@ -126,8 +154,8 @@ class Avada_Autoload {
 	public function include_class_file( $class_name ) {
 
 		// If the path is cached, use it & early exit.
-		if ( isset( self::$cached_paths[ $class_name ] ) ) {
-			include_once self::$cached_paths[ $class_name ];
+		if ( isset( self::$cached_paths[ $class_name ] ) && file_exists( self::$cached_paths[ $class_name ] ) ) {
+			include_once wp_normalize_path( self::$cached_paths[ $class_name ] );
 			return;
 		}
 
@@ -141,12 +169,16 @@ class Avada_Autoload {
 		}
 
 		// Include the path.
-		include_once $path;
-
-		// Add path to the array of paths to cache.
-		self::$cached_paths[ $class_name ] = $path;
-		// Make sure we update the caches.
-		self::$update_cache = true;
+		if ( file_exists( $path ) ) {
+			include_once wp_normalize_path( $path );
+			// Add path to the array of paths to cache.
+			self::$cached_paths[ $class_name ] = $path;
+			// Make sure we update the caches.
+			self::$update_cache = true;
+			return;
+		}
+		// If we got this far, we need to reset the caches.
+		$this->reset_cached_paths();
 
 	}
 
@@ -164,8 +196,21 @@ class Avada_Autoload {
 			return;
 		}
 
-		// Cache for an hour using transients.
-		set_site_transient( self::$transient_name, self::$cached_paths, HOUR_IN_SECONDS );
+		// Cache for 30 seconds using transients.
+		set_site_transient( self::$transient_name, self::$cached_paths, 30 );
+
+	}
+
+	/**
+	 * Reset caches.
+	 *
+	 * @access public
+	 * @since 5.0.4
+	 * @return void
+	 */
+	public function reset_cached_paths() {
+
+		delete_site_transient( self::$transient_name );
 
 	}
 }

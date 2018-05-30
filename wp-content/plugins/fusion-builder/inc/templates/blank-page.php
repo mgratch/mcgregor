@@ -27,7 +27,7 @@
 	</div>
 
 	<div id="video-dialog" title="{{{ fusionBuilderText.getting_started_video }}}">
-		<p><iframe width="560" height="315" src="https://www.youtube.com/embed/UDyNsnB_COA" frameborder="0" allowfullscreen></iframe></p>
+		<p><iframe width="560" height="315" src="https://www.youtube.com/embed/UDyNsnB_COA?rel=0" frameborder="0" allowfullscreen></iframe></p>
 	</div>
 </div>
 

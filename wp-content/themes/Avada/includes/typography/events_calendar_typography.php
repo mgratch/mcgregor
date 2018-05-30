@@ -1,6 +1,13 @@
 <?php
 /**
- * This file contains typography styles for The Events Calendar plugin
+ * This file contains typography styles for The Events Calendar plugin.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.0.0
  */
 
 // Do not allow directly accessing this file.
@@ -76,7 +83,7 @@ add_filter( 'avada_h4_typography_elements', 'avada_events_calendar_h4_typography
  */
 function avada_events_calendar_button_typography( $typography_elements ) {
 	if ( class_exists( 'Tribe__Events__Main' ) ) {
-		$typography_elements['family'][] = '.tribe-events-tickets .add-to-cart .button';
+		$typography_elements['family'][] = '#tribe-events .tribe-events-tickets .add-to-cart .tribe-button';
 	}
 
 	return $typography_elements;

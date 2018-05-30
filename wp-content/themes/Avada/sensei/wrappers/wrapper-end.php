@@ -9,6 +9,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; ?>
 
-</div>
+</section>
 <?php do_action( 'avada_after_content' ); ?>
 </div>

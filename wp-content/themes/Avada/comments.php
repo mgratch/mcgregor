@@ -1,4 +1,10 @@
 <?php
+/**
+ * Comments template.
+ *
+ * @package Avada
+ * @subpackage Templates
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +29,7 @@ do_action( 'avada_before_comments' );
 	<div id="comments" class="comments-container">
 		<?php ob_start(); ?>
 		<?php comments_number( esc_html__( 'No Comments', 'Avada' ), esc_html__( 'One Comment', 'Avada' ), '% ' . esc_html__( 'Comments', 'Avada' ) ); ?>
-		<?php echo Avada()->template->title_template( ob_get_clean(), '3' ); ?>
+		<?php Avada()->template->title_template( ob_get_clean(), '3' ); ?>
 
 		<?php if ( function_exists( 'the_comments_navigation' ) ) : ?>
 			<?php the_comments_navigation(); ?>
@@ -54,26 +60,29 @@ do_action( 'avada_before_comments' );
 
 	$fields = array();
 
-	$fields['author'] = '<div id="comment-input"><input id="author" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" placeholder="' . esc_html__( 'Name (required)', 'Avada' ) . '" size="30"' . $aria_req . $html_req . ' />';
-	$fields['email']  = '<input id="email" name="email" ' . ( $html5 ? 'type="email"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_email'] ) . '" placeholder="' . esc_html__( 'Email (required)', 'Avada' ) . '" size="30" aria-describedby="email-notes"' . $aria_req . $html_req . ' />';
-	$fields['url']    = '<input id="url" name="url" ' . ( $html5 ? 'type="url"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_url'] ) . '" placeholder="' . esc_html__( 'Website', 'Avada' ) . '" size="30" /></div>';
+	$fields['author'] = '<div id="comment-input"><input id="author" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" placeholder="' . esc_html__( 'Name (required)', 'Avada' ) . '" size="30"' . $aria_req . $html_req . ' aria-label="' . esc_attr__( 'Name', 'Avada' ) . '"/>';
+	$fields['email']  = '<input id="email" name="email" ' . ( $html5 ? 'type="email"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_email'] ) . '" placeholder="' . esc_html__( 'Email (required)', 'Avada' ) . '" size="30" ' . $aria_req . $html_req . ' aria-label="' . esc_attr__( 'Email', 'Avada' ) . '"/>';
+	$fields['url']    = '<input id="url" name="url" ' . ( $html5 ? 'type="url"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_url'] ) . '" placeholder="' . esc_html__( 'Website', 'Avada' ) . '" size="30" aria-label="' . esc_attr__( 'URL', 'Avada' ) . '" /></div>';
 
 	$comments_args = array(
 		'fields'               => apply_filters( 'comment_form_default_fields', $fields ),
 		'comment_field'        => '<div id="comment-textarea"><label class="screen-reader-text" for="comment">' . esc_attr__( 'Comment', 'Avada' ) . '</label><textarea name="comment" id="comment" cols="45" rows="8" aria-required="true" required="required" tabindex="0" class="textarea-comment" placeholder="' . esc_html__( 'Comment...', 'Avada' ) . '"></textarea></div>',
 		'title_reply'          => esc_html__( 'Leave A Comment', 'Avada' ),
 		'title_reply_to'       => esc_html__( 'Leave A Comment', 'Avada' ),
+		/* translators: Opening and closing link tags. */
 		'must_log_in'          => '<p class="must-log-in">' . sprintf( esc_html__( 'You must be %1$slogged in%2$s to post a comment.', 'Avada' ), '<a href="' . wp_login_url( apply_filters( 'the_permalink', get_permalink() ) ) . '">', '</a>' ) . '</p>',
+		/* translators: %1$s: The username. %2$s and %3$s: Opening and closing link tags. */
 		'logged_in_as'         => '<p class="logged-in-as">' . sprintf( esc_html__( 'Logged in as %1$s. %2$sLog out &raquo;%3$s', 'Avada' ), '<a href="' . admin_url( 'profile.php' ) . '">' . $user_identity . '</a>', '<a href="' . wp_logout_url( apply_filters( 'the_permalink', get_permalink() ) ) . '" title="' . esc_html__( 'Log out of this account', 'Avada' ) . '">', '</a>' ) . '</p>',
 		'comment_notes_before' => '',
 		'id_submit'            => 'comment-submit',
-		'class_submit'         => 'fusion-button fusion-button-default',
+		'class_submit'         => 'fusion-button fusion-button-default fusion-button-default-size',
 		'label_submit'         => esc_html__( 'Post Comment', 'Avada' ),
 	);
 	?>
 
 	<?php comment_form( $comments_args ); ?>
 
-<?php endif;
+<?php
+endif;
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

@@ -30,7 +30,7 @@
 
 .fusion-body .fusion-header-shadow:after,
 .fusion-body.side-header #side-header.header-shadow:after ,
-.fusion-body.side-header #side-header.header-shadow:before 
+.fusion-body.side-header #side-header.header-shadow:before
 { display: none }
 .fusion-button.button-pill, .fusion-button.button-pill:hover { filter: none; }
 
@@ -70,6 +70,65 @@
 
 .rtl .fusion-header-v4 .fusion-header > .fusion-row .fusion-secondary-menu-search {
 	direction: rtl;
+}
+
+.fusion-header-v6 .fusion-header-v6-content {
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+
+}
+
+.fusion-header-v6 .fusion-header-v6-content .fusion-logo {
+	float: none;
+}
+
+.fusion-header-v6 .fusion-header-v6-content .fusion-flyout-menu-icons {
+	display: table-cell;
+	text-align: right;
+	vertical-align: middle;
+}
+
+.fusion-header-v6 .fusion-header-v6-content .fusion-flyout-menu-icons .fusion-flyout-search-toggle {
+	vertical-align: middle;
+}
+
+.fusion-header-v6 .fusion-flyout-menu-icons .fusion-flyout-menu-toggle {
+	display: inline-block;
+	height: 36px;
+	width: 36px;
+	vertical-align: middle;
+}
+
+.fusion-header-v6 .fusion-flyout-menu-icons .fusion-toggle-icon-line {
+	display: block;
+	margin: 5px 0 8px 0;
+}
+
+.fusion-flyout-active.fusion-header-v6 .fusion-flyout-menu-bg {
+	z-index: -1;
+}
+
+.fusion-header-v7 .fusion-middle-logo-ul {
+	text-align: center;
+}
+
+.fusion-header-v7 .fusion-middle-logo-ul li {
+	display: inline-block;
+}
+
+.fusion-header-v7 .fusion-middle-logo-menu-logo a img {
+	vertical-align: middle;
+}
+
+.fusion-page-title-wrapper {
+	display: table;
+}
+
+.fusion-page-title-captions,
+.fusion-page-title-secondary {
+	display: table-cell;
+	vertical-align: middle;
 }
 
 .fusion-countdown {

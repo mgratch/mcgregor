@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,7 +31,7 @@ function avada_options_section_elastic_slider( $sections ) {
 		'fields'   => array(
 			'tfes_disabled_note' => ( '0' === Avada()->settings->get( 'dependencies_status' ) ) ? array() : array(
 				'label'       => '',
-				'description' => '<div class="avada-avadaredux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> Elastic Slider is disabled in Advanced > Theme Features section. Please enable it to see the options.', 'Avada' ) . '</div>',
+				'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> Elastic Slider is disabled in Advanced > Theme Features section. Please enable it to see the options.', 'Avada' ) . '</div>',
 				'id'          => 'tfes_disabled_note',
 				'type'        => 'custom',
 				'required'    => array(

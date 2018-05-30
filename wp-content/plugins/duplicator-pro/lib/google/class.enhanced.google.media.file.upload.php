@@ -17,7 +17,7 @@
 if (!class_exists('Google_Client'))
 {
 	//require_once dirname(__FILE__) . '/../autoload.php';
-	require_once dirname(__FILE__) . '/src/Google/autoload.php';
+	require_once dirname(__FILE__) . '/apiclient/autoload.php';
 }
 
 if (!class_exists('DUP_Pro_EnhancedGoogleMediaFileUpload'))
@@ -48,7 +48,6 @@ if (!class_exists('DUP_Pro_EnhancedGoogleMediaFileUpload'))
 		private $size;
 
 		/** @var string $resumeUri */
-		// RSR TODO: made this public so we can save it off for a future session
 		public $resumeUri;
 
 		/** @var int $next_offset */
@@ -133,7 +132,7 @@ if (!class_exists('DUP_Pro_EnhancedGoogleMediaFileUpload'))
 		 */
 		public function nextChunk($chunk = false)
 		{
-			DUP_PRO_U::log('Next chunk');
+			DUP_PRO_LOG::trace('Next chunk');
 
 			if (false == $this->resumeUri)
 			{
@@ -153,7 +152,7 @@ if (!class_exists('DUP_Pro_EnhancedGoogleMediaFileUpload'))
 				'expect' => '',
 			);
 
-			DUP_PRO_U::log_object('next chunk headers', $headers);
+			DUP_PRO_LOG::traceObject('next chunk headers', $headers);
 
 			$httpRequest = new Google_Http_Request(
 					$this->resumeUri, 'PUT', $headers, $chunk

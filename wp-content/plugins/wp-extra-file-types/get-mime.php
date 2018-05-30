@@ -1,5 +1,43 @@
 <?php
 
+$url = 'https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
+
+$ch = curl_init();
+$timeout = 30;
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+$data = curl_exec($ch);
+curl_close($ch);
+
+$apache = array();
+
+$data = str_replace("\r","",$data);
+$data = explode("\n",$data);
+
+foreach ($data as $line) {
+    $line = trim($line);
+    if (substr($line,0,1)=='#' || $line=='') {
+	continue;
+    }
+    $line = preg_replace("#\s+#","\t",$line);
+    $line = trim($line);
+    $info = explode("\t",$line);
+    $info[0] = preg_replace('#^([^/]+)/#','',$info[0]);
+    $info[0] = preg_replace('#^x-#','',$info[0]);
+    $info[0] = preg_replace('#^vnd\.#','',$info[0]);
+    if (count($info)>2) {
+	$tot = count($info);
+	for ($i=1;$i<$tot;$i++) {
+	    $apache['.'.$info[$i]] = array( $info[0], preg_replace('#([^A-Za-z0-9]+)#',' ',$info[0]) );
+	}
+    } else {
+	$apache['.'.$info[1]] = array( $info[0], preg_replace('#([^A-Za-z0-9]+)#',' ',$info[0]) );
+    }
+}
+
+// print_r($apache);die;
+
 $url = 'http://www.freeformatter.com/mime-types-list.html';
 
 $ch = curl_init();
@@ -55,10 +93,15 @@ $extra = array(
  '.mobi' => array('application/x-mobipocket-ebook','Mobi EBook',false),
  '.pages' => array('application/x-iwork-pages-sffpages','Apple Pages document',false),
  '.numbers' => array('application/x-iwork-numbers-sffnumbers','Apple Numbers spreadsheet',false),
- '.keynote' => array('application/x-iwork-keynote-sffkey','Apple Keynote Presentation',false)
+ '.keynote' => array('application/x-iwork-keynote-sffkey','Apple Keynote Presentation',false),
+ '.key' => array('application/x-iwork-keynote-sffkey','Apple Keynote Presentation',false)
 );
 
 $exts = array();
+
+$fixes = array(
+    '.exe' => array( 'mime_type' => 'application/vnd.microsoft.portable-executable', 'application'=>'' )
+);
 
 foreach ($lista as $elemento) {
 
@@ -74,6 +117,13 @@ foreach ($lista as $elemento) {
 	$tipo         = trim($parti[1]);
 	$estensioni   = explode(',',str_replace(' ','',$parti[2]));
 	
+	foreach ($estensioni as $ext) {
+	    if (isset($fixes[$ext])) {
+		$applicazione = $fixes[$ext]['application'] ? : $applicazione;
+		$tipo         = $fixes[$ext]['mime_type'] ? : $tipo;
+	    }
+	}
+	
 	$tmp = new \stdClass();
 	$tmp->application = $applicazione;
 	$tmp->mime_type   = $tipo;
@@ -85,16 +135,35 @@ foreach ($lista as $elemento) {
 	
 }
 
+
 asort($exts);
 
 foreach ($extra as $ext=>$dati) {
 	if (!in_array($ext,$exts)) {
-		$tmp = new \stdClass();
-		$tmp->application = $dati[1];
-		$tmp->mime_type   = $dati[0];
-		$tmp->extensions  = array( $ext );
-		$array[] = $tmp;
+	    if (isset($fixes[$ext])) {
+		$dati[1] = $fixes[$ext]['application'] ? : $dati[1];
+		$dati[0] = $fixes[$ext]['mime_type'] ? : $dati[0];
+	    }
+	    $tmp = new \stdClass();
+	    $tmp->application = $dati[1];
+	    $tmp->mime_type   = $dati[0];
+	    $tmp->extensions  = array( $ext );
+	    $array[] = $tmp;
 	}
+}
+
+foreach ($apache as $ext=>$dati) {
+    if (!in_array($ext,$exts)) {
+	if (isset($fixes[$ext])) {
+	    $dati[1] = $fixes[$ext]['application'] ? : $dati[1];
+	    $dati[0] = $fixes[$ext]['mime_type'] ? : $dati[0];
+	}
+	$tmp = new \stdClass();
+	$tmp->application = $dati[1];
+	$tmp->mime_type   = $dati[0];
+	$tmp->extensions  = array( $ext );
+	$array[] = $tmp;
+    }
 }
 
 function doSort($a,$b) {
@@ -105,6 +174,7 @@ function doSort($a,$b) {
 
 usort($array,'doSort');
 
+// print_r($array);die;
 
 file_put_contents(dirname(__FILE__).DIRECTORY_SEPARATOR.'mime-list.txt',serialize($array));
 

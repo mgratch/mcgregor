@@ -1,4 +1,13 @@
 <?php
+/**
+ * The main navwalker.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -133,6 +142,15 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 		 */
 		private $menu_megamenu_thumbnail = '';
 
+
+		/**
+		 * Does the item have a background image?
+		 *
+		 * @access  private
+		 * @var string
+		 */
+		private $menu_megamenu_background_image = '';
+
 		/**
 		 * Middle logo menu breaking point
 		 *
@@ -161,12 +179,13 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 
 			$megamenu_width = $megamenu_max_width;
 			// Site width in px.
-			if ( false !== strpos( Avada()->settings->get( 'site_width' ), 'px' ) ) {
+			if ( false !== strpos( Avada()->settings->get( 'site_width' ), 'px' ) && false === strpos( Avada()->settings->get( 'site_width' ), 'calc' ) ) {
 				$megamenu_width = $site_width;
 				if ( $site_width > $megamenu_max_width && 0 < $megamenu_max_width ) {
 					$megamenu_width = $megamenu_max_width;
 				}
 			}
+
 			$this->menu_megamenu_maxwidth = $megamenu_width;
 		}
 
@@ -181,18 +200,17 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 		 * @param  array  $args Not used.
 		 */
 		public function start_lvl( &$output, $depth = 0, $args = array() ) {
-
 			if ( 0 === $depth && 'enabled' === $this->menu_megamenu_status ) {
 				// Set overall width of megamenu.
 				if ( ! $this->menu_megamenu_maxwidth ) {
 					$this->set_megamenu_max_width();
 				}
 				$output .= '{first_level}';
-				$output .= '<div class="fusion-megamenu-holder" {megamenu_final_width}><ul class="fusion-megamenu {megamenu_border}">';
+				$output .= '<div class="fusion-megamenu-holder" {megamenu_final_width}><ul role="menu" class="fusion-megamenu {megamenu_border}">';
 			} elseif ( 2 <= $depth && 'enabled' === $this->menu_megamenu_status ) {
-				$output .= '<ul class="sub-menu deep-level">';
+				$output .= '<ul role="menu" class="sub-menu deep-level">';
 			} else {
-				$output .= '<ul class="sub-menu">';
+				$output .= '<ul role="menu" class="sub-menu">';
 			}
 
 		}
@@ -215,30 +233,29 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 
 				$output .= '</ul></div><div style="clear:both;"></div></div></div>';
 
+				$col_span = ' col-span-' . $this->max_num_of_columns * 2;
 				if ( $this->total_num_of_columns < $this->max_num_of_columns ) {
 					$col_span = ' col-span-' . $this->total_num_of_columns * 2;
-				} else {
-					$col_span = ' col-span-' . $this->max_num_of_columns * 2;
 				}
 
+				// Calc overall megamenu wrapper width in px.
+				$wrapper_width = max( $this->menu_megamenu_rowwidth_matrix ) * $this->menu_megamenu_maxwidth;
 				if ( 'fullwidth' === $this->menu_megamenu_width ) {
 					$col_span = ' col-span-12 fusion-megamenu-fullwidth';
 					// Overall megamenu wrapper width in px is max width for fullwidth megamenu.
 					$wrapper_width = $this->menu_megamenu_maxwidth;
-				} else {
-					// Calc overall megamenu wrapper width in px.
-					$wrapper_width = max( $this->menu_megamenu_rowwidth_matrix ) * $this->menu_megamenu_maxwidth;
+				}
+
+				$background_image = '';
+				if ( ! empty( $this->menu_megamenu_background_image ) ) {
+					$background_image = 'background-image: url(' . $this->menu_megamenu_background_image . ');';
 				}
 
 				$output = str_replace( '{first_level}', '<div class="fusion-megamenu-wrapper {fusion_columns} columns-' . $this->total_num_of_columns . $col_span . '" data-maxwidth="' . $this->menu_megamenu_maxwidth . '"><div class="row">', $output );
+				$output = str_replace( '{megamenu_final_width}', 'style="width:' . $wrapper_width . 'px;' . $background_image . '" data-width="' . $wrapper_width . '"', $output );
 
-				$output = str_replace( '{megamenu_final_width}', 'style="width:' . $wrapper_width . 'px;" data-width="' . $wrapper_width . '"', $output );
-
-				if ( $this->total_num_of_columns > $this->max_num_of_columns ) {
-					$output = str_replace( '{megamenu_border}', 'fusion-megamenu-border', $output );
-				} else {
-					$output = str_replace( '{megamenu_border}', '', $output );
-				}
+				$replacement = ( $this->total_num_of_columns > $this->max_num_of_columns ) ? 'fusion-megamenu-border' : '';
+				$output = str_replace( '{megamenu_border}', $replacement, $output );
 
 				foreach ( $this->submenu_matrix as $row => $columns ) {
 					$layout_columns = 12 / $columns;
@@ -250,18 +267,17 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 
 					$output = str_replace( '{row_width_' . $row . '}', $row_width, $output );
 
-					if ( ( $row - 1 ) * $this->max_num_of_columns + $columns < $this->total_num_of_columns ) {
-						$output = str_replace( '{row_number_' . $row . '}', 'fusion-megamenu-row-columns-' . $columns . ' fusion-megamenu-border', $output );
-					} else {
-						$output = str_replace( '{row_number_' . $row . '}', 'fusion-megamenu-row-columns-' . $columns, $output );
-					}
+					$replacement  = 'fusion-megamenu-row-columns-' . $columns;
+					$replacement .= ( ( $row - 1 ) * $this->max_num_of_columns + $columns < $this->total_num_of_columns ) ? ' fusion-megamenu-border' : '';
+					$output = str_replace( '{row_number_' . $row . '}', $replacement, $output );
+
 					$output = str_replace( '{current_row_' . $row . '}', 'fusion-megamenu-columns-' . $columns . ' col-lg-' . $layout_columns . ' col-md-' . $layout_columns . ' col-sm-' . $layout_columns, $output );
 
 					$output = str_replace( '{fusion_columns}', 'fusion-columns-' . $columns . ' columns-per-row-' . $columns, $output );
 				}
 			} else {
 				$output .= '</ul>';
-			}
+			} // End if().
 		}
 
 		/**
@@ -278,18 +294,35 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 		 */
 		public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
 
-			$item_output = $class_columns = '';
+			$item_output          = '';
+			$class_columns        = '';
+			$menu_highlight_label = '';
 
-			if ( Avada()->settings->get( 'header_layout' ) == 'v7' ) {
+			$is_rtl                          = is_rtl();
+			$header_layout                   = Avada()->settings->get( 'header_layout' );
+			$header_position                 = Avada()->settings->get( 'header_position' );
+			$menu_icon_position              = Avada()->settings->get( 'menu_icon_position' );
+			$menu_display_dropdown_indicator = Avada()->settings->get( 'menu_display_dropdown_indicator' );
+			$menu_highlight_style            = Avada()->settings->get( 'menu_highlight_style' );
+
+			if ( null === $item->menu_item_parent ) {
+				$item->menu_item_parent = '0';
+			}
+
+			if ( 'v7' === $header_layout ) {
 				if ( ! isset( $this->middle_logo_menu_break_point ) ) {
 
 					$is_search_icon_enabled = Avada()->settings->get( 'main_nav_search_icon' );
-					$is_cart_icon_enabled = Avada()->settings->get( 'woocommerce_cart_link_main_nav' );
+					$is_cart_icon_enabled   = Avada()->settings->get( 'woocommerce_cart_link_main_nav' );
 
-					$middle_logo_menu_elements = wp_get_nav_menu_items( $args->menu );
-		      		$middle_logo_menu_top_level_elements = 0;
+					$middle_logo_menu_elements           = wp_get_nav_menu_items( $args->menu );
+					$middle_logo_menu_top_level_elements = 0;
 
 					foreach ( $middle_logo_menu_elements as $menu_element ) {
+						if ( null === $menu_element->menu_item_parent ) {
+							$menu_element->menu_item_parent = '0';
+						}
+
 						if ( '0' === $menu_element->menu_item_parent ) {
 							$middle_logo_menu_top_level_elements++;
 						}
@@ -308,54 +341,98 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 					if ( 0 === $top_level_menu_items_count ) {
 						$this->middle_logo_menu_break_point = $middle_logo_menu_top_level_elements / 2;
 					} else {
+						$this->middle_logo_menu_break_point = ceil( $middle_logo_menu_top_level_elements / 2 );
 						if ( $is_search_icon_enabled || $is_cart_icon_enabled ) {
 							$this->middle_logo_menu_break_point = floor( $middle_logo_menu_top_level_elements / 2 );
-						} else {
-							$this->middle_logo_menu_break_point = ceil( $middle_logo_menu_top_level_elements / 2 );
 						}
 					}
 				}
 			}
 
 			// Set some vars.
+			$meta_data  = get_post_meta( $item->ID );
+			$avada_meta = ! empty( $meta_data['_menu_item_fusion_megamenu'][0] ) ? maybe_unserialize( $meta_data['_menu_item_fusion_megamenu'][0] ) : array();
+
+			$this->menu_style               = isset( $avada_meta['style'] ) ? $avada_meta['style'] : '';
+			$this->menu_megamenu_icon       = isset( $avada_meta['icon'] ) ? $avada_meta['icon'] : '';
+			$this->menu_megamenu_modal      = isset( $avada_meta['modal'] ) ? $avada_meta['modal'] : '';
+			$this->menu_title_only          = isset( $avada_meta['icononly'] ) ? $avada_meta['icononly'] : '';
+
+			$this->fusion_highlight_label               = isset( $avada_meta['highlight_label'] ) ? $avada_meta['highlight_label'] : '';
+			$this->fusion_highlight_label_background    = isset( $avada_meta['highlight_label_background'] ) ? $avada_meta['highlight_label_background'] : '';
+			$this->fusion_highlight_label_color         = isset( $avada_meta['highlight_label_color'] ) ? $avada_meta['highlight_label_color'] : '';
+			$this->fusion_highlight_label_border_color  = isset( $avada_meta['highlight_label_border_color'] ) ? $avada_meta['highlight_label_border_color'] : '';
+
+			if ( ! empty( $item->fusion_highlight_label ) ) {
+
+				$highlight_style  = '';
+
+				if ( ! empty( $item->fusion_highlight_label_background ) ) {
+					$highlight_style .= 'background-color:' . $item->fusion_highlight_label_background . ';';
+				}
+
+				if ( ! empty( $item->fusion_highlight_label_border_color ) ) {
+					$highlight_style .= 'border-color:' . $item->fusion_highlight_label_border_color . ';';
+				}
+
+				if ( ! empty( $item->fusion_highlight_label_color ) ) {
+					$highlight_style .= 'color:' . $item->fusion_highlight_label_color . ';';
+				}
+
+				$menu_highlight_label = '<span class="fusion-menu-highlight-label" style="' . esc_attr( $highlight_style ) . '">' . esc_html( $item->fusion_highlight_label ) . '</span>';
+			}
+
 			// Megamenu is enabled.
-			if ( Avada()->settings->get( 'disable_megamenu' ) ) {
+			if ( Avada()->settings->get( 'disable_megamenu' ) && 'top_navigation' !== $args->theme_location ) {
 				if ( 0 === $depth ) {
-					$this->menu_megamenu_status = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_status', true );
-					$this->menu_megamenu_width  = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_width', true );
-					$allowed_columns = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_columns', true );
+					$this->menu_megamenu_status = isset( $avada_meta['status'] ) ? $avada_meta['status'] : 'disabled';
+					$this->menu_megamenu_width  = isset( $avada_meta['width'] ) ? $avada_meta['width'] : '';
+					$allowed_columns            = isset( $avada_meta['columns'] ) ? $avada_meta['columns'] : '';
 					if ( 'auto' !== $allowed_columns ) {
 						$this->max_num_of_columns = $allowed_columns;
 					}
-					$this->num_of_columns                                      = $this->total_num_of_columns = 0;
+					$this->num_of_columns                                      = 0;
+					$this->total_num_of_columns                                = 0;
 					$this->num_of_rows                                         = 1;
 					$this->menu_megamenu_rowwidth_matrix                       = array();
 					$this->menu_megamenu_rowwidth_matrix[ $this->num_of_rows ] = 0;
+
+					$this->menu_megamenu_background_image  = isset( $avada_meta['background_image'] ) ? $avada_meta['background_image'] : '';
+				} elseif ( 1 === $depth ) {
+					$megamenu_column_background_image  = isset( $avada_meta['background_image'] ) ? $avada_meta['background_image'] : '';
 				}
 
-				$this->menu_style               = get_post_meta( $item->ID, '_menu_item_fusion_menu_style', true );
-				$this->menu_megamenu_title      = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_title', true );
-				$this->menu_megamenu_widgetarea = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_widgetarea', true );
-				$this->menu_megamenu_icon       = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_icon', true );
-				$this->menu_megamenu_thumbnail  = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_thumbnail', true );
+				$this->menu_megamenu_title      = isset( $avada_meta['title'] ) ? $avada_meta['title'] : '';
+				$this->menu_megamenu_widgetarea = isset( $avada_meta['widgetarea'] ) ? $avada_meta['widgetarea'] : '';
+
+				if ( ! empty( $avada_meta['thumbnail'] ) ) {
+					$thumbnail_data = Avada()->images->get_attachment_data_from_url( $avada_meta['thumbnail'] );
+
+					if ( $thumbnail_data ) {
+						$this->menu_megamenu_thumbnail  = '<img src="' . $thumbnail_data['url'] . '" alt="' . $thumbnail_data['alt'] . '" title="' . $thumbnail_data['title'] . '">';
+					} else {
+						$this->menu_megamenu_thumbnail  = '<img src="' . $avada_meta['thumbnail'] . '">';
+					}
+				} else {
+					$this->menu_megamenu_thumbnail = '';
+				}
+
 				// Megamenu is disabled.
 			} else {
 				$this->menu_megamenu_status = 'disabled';
-				$this->menu_style           = get_post_meta( $item->ID, '_menu_item_fusion_menu_style', true );
-				$this->menu_megamenu_icon   = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_icon', true );
 			}
+
 			// We are inside a megamenu.
 			if ( 1 === $depth && 'enabled' === $this->menu_megamenu_status ) {
 
-				if ( get_post_meta( $item->ID, '_menu_item_fusion_megamenu_columnwidth', true ) ) {
-					$this->menu_megamenu_columnwidth = get_post_meta( $item->ID, '_menu_item_fusion_megamenu_columnwidth', true );
+				if ( isset( $avada_meta['columnwidth'] ) && $avada_meta['columnwidth'] ) {
+					$this->menu_megamenu_columnwidth = $avada_meta['columnwidth'];
 				} else {
+					$this->menu_megamenu_columnwidth = '16.6666%';
 					if ( 'fullwidth' === $this->menu_megamenu_width && $this->max_num_of_columns ) {
 						$this->menu_megamenu_columnwidth = 100 / $this->max_num_of_columns . '%';
 					} elseif ( '1' == $this->max_num_of_columns ) {
 						$this->menu_megamenu_columnwidth = '100%';
-					} else {
-						$this->menu_megamenu_columnwidth = '16.6666%';
 					}
 				}
 
@@ -370,7 +447,7 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 					// Start new row width calculation.
 					$this->menu_megamenu_rowwidth_matrix[ $this->num_of_rows ] = floatval( $this->menu_megamenu_columnwidth ) / 100;
 
-					$output .= '</ul><ul class="fusion-megamenu fusion-megamenu-row-' . $this->num_of_rows . ' {row_number_' . $this->num_of_rows . '}" {row_width_' . $this->num_of_rows . '}>';
+					$output .= '</ul><ul role="menu" class="fusion-megamenu fusion-megamenu-row-' . $this->num_of_rows . ' {row_number_' . $this->num_of_rows . '}" {row_width_' . $this->num_of_rows . '}>';
 				} else {
 					$this->menu_megamenu_rowwidth_matrix[ $this->num_of_rows ] += floatval( $this->menu_megamenu_columnwidth ) / 100;
 				}
@@ -383,7 +460,7 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 
 				$title = apply_filters( 'the_title', $item->title, $item->ID );
 
-				if ( ! ( ( empty( $item->url ) || '#' === $item->url || 'http://' === $item->url )  && 'disabled' === $this->menu_megamenu_title ) ) {
+				if ( ! ( ( empty( $item->url ) || '#' === $item->url || 'http://' === $item->url ) && 'disabled' === $this->menu_megamenu_title ) ) {
 					$heading      = do_shortcode( $title );
 					$link         = '';
 					$link_closing = '';
@@ -406,21 +483,25 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 					// Check if we need to set an image.
 					$title_enhance = '';
 					if ( ! empty( $this->menu_megamenu_thumbnail ) ) {
-						$title_enhance = '<span class="fusion-megamenu-icon"><img src="' . $this->menu_megamenu_thumbnail . '"></span>';
+						$title_enhance = '<span class="fusion-megamenu-icon fusion-megamenu-thumbnail">' . $this->menu_megamenu_thumbnail . '</span>';
 					} elseif ( ! empty( $this->menu_megamenu_icon ) ) {
 						$title_enhance = '<span class="fusion-megamenu-icon"><i class="fa glyphicon ' . avada_font_awesome_name_handler( $this->menu_megamenu_icon ) . '"></i></span>';
 					} elseif ( 'disabled' === $this->menu_megamenu_title ) {
 						$title_enhance = '<span class="fusion-megamenu-bullet"></span>';
 					}
 
-					$heading = $link . $title_enhance . $title . $link_closing;
-
+					$heading = $link . $title_enhance . $title . $menu_highlight_label . $link_closing;
+					$menu_icon_right = ( ( ! $is_rtl && 'right' === $menu_icon_position ) || ( $is_rtl && 'left' === $menu_icon_position ) );
+					// If we have an icon or thumbnail and the position is not left, then change order.
+					if ( 0 === $depth && ( ! empty( $this->menu_megamenu_icon ) || ! empty( $this->menu_megamenu_thumbnail ) ) && $menu_icon_right ) {
+						$heading = $link . $title . $title_enhance . $link_closing;
+					}
 					if ( 'disabled' !== $this->menu_megamenu_title ) {
 						$item_output .= "<div class='fusion-megamenu-title'>" . $heading . '</div>';
 					} else {
 						$item_output .= $heading;
 					}
-				}
+				} // End if().
 
 				if ( $this->menu_megamenu_widgetarea && is_active_sidebar( $this->menu_megamenu_widgetarea ) ) {
 					ob_start();
@@ -428,7 +509,7 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 					$item_output .= '<div class="fusion-megamenu-widgets-container second-level-widget">' . ob_get_clean() . '</div>';
 				}
 
-				$class_columns  = ' {current_row_' . $this->num_of_rows . '}';
+				$class_columns = ' {current_row_' . $this->num_of_rows . '}';
 
 			} elseif ( 2 === $depth && 'enabled' === $this->menu_megamenu_status && $this->menu_megamenu_widgetarea ) {
 
@@ -441,17 +522,42 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 
 				$atts = array();
 				$atts['title']  = ! empty( $item->attr_title ) ? esc_attr( $item->attr_title ) : '';
-				$atts['target'] = ! empty( $item->target )     ? esc_attr( $item->target )     : '';
-				$atts['rel']    = ! empty( $item->xfn )        ? esc_attr( $item->xfn )        : '';
-				$atts['href']   = ! empty( $item->url )        ? esc_attr( $item->url )        : '';
+				$atts['target'] = ! empty( $item->target ) ? esc_attr( $item->target ) : '';
+				$atts['rel']    = ! empty( $item->xfn ) ? esc_attr( $item->xfn ) : '';
+				$atts['href']   = ! empty( $item->url ) ? esc_attr( $item->url ) : '';
+				$atts['class']  = array();
 
-				if ( 'v7' === Avada()->settings->get( 'header_layout' ) && '0' === $item->menu_item_parent ) {
-					$atts['class'] = 'fusion-top-level-link';
+				if ( 'v7' === $header_layout && '0' === $item->menu_item_parent ) {
+					$atts['class'][] = 'fusion-top-level-link';
+				}
+
+				if ( 'icononly' === $this->menu_title_only && 0 === $depth ) {
+					$atts['class'][] = 'fusion-icon-only-link';
+				}
+
+				if ( ( ! empty( $this->menu_megamenu_icon ) || ! empty( $this->menu_megamenu_thumbnail ) || $item->description ) && ! $this->menu_style && 0 === $depth ) {
+					$atts['class'][] = 'fusion-flex-link';
+					if ( 'top' === $menu_icon_position || 'bottom' === $menu_icon_position ) {
+						$atts['class'][] = 'fusion-flex-column';
+					}
+				}
+
+				$atts['class'][] = 'fusion-' . $menu_highlight_style . '-highlight';
+
+				if ( 0 === $depth && $item->description ) {
+					$atts['class'][] = 'fusion-has-description';
 				}
 
 				if ( '_blank' === $atts['target'] ) {
 					$atts['rel'] = ( ( $atts['rel'] ) ? $atts['rel'] . ' noopener noreferrer' : 'noopener noreferrer' );
 				}
+
+				if ( '' !== $this->menu_megamenu_modal ) {
+					$atts['data-toggle'] = 'modal';
+					$atts['data-target'] = '.' . $this->menu_megamenu_modal;
+				}
+
+				$atts['class'] = implode( ' ', $atts['class'] );
 				$atts = apply_filters( 'nav_menu_link_attributes', $atts, $item, $args, $depth );
 
 				$attributes = '';
@@ -465,19 +571,24 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 				$item_output .= $args->before . '<a ' . $attributes . '>';
 
 				// For right side header add the caret icon at the beginning.
-				if ( 0 === $depth && $args->has_children && Avada()->settings->get( 'menu_display_dropdown_indicator' ) && 'v6' !== Avada()->settings->get( 'header_layout' ) && 'Right' === Avada()->settings->get( 'header_position' ) ) {
+				if ( 0 === $depth && $args->has_children && $menu_display_dropdown_indicator && 'v6' !== $header_layout && 'Right' === $header_position && ! $this->menu_style ) {
 					$item_output .= ' <span class="fusion-caret"><i class="fusion-dropdown-indicator"></i></span>';
 				}
 
 				// Check if we need to set an image.
 				$icon_wrapper_class = 'fusion-megamenu-icon';
 				if ( 0 === $depth && $this->menu_style ) {
-					$icon_wrapper_class = ( is_rtl() ) ? 'button-icon-divider-right' : 'button-icon-divider-left';
+					$icon_wrapper_class = ( $is_rtl ) ? 'button-icon-divider-right' : 'button-icon-divider-left';
 				}
 
 				$icon = '';
+
+				// If its a side header, make sure icons are fixed size.
+				if ( ! empty( $this->menu_megamenu_icon ) && 'Top' !== $header_position ) {
+					$this->menu_megamenu_icon .= ' fa-fw';
+				}
 				if ( ! empty( $this->menu_megamenu_thumbnail ) && 'enabled' === $this->menu_megamenu_status ) {
-					$icon = '<span class="' . $icon_wrapper_class . ' fusion-megamenu-image"><img src="' . $this->menu_megamenu_thumbnail . '"></span>';
+					$icon = '<span class="' . $icon_wrapper_class . ' fusion-megamenu-image">' . $this->menu_megamenu_thumbnail . '</span>';
 				} elseif ( ! empty( $this->menu_megamenu_icon ) ) {
 					$icon = '<span class="' . $icon_wrapper_class . '"><i class="fa glyphicon ' . $this->menu_megamenu_icon . '"></i></span>';
 				} elseif ( 0 !== $depth && 'enabled' === $this->menu_megamenu_status ) {
@@ -495,32 +606,55 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 							$classes .= ' button-3d';
 						}
 					}
-
-					$item_output .= '<span class="' . $classes . '">' . $icon;
-					// Normal menu item.
-				} else {
-					$item_output .= $icon . '<span class="' . $classes . '">';
 				}
 
 				$title = $args->link_before . apply_filters( 'the_title', $item->title, $item->ID ) . $args->link_after;
+
+				// If we are top level, not using a button and have a description, then add that to the title.
+				if ( $item->description && 0 === $depth && ! $this->menu_style ) {
+					$title .= '<span class="fusion-menu-description">' . $item->description . '</span>';
+				}
+
+				if ( ! empty( $menu_highlight_label ) ) {
+					$title .= $menu_highlight_label;
+				}
 
 				if ( false !== strpos( $icon, 'button-icon-divider-left' ) ) {
 					$title = '<span class="fusion-button-text-left">' . $title . '</span>';
 				} elseif ( false !== strpos( $icon, 'button-icon-divider-right' ) ) {
 					$title = '<span class="fusion-button-text-right">' . $title . '</span>';
+				} else if ( 'icononly' === $this->menu_title_only && 0 === $depth ) {
+					$title = '<span class="menu-title">' . $title . '</span>';
 				}
 
-				$item_output .= $title;
-				$item_output .= '</span>';
+				// SVG creation for menu item hover/active.
+				if ( 0 === $depth && ( ! $this->menu_style || $args->has_children ) ) {
+					$title = apply_filters( 'avada_menu_arrow_hightlight', $title, $args->has_children );
+				}
+
+				$menu_icon_right = ( ( ! $is_rtl && 'right' === $menu_icon_position ) || ( $is_rtl && 'left' === $menu_icon_position ) );
+
+				$opening_span = ( $classes ) ? '<span class="' . $classes . '">' : '<span>';
+
+				// If we have an icon or thumbnail and the position is not left, then change order.
+				if ( ( ! empty( $this->menu_megamenu_icon ) || ! empty( $this->menu_megamenu_thumbnail ) ) &&
+					 ( $menu_icon_right || 'bottom' === $menu_icon_position )
+					 && ! $this->menu_style && 0 === $depth ) {
+					$item_output = $item_output . $opening_span . $title . '</span>' . $icon;
+				} elseif ( $this->menu_style || 0 !== $depth ) {
+					$item_output = $item_output . $opening_span . $icon . $title . '</span>';
+				} else {
+					$item_output = $item_output . $icon . $opening_span . $title . '</span>';
+				}
 
 				// For top header and left side header add the caret icon at the end.
-				if ( 0 === $depth && $args->has_children && Avada()->settings->get( 'menu_display_dropdown_indicator' ) && 'v6' !== Avada()->settings->get( 'header_layout' ) && 'Right' !== Avada()->settings->get( 'header_position' ) ) {
+				if ( 0 === $depth && $args->has_children && $menu_display_dropdown_indicator && 'v6' !== $header_layout && 'Right' !== $header_position && ! $this->menu_style ) {
 					$item_output .= ' <span class="fusion-caret"><i class="fusion-dropdown-indicator"></i></span>';
 				}
 
 				$item_output .= '</a>' . $args->after;
 
-			}
+			} // End if().
 
 			// Check if we need to apply a divider.
 			if ( 'enabled' !== $this->menu_megamenu_status && ( ( 0 == strcasecmp( $item->attr_title, 'divider' ) ) || ( 0 == strcasecmp( $item->title, 'divider' ) ) ) ) {
@@ -531,6 +665,7 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 
 				$class_names  = '';
 				$column_width = '';
+				$style        = '';
 				$custom_class_data = '';
 				$classes      = empty( $item->classes ) ? array() : (array) $item->classes;
 				$classes[]    = 'menu-item-' . $item->ID;
@@ -546,6 +681,7 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 				}
 
 				if ( 1 === $depth ) {
+
 					if ( 'enabled' === $this->menu_megamenu_status ) {
 						$class_names .= ' fusion-megamenu-submenu';
 
@@ -553,9 +689,14 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 							$class_names .= ' fusion-megamenu-submenu-notitle';
 						}
 
+						if ( ! empty( $megamenu_column_background_image ) ) {
+							$style .= 'background-image: url(' . $megamenu_column_background_image . ');';
+						}
+
 						if ( 'fullwidth' !== $this->menu_megamenu_width ) {
 							$width        = $this->menu_megamenu_maxwidth * floatval( $this->menu_megamenu_columnwidth ) / 100;
-							$column_width = 'style="width:' . $width . 'px;max-width:' . $width . 'px;" data-width="' . $width . '"';
+							$column_width = 'data-width="' . $width . '"';
+							$style       .= 'width:' . $width . 'px;max-width:' . $width . 'px;';
 						}
 					} else {
 						$class_names .= ' fusion-dropdown-submenu';
@@ -568,12 +709,14 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 
 				$class_names = $class_names ? ' class="' . esc_attr( $class_names ) . $class_columns . '"' : '';
 
+				$style = $style ? ' style="' . esc_attr( $style ) . '"' : '';
+
 				$id = apply_filters( 'nav_menu_item_id', 'menu-item-' . $item->ID, $item, $args );
 				$id = $id ? ' id="' . esc_attr( $id ) . '"' : '';
 
-				$output .= '<li ' . $id . ' ' . $class_names . ' ' . $column_width . $custom_class_data . ' >';
+				$output .= '<li role="menuitem" ' . $id . ' ' . $class_names . ' ' . $column_width . $custom_class_data . $style . ' >';
 				$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
-			}
+			} // End if().
 		}
 
 		/**
@@ -586,8 +729,12 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 		 * @param int    $depth Depth of page. Not Used.
 		 * @param  array  $args Not used.
 		 */
-		function end_el( &$output, $item, $depth = 0, $args = array() ) {
+		public function end_el( &$output, $item, $depth = 0, $args = array() ) {
 			$output .= '</li>';
+
+			if ( null === $item->menu_item_parent ) {
+				$item->menu_item_parent = '0';
+			}
 
 			if ( '0' === $item->menu_item_parent ) {
 				$this->no_of_top_level_items_displayed++;
@@ -651,6 +798,6 @@ if ( ! class_exists( 'Avada_Nav_Walker' ) ) {
 			}
 		}
 	}
-}
+} // End if().
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

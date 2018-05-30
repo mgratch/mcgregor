@@ -1,8 +1,1086 @@
-
 IMPORTANT:
 -----------------------------------------------------------------------------------------
 Please be sure to read the Important Update Notes before you update:
 http://theme-fusion.com/avada-doc/install-update/important-update-information/
+We are always proactive in preventing security issues, however nobody can assume they will never come up.
+This is why we highly recommend to stay up to date with each new theme version and plugins.
+
+
+-----------------------------------------------------------------------------------------
+Version 5.4.2 - January 29th, 2018
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Full support of WooCommerce 3.3
+- NEW: Updated all premium bundled plugins to latest version as of release date
+- NEW: Added a Theme Option to set a custom link URL for the site logo
+- NEW: Added a Theme Option to set the icon circle bg color for separator element
+- NEW: Added filter for easier changes of secondary (top) header content
+- NEW: Replaced the select2 JS library with selectWoo library for better 3rd party compatibility
+- IMPROVEMENT: Added the post ID as class to portfolio element posts to make CSS targetting easier
+- IMPROVEMENT: Made Fusion Page Options available on Event Espresso single event screens
+- FIXED: PHP fatal error when Fusion Builder is active without Avada
+- FIXED: PHP fatal error on view order page, if a product of the order was already deleted from db
+- FIXED: Border on tab missing on My-Account view order pages, when using WooCommerce horizontal tabs layout
+- FIXED: Select2 library conflict with Events Calendar Pro list widget on backend
+- FIXED: Links in lists inside the widget area element being displayed as block elements
+- FIXED: Smooth scroll for on page anchors not working if header is turned off in Page Options
+- FIXED: PHP fatal error on PHP 7+ in recent posts element, when retrieving posts by tags
+- FIXED: PHP 7.2 compatibility issue happening on Theme Options save, causing a PHP notice
+- FIXED: Page Option dependency with the rollover custom link icon
+- FIXED: Smooth anchor scrolling to begin of 100% height scrolling section not working on setups like Adventure demo
+- FIXED: Smooth anchor scrolling position incorrect on mobiles when anchor is inside 100% height scrolling section
+- FIXED: Smooth anchor scrolling not working on mobiles when JS compiler is off
+- FIXED: Flip boxes column alignment issue on desktop
+- FIXED: Content boxes column alignment issue on tablet portrait mode
+- FIXED: Icon circle bg color in separator element being used, even if circle was turned off
+- FIXED: Default mobile menu font color not changing with color scheme
+
+
+-----------------------------------------------------------------------------------------
+Version 5.4.1 - January 16th, 2018
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Added possibility to update bundled premium plugins outside of theme updates
+- NEW: Updated Fusion White Label Branding Plugin To Latest Version As of Release Date
+- NEW: Updated Advanced Custom Fields Pro Plugin To Latest Version As of Release Date
+- NEW: Updated Convert Plus Plugin To Latest Version As of Release Date
+- NEW: Updated Slider Revolution Plugin To Latest Version As of Release Date
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- NEW: It is now possible to link to a single tab directly, when using a smooth scroll anchor link on the same page
+- IMPROVEMENT: Integrated the styling of featured events for The Events Calendar plugin
+- IMPROVEMENT: Rendering of images in gallery element preview optimized when using a lot of images
+- IMPROVEMENT: Cached queries are no longer language agnostic, to improve compatibility with mem cache plugins
+- IMPROVEMENT: Updated error notices popup on plugin installation page for better UX
+- IMPROVEMENT: Removed the Convert Plus registration nag to free admin pages from clutter
+- IMPROVEMENT: Fusion Builder CPT now hidden from the link selector options for easier navigation
+- FIXED: Added nonce check for Fusion Slider exports, so slider export can't be downloaded outside of backend
+- FIXED: Spacing issue inside vertical timeline content boxes, when box title is linked
+- FIXED: page contents height sometimes being too large when using parallax Fusion Slider together with parallax footer
+- FIXED: Icon unboxed mode not working correctly in FAQ element
+- FIXED: Indentation issue and missing arrows on vertical menu widget when using custom menu
+- FIXED: Gallery element not being rendered when there is a URL scheme mismatch between actual URLS and site URL in WP settings
+- FIXED: WooCommerce equal height products not working correctly in IE11
+- FIXED: Content area being misaligned on WooCommerce MyAccount page when horizontal tabs layout is used
+- FIXED: Compatibility issue with YITH WooCommerce Pre Order Premium plugin on single products page
+- FIXED: Menu items linking to an anchor on same page not highlighted correctly in mobile menus when page is scrolled
+- FIXED: Sticky header height calcs being incorrect when using very small headers and no sticky animation
+- FIXED: Smooth scroll to anchor not working when header is turned off in Fusion Page Options
+- FIXED: Content behind overlay moving up under certain circumstances when mobile flyout menu is used
+- FIXED: Fusion Builder sticky button being labeled "Publish" even on a private post where it should be "Update" instead
+- FIXED: Fusion Builder sticky update buttons getting added to WP dashboard when activity widget is used
+- FIXED: Positioning issue of titles on single posts page on RTL setups
+- FIXED: Image element not being able to render all foreign image file names, due to encoding
+- FIXED: Portfolio using fusion-builder text domain instead of fusion-core
+- FIXED: Small admin links separator showing on first post of bbPress topics when logged out
+- FIXED: Minor styling issue with form inputs on iOS
+- FIXED: Countdown element weeks default option value not being correctly shown in backend
+- FIXED: "Imported" label in importer not being AJAX updated
+- FIXED: Slider Revolution attachment not being correctly deleted, when a demo containing such a slider is removed
+- FIXED: onYouTubeIframeAPIReady() function being called even if YouTube scripts are turned off in Theme Options
+- FIXED: Rare issue with Fusion Builder global elements causing memory issue, if the template id was missing
+- FIXED: Side header with sticky header enabled on mobile cannot scroll menu
+- FIXED: Portfolio lightbox gallery not working correctly when set to show post images only, and All filter is deactivated
+
+
+-----------------------------------------------------------------------------------------
+Version 5.4 - December 19th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: 3 New Professionally Designed Demos
+- NEW: Added Advanced Custom Fields Pro plugin to our set of bundled premium plugins
+- NEW: Added Fusion White Label Branding plugin to our set of bundled premium plugins
+- NEW: Added Convert Plus plugin to our set of bundled premium plugins
+- NEW: Added a Fusion Builder element for Convert Plus plugin
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- NEW: Updated Slider Revolution Plugin To Latest Version As of Release Date
+- NEW: Added sliding bar link hover color setting to Theme Options
+- IMPROVEMENT: Related posts with fixed image size mode now make full use of responsive image setup
+- IMPROVEMENT: Updated a few database queries that were not following WP coding standards
+- IMPROVEMENT: Added new option to Fusion Slider to choose scroll down arrow or nav bullets, to avoid overlapping
+- IMPROVEMENT: Fusion Slider now also showing in preview mode of scheduled posts
+- IMPROVEMENT: Updated multiple featured image class to make meta box appearance the same across browsers if no image is yet chosen
+- IMPROVEMENT: Updated links on Fusion Builder add-ons page to SSL
+- IMPROVEMENT: Gallery pre-selection is now available on already created gallery elements
+- IMPROVEMENT: Updated several descriptions to improve option explanations
+- FIXED: 100% height scrolling sections being cut off on mobile, even if the 100% height option is disabled
+- FIXED: Blog pagination not being able to go beyond 5 pages
+- FIXED: Sliding bar icon on header v6 being visible, even if sliding bar was disabled
+- FIXED: Compatibility issues with plugins adding custom fields to checkout page
+- FIXED: Demo import only working for primary language when using WPML
+- FIXED: Demo import failing when mbstring PHP extension is not loaded
+- FIXED: Link selector in different Fusion Builder elements not working correctly in Firefox
+- FIXED: Backend compatibility issue with Yoast SEO when horizontal menu widget is used in page contents
+- FIXED: Arrow highlight indicator not working, when main menu item consists of an icon only
+- FIXED: Dedicated sticky header menu not working for header v6
+- FIXED: Vimeo video not pausing when moving to next frame in lightbox
+- FIXED: Fusion Taxonomy Options for WooCommerce product archives not working correctly
+- FIXED: A few styling issues in the vertical menu widget
+- FIXED: Javascript error and rendering issue, when using elements with lightbox option where a sub element misses image
+- FIXED: Styling issues on RTL setups for the tab element
+- FIXED: Icon / heading alignment issue in content boxes element when using vertical timeline layout
+- FIXED: Drop shadow not correctly working with zoom in/ zoom out image hover effects
+- FIXED: Bottom shadow not correctly displayed on person element if image lift up hover type is chosen
+- FIXED: Blog element padding setting from Theme Options not applied as default value for blog elements
+- FIXED: Equal heights setting in containers causing height issue when using the Events Calendar element
+- FIXED: Anchor scrolling on mobile not working correctly when triggered through sub-menu items
+- FIXED: Facebook widget no correctly resizing with the available space in wrapping container
+- FIXED: Fusion Taxonomy Options slider setting incorrectly copied to category pages from main shop page (upgrade fix only)
+- FIXED: Popularity setting in tabs widget not working correctly for non English languages
+- FIXED: Stored padding values for a few elements not being correctly read into the Fusion Builder settings popup
+- FIXED: Social icons widget conditional options only working after widget was saved for the first time
+- FIXED: PHP notice in social icon class if no title was set for custom icons
+- FIXED: Blank page template alignment issue when using side header and sticky footer
+- FIXED: Smooth anchor scrolling not respecting mobile sticky header when used on side header desktop layouts
+- FIXED: Theme Option remote media warning notice showing on all admin pages
+- FIXED: Overlay issue under certain circumstances when switching between shortcode generator and Fusion Builder
+
+
+-----------------------------------------------------------------------------------------
+Version 5.3.1 - November 29th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: 100% width option added to WooCommerce single product pages
+- NEW: Added the new tabs functionality to the Facebook widget
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- NEW: Updated Slider Revolution Plugin To Latest Version As of Release Date
+- NEW: Added a filter for developers for 100% width template check in header.php
+- IMPROVEMENT: Email generated by the Avada contact page form are now RTL ready
+- IMPROVEMENT: Version number comparison for auto updates to make sure update notice disappears correctly
+- IMPROVEMENT: Made sure that bold and strong tags use same font-weight across browsers
+- IMPROVEMENT: Fusion Cache reset confirmation box now uses standard alert box for easier usage
+- IMPROVEMENT: Updated some option descriptions for better usability
+- IMPROVEMENT: "Insert from URL" option in media uploader is now available for the Text Block element
+- FIXED: Setting sidebar to "No Sidebar" in Fusion Page Options not working correctly for posts
+- FIXED: Mega menu background images having 1px gap on the side for certain setups
+- FIXED: Side header background color hiding background image on archive pages that don't use Fusion Taxonomy Options
+- FIXED: Smooth scroll issue when using portfolio element with infinite scroll / load more button
+- FIXED: Sliding bar always being open when used on right side of viewport together with smooth scroll
+- FIXED: Compatibility issue with the Events Calendar shortcode for photo view, causing a JS error
+- FIXED: Skype phone link not working correctly in Social Links widget
+- FIXED: Avada Menu Options not being correctly saved when used in WP Customizer
+- FIXED: Custom templates imported in Fusion Builder having an extra line break in text editor
+- FIXED: Dedicated redirection link in Login element working even if a login error occurred (no security issue)
+- FIXED: Images not showing for blog grid/masonry layouts, if excerpt length is set to 0 and also title and all meta data is hidden
+- FIXED: Styling for WooCommerce search fields in select boxes
+- FIXED: Images added to WooCommerce single product pages not being opened in lightbox, if corresponding Theme Options is active
+- FIXED: Compatibility issue with WooCommerce Checkout Add-Ons plugin
+- FIXED: Quotation marks not working in the contact form
+- FIXED: bbPress plugin activation through importer causing import not working on first attempt
+- FIXED: Rounding bug for navigation typography letter spacing in Theme Options
+- FIXED: Link on demo import failure notice, so it correctly goes to System Status tab
+- FIXED: Theme Option dependency description reading "Page Option" even for Fusion Builder Options
+- FIXED: Compatibility issue on AJAX completion events with Fancy Product Designer plugin
+- FIXED: New 5.3 demos not being available in the Fusion Builder single page imports
+- FIXED: Facebook widget not being responsive on browser window resize
+- FIXED: Encoding issue for some user inputs to elements using raw_textarea field, leading to element edit screen not being opened
+- FIXED: Issue with WP category widget not loading selected category page
+- FIXED: Two menus showing in mobile flyout menu, when a separate sticky menu is used
+- FIXED: RTL issue with center aligned font awesome icons
+- FIXED: RTL issue with blog element and large alternative layout
+- FIXED: Compatibility issue with WP 4.6.8
+- FIXED: Added compatibility with Borlabs cache plugin
+
+
+-----------------------------------------------------------------------------------------
+Version 5.3 - November 20th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: 5 New Professionally Designed Demos
+- NEW: Fusion Builder saved elements can now be used as globals, where any edits to the global will update contents on pages where the global is used
+- NEW: Full screen scrolling sections with a side navigation graphic and fading animations between sections
+- NEW: Added 100% height option to container element
+- NEW: Sliding bar can be positioned on every side now (top/right/bottom/left)
+- NEW: Sliding bar has new toggle layouts (floating circle / rectangle / menu item) and a set of new options, like sticky sliding bar
+- NEW: Flyout menu is now available as additional mobile menu layout for all header versions
+- NEW: Added import/export functionality to Fusion Page Options for easy usage of options across different posts/pages/sites
+- NEW: Added set of page options to archive pages so that any archive can get individual styling (e.g. header, slider, page title bar)
+- NEW: Added icon options to tabs element, so icons can be displayed on any side of the tab title and with an arbitrary size
+- NEW: Added icon options to toggle element, so that icon alignment, size color and boxed/unboxed mode can be chosen
+- NEW: Added a set of coloring options to pricing table element for deeper customization and to support new designs
+- NEW: Added grid box background color, border color, separator style and separator color options to blog and portfolio elements
+- NEW: Added grid box padding options for blog and portfolio archives and Fusion Builder elements
+- NEW: Added full set of element and theme options to FAQ element so styling can be changed similar to toggle element
+- NEW: Added sticky update/save and preview buttons to pages/posts using Fusion Builder for easier updating when page is scrolled
+- NEW: Added Fusion Builder column options for deleting, cloning and resizing to nested columns element. Save icon cannot be added due to technical limitations
+- NEW: Added parent level element options to content boxes, flip boxes, counter boxes and tabs elements for easier child item editing
+- NEW: Revised our global sidebar setup to work more consistently with our option network
+- NEW: Global sidebar assignments will work on all pages that use new "default" sidebar setting, even if forced global sidebars is off
+- NEW: Side navigation setup (previously done via template) via the new vertical menu widget to display custom menu in sidebars and to simplify usage
+- NEW: Added a full set of styling and alignment options for every widget that allows incredible new design possibilities
+- NEW: Equal heights option is now available for blog and portfolio elements and archives in grid layout
+- NEW: Equal heights option is now available for WooCommerce products on shop page
+- NEW: Added Theme Option for choosing if WooCommerce shop page should be grid or list view by default
+- NEW: Added Theme Option for choosing if the grid/list view buttons should be shown on WooCommerce shop page
+- NEW: Added links to all user account page to the WooCommerce "My Account" main menu item
+- NEW: Added margin options to font awesome element, so it can be positioned arbitrarily
+- NEW: Added ordering options to portfolio element, so posts can be ordered by date, title, name, author, comment count, modified date, menu order or random
+- NEW: Added options to order slides in Fusion Slider: post id, title, creation data, last updated or random
+- NEW: Fusion Slider heading and caption can be set to any HTML heading tag (h1 - h6) for SEO optimization
+- NEW: Option for Fusion Slider to display a downward arrow indicator on the slider which scrolls smoothly to page contents below slider
+- NEW: Added preview images for Portfolio, FAQ and Fusion Slider post types in the dashboard list view
+- NEW: Added options to recent posts element that allow meta data to be enabled/disabled individually
+- NEW: Added a filter to Fusion Page Options so that developers can add their own tabs and use Avada specific UI
+- NEW: Added filters for easily changing the portfolio strings like "Project Details", "Skills Needed" etc.
+- NEW: Persistent object cache setups get cleared now on any kind of post manipulation to make sure changes are correctly reflected on front end
+- NEW: Fusion Cache clearing functionality now can auto clear Autoptimize and LiteSpeed cache
+- NEW: Added full set of mobile menu font typography options
+- NEW: Full column link in column element now has option to choose if it should open in same or new tab
+- NEW: Added notice about deprecation of PHP 5.2 support in Avada 6.0
+- NEW: Added easy link selector support for options that take links, for better UX
+- NEW: Added TinyMCE widget conversion for Fusion Builder elements when updating from Avada below version 5
+- NEW: Avada grid image sizes can now be selected in the WP Media Library for easy usage
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- NEW: Updated Slider Revolution Plugin To Latest Version As of Release Date
+- NEW: Added native support for Envato hosted platform for easier plug and play integration
+- NEW: Added new raw textarea element, so that HTML contents can be stored in elements like Google maps or tagline box
+- NEW: Added Content display option for blog archives and for blog element global
+- NEW: Added version and author information to the Add-ons featured on Fusion Builder Add-ons page
+- IMPROVEMENT: Retina logos are setup through srcset now and not through additional HTML markup
+- IMPROVEMENT: Avada's advanced responsive images now also working when using file names that are WP specific for generated thumbnails
+- IMPROVEMENT: Social icons widget and element now use set names for custom icons in title for a better understanding UX
+- IMPROVEMENT: Added a loading spinner when Fusion Caches are cleared to indicate progress
+- IMPROVEMENT: Fusion Cache clearing works in modules now, allowing to only clear certain parts
+- IMPROVEMENT: Portfolio element now displays a placeholder on mobile when Avada is used together with WP touch plugin
+- IMPROVEMENT: Logo margin will no longer apply on front end, if no logo is set in Theme Options
+- IMPROVEMENT: Removed old compatibility styles for IE8
+- IMPROVEMENT: Google maps custom info box content is now displayed on front end, even if custom styling is disabled
+- IMPROVEMENT: When using full screen Fusion Slider above header, the header is now also shown on mobiles
+- IMPROVEMENT: Prefixed TGM plugin class to ensure compatibility with third party plugins using same class
+- IMPROVEMENT: The avada-noscroll class now works for buttons in content and tagline boxes
+- IMPROVEMENT: All needed token options are auto checked now when using the link to token generation on the registration screen
+- IMPROVEMENT: Update page no longer needs reloaded after theme auto update in order for the update notice to be dismissed
+- IMPROVEMENT: Updated option descriptions and explanations for better UX and fixed some typos
+- IMPROVEMENT: Continued maintenance update to increase overall performance
+- IMPROVEMENT: UTF-8 encoding is now automatically done during demo import to support maximum compatibility for post contents
+- IMPROVEMENT: All mega menu options update live now, so dependent options no longer need a reload to show
+- IMPROVEMENT: Demo data is no longer deleted after import is done, but remains available, so less requests are made
+- IMPROVEMENT: Conversion related settings now have their own section on the system status page
+- IMPROVEMENT: Import of Theme Options will now also work with max_input_vars at low values
+- IMPROVEMENT: Consolidated all spacings, borders, background colors and separator options for blog and portfolio grid layouts for perfect matching
+- IMPROVEMENT: Minor styling adjustments on different admin screens for better UX
+- IMPROVEMENT: Implementation of blog pagination is refactored to improve performance when the amount of pages is very high
+- IMPROVEMENT: Added new "default" option to the separator element style setting, so theme option setting can be used easily
+- IMPROVEMENT: Make image meta data, like image titles, work for image elements on sites that changed URL scheme
+- IMPROVEMENT: Image frame element is now simply called image, which fits its purpose much better
+- IMPROVEMENT: Fusion Builder development mode includes more assets now unminified for easier development work
+- IMPROVEMENT: When grid element color is set to transparent, borders are no longer added
+- IMPROVEMENT: Simplified portfolio element text options for easier usage
+- IMPROVEMENT: Better support of WP admin color schemes inside of Avada and Fusion Builder
+- IMPROVEMENT: Better styling of search box in Fusion Page Options selects with a large amount of options
+- IMPROVEMENT: Content boxes read more links can now be used for smooth anchor scrolling
+- IMPROVEMENT: The WooCommerce login form in the main menu is now compatible with WP Engine security block filter
+- UPDATED: Flexslider script to latest version 2.6.4
+- UPDATED: iLightbox to the latest version 2.2.2
+- UPDATED: Main navigation highlight radius option now uses a dimension field for better UX
+- UPDATED: Better style integration for the new Events Filter Bar 4.5
+- UPDATED: Removed custom WooCommerce product sorting from search results page, as it is no longer supported by WooCommerce
+- FIXED: WCAG 2.0 issue with search in main menu not being accessible using the tab key
+- FIXED: WCAG 2.0 issue with secondary menu drop downs not being accessible  using the tab key
+- FIXED: Lightbox thumbnail missing for portfolio posts that use a video URL for first featured image
+- FIXED: Lightbox not correctly working on mobiles in some instances, when viewing in desktop mode
+- FIXED: Menu cart widget being cut off through viewport when using side header when cart has a lot of items
+- FIXED: Removed the loading spinner on variable products on WooCommerce shop page when select options button is clicked
+- FIXED: Incorrect featured image from displaying when WooCommerce Product Bundles plugin is used
+- FIXED: Theme options export URL not working
+- FIXED: Direct tab links causing other tab elements on same page to be empty
+- FIXED: Minor WooCommerce styling issue on single product page, when stock is down to only 1
+- FIXED: Issue with sorting on WooCommerce shop page, where sorting direction is not always correct or requires two clicks
+- FIXED: Issue with WooCommerce variable product attributes falling to one line in cart when updating the cart
+- FIXED: Menu highlight arrow not working for the WooCommerce "My Account" main menu item
+- FIXED: Variation name not correctly displayed on WooCommerce checkout page for variable products
+- FIXED: Shipping address not being displayed on WooCommerce order received page
+- FIXED: WooCommerce shop page shown in breadcrumb paths on archive pages, even when post type archives are disabled in Theme Options
+- FIXED: Styling issue with YITH WooCommerce Product Add-Ons Premium
+- FIXED: Issue with WMPL, where caption and alt tags were not translated when multiple featured images are used
+- FIXED: Styling issues with Events Tickets Plus forms
+- FIXED: YouTube background video on containers always looping, even if set to no
+- FIXED: Display issue with social sharing by mail when using titles with special characters
+- FIXED: Minor issue with form input height for the search bar in main menu when not using px as unit
+- FIXED: Quotation marks in contact form appearing as HTML entities
+- FIXED: Quantity boxes from third party plugins losing the up/down arrows
+- FIXED: Compatibility issue between Avada Facebook widget and Facebook Comments Plugin
+- FIXED: Infinite scroll for blog elements being auto triggered under some circumstances when using masonry layout
+- FIXED: Small inconsistency with the flyout menu icon font size
+- FIXED: Blog element not displaying content when masonry layout is used and set to one column
+- FIXED: Flip boxes not flipping correctly in latest Edge browser version
+- FIXED: Image sizes in image carousel element not always being correct when fixed mode is used
+- FIXED: Custom classes added to nested column element being doubled in HTML markup
+- FIXED: Navigation arrows not correctly aligned in Fusion Slider when parallax mode is used
+- FIXED: Amount of columns not showing in backend blog element preview
+- FIXED: Fusion Slider full screen non-parallax layout not always correctly positioned
+- FIXED: Fusion Slider compatibility issue with Polylang
+- FIXED: Page title bar theme option for main blog archive pages only working on main blog page
+- FIXED: RTL contents positioning issue in Page Title Bar
+- FIXED: Responsive images calculation for one column setups being underestimated
+- FIXED: Video resize issue when using a video element inside a container with video background
+- FIXED: Missing alt attributes in mega menu thumbnail images
+- FIXED: Menu anchor scroll not working on mobiles when JS compiler is turned off
+- FIXED: Smooth scroll not working correctly with portfolio filters and load more button
+- FIXED: Compatibility issue with plugins using same color picker instantiation function
+- FIXED: Issue in IE11 where sub menus where not correctly displayed when using arrow highlight option
+- FIXED: Page title bar vertical alignment issue in IE11 on mobiles
+- FIXED: Browser history state when using anchor links containing underscores
+- FIXED: A few PHP notices coming up in very rare cases
+- FIXED: Missing map marker file in Music demo
+- FIXED: Number of posts option in portfolio element not being able to pull global theme option value
+- FIXED: Featured images not being auto selected in library, when editing the image in dashboard
+- FIXED: Alt attribute missing for featured images, if more than one featured image is displayed
+- FIXED: Mobile secondary menu hamburger toggle being misaligned
+- FIXED: WP native video embeds overflowing content area, if viewport width becomes too small
+- FIXED: Fusion Builder saved elements using incorrect status variable, which can lead to plugin conflicts
+- FIXED: Gallery element on pages without additional content disables sticky header on load
+- FIXED: Image carousel element sometimes overflowing wrapping container when there is not enough space
+- FIXED: Equal heights for content boxes not working properly on iPad
+- FIXED: Content on blog medium layouts flowing into sidebar on iPad
+- FIXED: Fusion Builder element modals being too large on small screens, improved responsiveness
+- FIXED: Scrolling issue with open modals on iOS, where scrolling or closing the modal does not work
+- FIXED: Scrolling issue and doubled scrollbars when opening modal and smooth scroll is used
+- FIXED: Color picker issue that caused the icon element color theme option affect flip box element icon colors
+- FIXED: Equal heights option together with infinite scroll and dynamically changing post content causing display issues in portfolio element
+- FIXED: Issue in slider element when saving the slider after removal of all slides causes an error
+- FIXED: Heading typography settings not applied to all title element heading sizes under some circumstances
+- FIXED: Auto calculation of first and last column, when updating from Avada versions < 4.0
+- FIXED: LayerSlider import causing error when the LayerSlider plugin is not active
+- FIXED: Ads widget not being displayed correctly
+- FIXED: Polylang language switcher flags misaligned on mobile menu
+- FIXED: Menu ordering buttons not working on the admin menu edit screen
+- FIXED: Fusion Slider buttons not exactly left/right aligned on corresponding content layouts
+- FIXED: Responsive type theme option not correctly working when Fusion Slider is enabled
+- FIXED: Responsive type sensitivity options not working correctly when multiple sliders are on one page
+- FIXED: Counter circles element incorrectly set back to 100% on resize and modal open when count down is used
+- FIXED: Right side header in boxed mode not correctly positioned, when sticky footer is used
+- FIXED: Lightbox on open jumping to top of page when sticky footer is used
+- FIXED: Menu dropdown indicator on secondary menu on side headers being misaligned
+- FIXED: Side header width not correctly respected in site width calculation for responsive images
+- FIXED: Events Calendar filter bar date picker being below header
+- FIXED: Small issue Fusion Slider assignment on pages translated using WPML
+- FIXED: Portfolio one column buttons being to large in width when using full width buttons
+- FIXED: Small gap above image on Events Calendar listing page on mobile
+- FIXED: Shortcode generator not always correctly being triggered in editor text mode
+- FIXED: Mega menu horizontal divider not respecting Theme Option menu separator color setting
+- FIXED: Events Calendar single post sidebar styling being incorrect
+- FIXED: Demo import fails if WooCommerce is activated from the demo popup
+
+
+-----------------------------------------------------------------------------------------
+Version 5.2.3 - November 14th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Compatibility with WordPress 4.9
+- NEW: WooCommerce 3.2.3 support
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- UPDATED: Change wp_remote_post() test URL to ensure system status page evaluates functionality correctly
+- FIXED: Facebook social sharing link not working correctly
+- FIXED: Portfolio archive text alignment Theme Options not working
+- FIXED: Blog element not being displayed when using including/excluding posts based on tag on PHP 7.1+ setups
+- FIXED: Issue within nested elements when added via the generator to other Fusion Builder parent elements, where options where not displayed
+- FIXED: Content box icons being misaligned when using classic icon boxed layout
+- FIXED: AJAX complete trigger issue in avada-header.js sometimes causing header height issues
+- FIXED: JS Compiler creating too many files when google maps scripts are used
+- FIXED: Incompatibility between Fusion Page Options and Events Calendar 4.6.4 select2 library
+
+
+-----------------------------------------------------------------------------------------
+Version 5.2.2 - August 7th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- FIXED: Fusion Builder text editor color picker and heading dropdown being hidden on WordPress 4.8.1
+- FIXED: WooCommerce product sorting not working correctly
+- FIXED: Gallery element not displaying correctly inside of toggles
+- FIXED: Alignment issue of content box icons using icon circles
+- FIXED: "Text display" setting in recent posts element changing from "None" to "Full Content"
+- FIXED: Bulk image upload from within advanced elements causing child element issue
+- FIXED: Title size being incorrect on single blog posts when meta details are below title
+- FIXED: Container and column background image not being visible in Chrome v60 (browser bug)
+- FIXED: "View Cart" link on product rollover not always being clickable
+- FIXED: Smooth scrolling to anchors not working for links on a different page
+- FIXED: Toggle Active Box Color not working on non-boxed toggles
+- FIXED: Demo removal issue (leading to empty Theme Option values) on clean installs when using PHP 7.1+
+- FIXED: Header v6 WCAG issue for the slide out toggle
+- FIXED: Image rollover not working on WooCommerce Featured Image element when using clean styling
+- FIXED: Issue with nicescroll on pages that use infinite scrolling or load more AJAX options
+- FIXED: RSS field automatically filled with same link as Twitter field in Social Links widget
+- FIXED: Container element border Theme Option not working correctly in individual elements
+- FIXED: Breadcrumbs post type for blog post archive pages always showing, even if disabled
+- FIXED: Load more button background color setting not working for portfolio archives
+
+
+-----------------------------------------------------------------------------------------
+Version 5.2.1 - July 17th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Links and menu items now have a smooth hover transition effect
+- NEW: Added new settings to Theme Options to enable/disable single rich snippets
+- NEW: Added a note and a link to Theme Option setting on post edit screens for featured image boxes
+- NEW: Added 'Settings" link to Fusion Builder on the WP plugins page
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- IMPROVED: Blog element excerpt / full content setting updated for easier choice
+- IMPROVED: Post meta data saving to increase performance on post save
+- IMPROVED: Google fonts now loaded before custom CSS to avoid issues when custom CSS is incorrect
+- IMPROVED: Limit for custom social link icons raised to 50
+- IMPROVED: Toggles in boxed mode can be collapsed/expanded now when clicking anywhere on the background
+- IMPROVED: Added some new option dependencies for easier configuration
+- IMPROVED: Removed several !important statements
+- IMPROVED: Removed unneeded old importer script parts
+- IMPROVED: Blog grid/timeline padding between title and content when meta data is disabled
+- UPDATED: Added the 3 new 5.2 demos to the Fusion Builder single page imports
+- UPDATED: jQuery Nicescroll script to version 3.7.4
+- FIXED: WooCommerce checkout validation failing when selling to only one country
+- FIXED: WooCommerce my-account billing address first name field label alignment
+- FIXED: WooCommerce breadcrumb structured data missing
+- FIXED: Portfolio archive number of items Theme Option not working
+- FIXED: Facebook like widget not resizing correctly in sliding bar and undefined index issue
+- FIXED: Boxed mode shadow not stretching over full content height when using sticky footer
+- FIXED: Mega menu dropdowns not disappearing when anchor links are clicked on menu
+- FIXED: Responsive image sizes sometimes being overestimated in columns when 100% width templates are used
+- FIXED: Additional size in responsive images sizes attribute causing issue in Chrome
+- FIXED: Dependency issue of animations JS causing script errors when animations are disabled
+- FIXED: Toggle contents sometimes reaching edge when using boxed mode
+- FIXED: 1px gap when using #home link for anchor scrolling in Chrome
+- FIXED: 1px vertical gap between portfolio images in some browsers when 0 column spacing is chosen
+- FIXED: Fusion admin news widget not working on some hosts
+- FIXED: Fusion Slider full screen option not always working in Safari
+- FIXED: main HTML5 tag not being supported in IE11 causing alignment and parallax issues
+- FIXED: Long description not working when using LinkedIn for social sharing
+- FIXED: Smooth scrolling issue in Firefox when using nicescroll
+- FIXED: Comment form fields not being full width on mobiles
+- FIXED: restore_current_blog() called incorrectly on Fusion cache clear and also double main blog clearing on multisite
+- FIXED: A small styling issue with the element action buttons in Fusion Builder
+- FIXED: Image preview of some elements in Fusion Builder to remove distortion
+- FIXED: Child element icon search also affecting the parent icons in Fusion Builder elements
+- FIXED: IE11 spacing issue with bg images in empty columns
+
+
+-----------------------------------------------------------------------------------------
+Version 5.2 - July 10th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: 3 New Professionally Designed Demos
+- NEW: Completely new demo importer user interface, that allows to partial install and also uninstall
+- NEW: New demo importer allows to install individual portions of demos & uninstall demo content
+- NEW: Added a new gallery element with several customization options with grid & masonry layouts
+- NEW: Added masonry layout to blog and portfolio elements and archives
+- NEW: Added sticky sidebars, which can be set sitewide, or page wide for one or both sidebars
+- NEW: Added option for background images in megamenu, one image for full menu, or individual image per menu column
+- NEW: Added menu highlight labels to main menu with several style options
+- NEW: Google fonts added to dynamic CSS for performance enhancement due to fonts no longer showing up as render blocking files in speed tests
+- NEW: Avada's advanced responsive images setup added to person and WooCommerce featured product element and WooCommerce Product Carousel
+- NEW: Avada's advanced responsive images setup extended to content inside of column elements producing performance enhancements
+- NEW: Added a new menu location for mobile menus so you can now assign a specific menu just for mobile
+- NEW: WooCommerce 3.1 support
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- NEW: Updated Slider Revolution Plugin To Latest Version As of Release Date
+- NEW: New WordPress media library now supported in Fusion Page Options
+- NEW: New Featured Image setup that is code optimized, updated and fully maintained by us
+- NEW: Added a complete set of portfolio global theme options for the portfolio element
+- NEW: Post meta data can now be aligned directly below post title on single blog posts
+- NEW: Posts in blog, recent posts and in portfolio element can now be pulled by tags
+- NEW: Portfolio posts can now be sorted by tags in portfolio element
+- NEW: Added option to select twitter icon color in twitter widget
+- NEW: Added set of global Theme Options for each Alert element style
+- NEW: Added option to align video elements left/center/right
+- NEW: Added new setting to button element to add additional attributes like rel
+- NEW: Added option for page title bar line height
+- NEW: Added an option so toggles can also be used as accordions
+- NEW: Added slider IDs to Fusion Page Option dropdowns
+- NEW: System path added to system status page
+- NEW: Support for Apple Pay on WooCommerce pages
+- NEW: Column spacing is now officially supported for portfolio carousel layout
+- NEW: Added support for 'transparent' as color in Theme Options
+- IMPROVED: Now using smaller fitting srcset thumbnails in image frame element when possible
+- IMPROVED: Replaced protocol relative asset URLs with absolute ones
+- IMPROVED: Changed data structure of menu item options to improve menu saving performance
+- IMPROVED: Added support for imports and caching on file systems using ftpext mode
+- IMPROVED: Fusion Page Option ordering is the same now for different post types
+- IMPROVED: Added several new HTML5 tags to the page markup
+- IMPROVED: Added a new responsive image size to make sure images can stretch fully on large screens
+- IMPROVED: Removed the ajax-functions.php
+- IMPROVED: Added support for Yoast sitemap images
+- IMPROVED: Grid elements in one column responsive mode now have the images centered
+- IMPROVED: Font uploads in Theme Options will work on more environments due to updated MIME types
+- IMPROVED: Added structured data to blog archives if blog meta data is deactivated
+- IMPROVED: Made WooCommerce sorting boxes compatible with larger font size setups
+- IMPROVED: Theme option value validation to avoid JS errors in Fusion Page Options
+- IMPROVED: Fusion Slider transition after video slide ended
+- IMPROVED: Events Calendar archive bar spacing for foreign languages
+- IMPROVED: Disabled dynamic CSS caching automatically when using mobile theme plugins like WP Touch
+- IMPROVED: WCAG: Dropdown menus now work using tabs
+- IMPROVED: Added more spacing for titles in vertical tabs
+- IMPROVED: Added automatic spacing between content and sidebars in responsive mode
+- IMPROVED: Added timestamps for cached CSS and JS files for better compatibility with caching plugins
+- IMPROVED: Added parent category to breadcrumbs path, when multiple sub categories share same parent
+- IMPROVED: Added conditional loading for some admin meta boxes for performance improvements
+- IMPROVED: Product registration is solid due to several changes while working with Envato
+- IMPROVED: Don't load lightbox CSS when lightbox is disabled in Theme Options
+- IMPROVED: Some RTL styling issues on Theme Options page
+- IMPROVED: Breadcrumbs now support posts page output on post archives and search page parent post types are linked now
+- IMPROVED: Admin messages and notices for demo imports etc. are not localized
+- UPDATED: WordPress importer script
+- UPDATED: Changelog link now directly available in the theme's update nag
+- UPDATED: Several Theme Options, Page Options and also element descriptions for better explanations
+- UPDATED: Removed no longer needed mobile bottom margin on #content container
+- FIXED: Tooltips not disappearing after an outbound link was clicked on mobiles
+- FIXED: Lightbox not working for portfolio elements added through AJAX
+- FIXED: Importer not converting menu URLs correctly
+- FIXED: Dynamic CSS being cached even if turned off
+- FIXED: Blog grid and portfolio boxed layouts not always using same separator colors
+- FIXED: PHP notice on update page
+- FIXED: Load more button on portfolio elements staying, even after all posts were loaded
+- FIXED: Dynamic CSS path issue on multisite installs
+- FIXED: JS not working on iPhone/iPad when cookies are deactivated
+- FIXED: Layout issue with WPML language switcher
+- FIXED: Anchor scrolling not working on WPML sites when the language name is used as param
+- FIXED: Longer page title breaking early to 2 lines in page title bar when no secondary content is used
+- FIXED: WooCommerce text strings that changed
+- FIXED: WooCommerce clean design add to cart animation layout
+- FIXED: Rare WooCommerce archive layout issue, when using CSS file compiler
+- FIXED: Dependency for avada-header.js is no longer conditional
+- FIXED: WooCommerce PHP notice
+- FIXED: Quantities not showing correctly on WooCommerce order page
+- FIXED: WooCommerce checkout page doesn't advance now, when there are input errors on one of the tabs
+- FIXED: WooCommerce one page checkout not scrolling fully up to display input errors
+- FIXED: WooCommerce shipping methods sometimes overflowing container on checkout page
+- FIXED: WooCommerce grouped product quantity input being displayed incorrectly on mobile
+- FIXED: WooCommerce double zoom icon on variation change in Safari
+- FIXED: WooCommerce carousel element scrolling issue on mobile
+- FIXED: WooCommerce bundled products showing sub-products in the menu cart widget
+- FIXED: Menu cart widget on side header not being auto positioned when widget hits bottom of viewport
+- FIXED: Spacing issue in WooCommerce check out notes when using HTML markup
+- FIXED: Removed additional PHP closing tag in social sharing box template.
+- FIXED: PHP notice in column element when REST API is used
+- FIXED: Header background images not working on WooCommerce archive pages
+- FIXED: Sale and out of stock badges overlapping on WooCommerce Shop page
+- FIXED: Search page sidebar sometimes being incorrect when doing product searches
+- FIXED: Images overlapping content on tablets in single product image gallery
+- FIXED: Content box hover animation being incorrect when parent or Theme Option setting is transparent
+- FIXED: RTL styling issue with classic mobile menu
+- FIXED: RTL alignment issue with font awesome element
+- FIXED: Fusion Slider navigation position being not correctly positioned
+- FIXED: Issue with video inside of a modal popup
+- FIXED: Active plugin list sometimes having incorrect plugin names
+- FIXED: Font names being duplicated in CSS when standard fonts are used
+- FIXED: Content box heading class name being doubled
+- FIXED: Link issue in flickr widget
+- FIXED: Content box icon hover pulsate animation only working once in Firefox
+- FIXED: Page title bar alignment in mobile mode not working in Firefox
+- FIXED: Fusion Slider sometimes not auto playing videos when autoplay is enabled
+- FIXED: Vertical timeline mode animation issue in content boxes
+- FIXED: Side header menu padding issue on IE11
+- FIXED: Column background image not always being correct in IE11
+- FIXED: Vertical column centering not working in IE
+- FIXED: Blockquotes in comments not respecting primary color for highlights
+- FIXED: Sticky header on short pages being sometimes triggered
+- FIXED: Rare sticky header scroll issue
+- FIXED: Random export issue in Fusion Slider
+- FIXED: Fusion Slider pausing on touch or swipe on mobile devices
+- FIXED: Fusion Slider transition not working on youtube video slide
+- FIXED: Fusion Slider parallax effect not working in IE11 when a touchscreen is used
+- FIXED: Excerpt issue when using The Events Calendar tribe_event_inline shortcode
+- FIXED: A few structured data issue with The Events Calendar
+- FIXED: Rare error where Events Calendar pages rendered very slowly
+- FIXED: Google maps using custom infobox content when set, even if default styling is chosen
+- FIXED: Unfiltered the_title usage in breadcrumb class
+- FIXED: Form scrolling on mobiles inside of modals
+- FIXED: Backend compatibility conflict with some plugins that also use select2 library
+- FIXED made sure dropdown menu disappears when an anchor link is clicked
+- FIXED: possible W3C markup errors
+- FIXED: Column bg image in empty columns not correctly shown when column uses cetntered content option
+- FIXED: Flyout header menu entries height changing on AJAX complete events
+
+
+-----------------------------------------------------------------------------------------
+Version 5.1.6 - April 17th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- NEW: Updated Slider Revolution Plugin To Latest Version As of Release Date
+- NEW: When using anchor scrolling, the current anchors are updated in the browser address bar
+- NEW: Countdown element can now user 3 digits for weeks and 4 digits for days
+- IMPROVED: Added a fallback for CSS compiler if file contents can't be read
+- IMPROVED: Timestamp for CSS compiler
+- IMPROVED: The Fusion Library path constant was updated to also work on non standard WP installs
+- IMPROVED: Error messages on product registration page
+- IMPROVED: Added additional styling for Fusion Page Option dropdowns on Events post edit screen
+- IMPROVED: Added a notice on registration page, if token does not have all needed permissions set
+- UPDATED: All WooCommerce translation strings are compatible with WooCommerce 3.0.3 now
+- FIXED: Small W3C validation error in menus
+- FIXED: WooCommerce 3.0 compatibility issue, where new products didn't show in carousel elements
+- FIXED: WooCommerce product quantity +/- buttons removed in product can only be boughty individually
+- FIXED: WooCommerce product images not being displayed on shop page after deactivation / reactivation
+- FIXED: WooCommerce shop_messages shortcode not being updated to new name
+- FIXED: Infinite scroll not working on blog archive pages
+- FIXED: 404 console error on portfolio pages that use infinite scroll
+- FIXED: Insert from URL option in WP upload dialog not working for image frame element
+- FIXED: WPML issue, where Theme Options were not loaded correctly on frontend when default language is not English
+- FIXED: Portfolio Slug Theme Options not being applied on frontend
+- FIXED: Buttons not being displayed correctly on portfolio archive pages when full content is used
+- FIXED: Patches not being applied correctly on multisite installs
+- FIXED: Breadcrumb issue when on search page of a custom post type
+- FIXED: Sidebar Map now being full width on Events Calendar Single Post pages
+- FIXED: Removed portfolio grid layout from the archive layout setting in Theme Options
+- FIXED: Events Calendar post excerpts displaying shortcode markup on frontend archive pages
+- FIXED: Theme Option search not working correctly for Fusion Builder elements
+- FIXED: Some setting values being incorrect on archive pages due to incorrectly returned page id
+- FIXED: Menu setup issue on Technology demo
+- FIXED: Pixelated logo on construction demo import
+- FIXED: Code Block Encoding setting in Theme Options not working correctly
+- FIXED: Styles missing on WooCommerce main shop page under certain circumstances
+- FIXED: Side header issue in IE11, where menu icons were not aligned correctly
+- FIXED: PHP error in demo importer when no Fusion Slider is part of the demo
+- FIXED: Fusion Builder being disabled after update from a pre Avada 4.0 version
+
+
+-----------------------------------------------------------------------------------------
+Version 5.1.5 - April 4th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Modal element can now be triggered from a menu item
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+       (Please see their changelog as this update involves security issues
+       https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#release-log)
+- NEW: Comments are off message no longer shown in related posts and projects
+- NEW: Fusion Builder and Fusion Core plugins can be updated using WP-CLI
+- NEW: Support for upcoming WooCommerce 3.0 (previously 2.7 RC was supported, which WooCommerce did not release)
+- IMPROVED: Countdown element now has a date picker for easier use
+- IMPROVED: Added several performance tweaks for faster loading
+- IMPROVED: Error reporting for unsuccessful demo import
+- IMPROVED: Compatibility of internal libraries for sites that have changed names of WP core folders
+- IMPROVED: Transparent header fallback for archive pages now using fulltone header background color
+- IMPROVED: Tagline element now using vertical centering when only title and button are used
+- IMPROVED: Better styling integration for Events Calendar tickets
+- IMPROVED: Added back possibility to set a fallback image for Fusion Slider on mobiles in Fusion Page Options
+- IMPROVED: Equal heights for columns is now correct on resize even for dynamic content
+- IMPROVED: Filenames for exported content and templates are now different in Fusion Builder
+- UPDATED: Modernizr script library to version 3.4.0
+- FIXED: Security fix to prevent additional calls to permalink structure (XSS)
+- FIXED: Security fix that adds AJAX request verification for Fusion Builder content importer
+- FIXED: Issue with Fusion Cache clearing and Fusion Compilers which led to rendering issues on some sites
+- FIXED: Compatibility issue with uberMenu set to full width
+- FIXED: Footer widgets being removed when disabled in Theme Options
+- FIXED: Sidebar classes set in dashboard, not being used on frontend
+- FIXED: Icon pulsate animation not working in all browsers
+- FIXED: Fusion Builder demo pages not always using correct image placeholders
+- FIXED: Lightbox not working for image tags on single post and portfolio pages
+- FIXED: Blog slideshow smooth height not being respected for AJAX loaded posts
+- FIXED: Menu highlight bar being displayed on top of button style menu entries
+- FIXED: Option dependency issue for main content background image in Fusion Page Options
+- FIXED: Infinite Scroll being triggered too early on page load
+- FIXED: Patches on multisite installs appearing an uninstalled although already applied
+- FIXED: Responsive image src attribute exchange not working
+- FIXED: Equal heights not working for content box element
+- FIXED: Tagline element center layout not working when only title and button are used
+- FIXED: Boxed icon background color not being correct for custom icons in social links widget
+- FIXED: Fusion Slider parallax mode issue when boxed site layout is used
+- FIXED: Issue with overlay colors for containers and columns in IE and Edge
+- FIXED: Icon alignment issue in content box element in Edge
+- FIXED: IE11 sometimes hiding the Theme Options panel contents
+- FIXED: Compatibility issue with Post Types Order plugin and single portfolio page navigation
+- FIXED: Portfolio permalink settings being reset on theme update
+- FIXED: Styling issue with content boxes using button bar
+- FIXED: Single quotation marks being HTML encoded in sharing box element
+- FIXED: Google maps not rendering correctly in a modal without resize
+- FIXED: Sticky header rendering issue when using infinite scroll
+- FIXED: WPML translation connections being lost on translation save
+- FIXED: Issue with logo for secondary languages when using WPML
+- FIXED: Compatibility issue with polylang and desktop/mobile logo rendering in different languages
+- FIXED: Patches number doesn't get reset on theme update
+- FIXED: Lightbox video dimension Theme Options setting not being respected
+- FIXED: Button squared style on single button not working when button style is set to round globally
+- FIXED: Fusion Slider not being loaded when header is disabled in Fusion Page Options
+- FIXED: Columns going full width on mobile even when responsive mode is disabled
+- FIXED: Mega menu column title option reverting when a different menu item is changed
+- FIXED: Sticky header animation not working when logo and menu don't fit in one row
+- FIXED: Toggles inside of tabs element not working
+
+
+-----------------------------------------------------------------------------------------
+Version 5.1.4 - March 18th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- FIXED: Added file check for Fusion Builder 1.1.1 for backwards compatibility
+
+
+-----------------------------------------------------------------------------------------
+Version 5.1.3 - March 18th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- FIXED: CSS compiler on database mode causing style issues on some installs
+- FIXED: JS compiler not loading all js assets on some installs
+- FIXED: Single portfolio item pages leading to 404 pages without permalink reset on some sites
+- FIXED: Patch numbers not being reset on update
+- FIXED: Search form in page title bar not being displayed
+- FIXED: WooCommerce elements not being populated with available product categories
+- FIXED: Embedded videos not showing in featured slideshow on main blog page
+- FIXED: Contact Form 7 buttons with special button size classes not being respected
+- FIXED: Inline CSS markup and WP gallery not being correctly handled on blog archive pages
+- FIXED: Minor WCAG issue with same alt tags on different logo container
+- FIXED: Redirect issue for WooCommerce MyAccount login widget in menu for some SSL sites
+- FIXED: Sticky header animation not being smooth if logo and menu don't fit on same row
+- FIXES: PHP warning inside the ENvato API class
+- FIXED: Removed mb_strtolower from contact template, as it is not active on all hosts
+
+
+-----------------------------------------------------------------------------------------
+Version 5.1.2 - March 16th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: All Fusion caches get reset when a patch is applied and on theme updates, for best update results
+- NEW: Fusion Builder demo pages now include newest demos
+- IMPROVED: Needed JS scripts are included now protocol agnostic, even on incorrectly setup SSL sites
+- IMPROVED: Shortened folder paths length to ensure compatibility with Microsoft IIS servers
+- FIXED: Issue on WPML sites, where depending on the default language not all Theme Options were copied to new database name
+- FIXED: Compatibility issue with uberMenu which led to menu display problems
+- FIXED: Theme icon font being loaded twice on frontend
+- FIXED: Fusion Slider element not being populated with available sliders
+- FIXED: Events element not being populated with available event categories
+- FIXED: Fusion Slider fallback image not working on mobiles
+- FIXED: URL being incorrect on Fusion Patcher dismiss notice button
+- FIXED: Compatibility issue with latest Sermon Manager plugin.
+- FIXED: Assigned WooCommerce shop page content rendering style and other tags incorrectly
+- FIXED: A WCAG2.0 label missing from mobile menu toggle
+- FIXED: WooCommerce sold out badge not being displayed
+- FIXED: WooCommerce default product ordering not being correct when using Price (desc)
+- FIXED: Events Calendar event ticket button not using Avada styling
+- FIXED: Image frame element not showing images on all browsers, depending on filename
+- FIXED: Single portfolio template file not being overrideable from child themes
+- FIXED: PHP error that could happen on Varnish cache clearing
+- FIXED: Resource loading 404 error on post.php screens
+- FIXED: An error with dynamic JS file creation
+- FIXED: Column padding option not working without units
+
+
+-----------------------------------------------------------------------------------------
+Version 5.1.1 - March 14th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- FIXED: theme option values not being respected on all child theme installs, due to WordPress theme setup hook issue
+
+
+-----------------------------------------------------------------------------------------
+Version 5.1 - March 13th, 2017
+-----------------------------------------------------------------------------------------
+
+
+- NEW: 5 New Professionally Designed Demos
+- NEW: WCAG 2.0 Accessibility Compatibility
+- NEW: New Menu Highlight Arrow Option
+- NEW: New Menu Highlight Boxed Background Option
+- NEW: New Main Menu Icon Theme Option Panel
+- NEW: New Main Menu Icon Position Option (Top/Right/Bottom/Left)
+- NEW: New Main Menu Icon Size Option
+- NEW: New Main Menu Icon Color Option
+- NEW: New Main Menu Icon Hover Color Option
+- NEW: New Mega Menu Thumbnail Size For Images
+- NEW: New Logo Background Color Option for headers v1, v2, v3, v6, v7 and side headers
+- NEW: Avada Menus Now Support Menu Descriptions in the WP native menu settings
+- NEW: Avada Menu Options In Appearance > Menu Are Now Better Organized With A Single Button That Opens The Options In A Window
+- NEW: New Boxed Mode Top/Bottom Offset
+- NEW: New Boxed Mode Offset Scroll Layout: Framed or Full Scrolling
+- NEW: New Boxed Mode Shadow Type (light/medium/hard)
+- NEW: New Zoom Capability For WooCommerce (Avada's style + default WooCommerce)
+- NEW: WooCommerce 2.7 compatibility
+- NEW: New Toggle Boxed Mode Option
+- NEW: New Toggle Border Width Option
+- NEW: New Toggle Border Color Option
+- NEW: New Toggle Background Color Option
+- NEW: New Toggle Background Hover Color Option
+- NEW: New Toggle Inactive Box Color Option
+- NEW: New Toggle Active Box Color
+- NEW: Fusion Builder allows <!--nextpage--> usage (was accidentally already added to Avada 5.0 changelog)
+- NEW: New Bulk Media Upload For Slider And Image Carousel elements
+- NEW: Google AMP Plugin Support (although this also worked on 5.0.6, just to avoid confusion)
+- NEW: Now The Entire Featured Image Rollover Links To Single Post
+- NEW: Updated Layer Slider Plugin To Latest Version As of Release Date
+- NEW: Updated Slider Revolution Plugin To Latest Version As of Release Date
+- NEW: Performance Improvement option to choose if one combined and minified JavaScript file should be loaded or several (for HTTP/2.0)
+- NEW: WP 4.7+ compatibility updates
+- NEW: Compatibility with Sermon Manager 2.0
+- NEW: Counter Box element can now use decimal numbers
+- NEW: Added all the available W3TC plugin CSS and JS include hooks
+- NEW: Better Organization For Avada & Fusion Builder Menus In WP Admin
+- NEW: Theme and element options for the widget area element
+- NEW: Avada Patcher is now called Fusion Patcher
+- NEW: Fusion Patcher Now Displays Patches For Each Product (Avada, Fusion Builder, Fusion Core)
+- NEW: Fusion Patcher Now Displays A Counter Circle For Available Patches
+- NEW: Demo Imports Are Now Compatible With PHP 5.2
+- NEW: Added option to portfolio element to show/hide URL parameter for category sensitive sorting on single posts pages
+- NEW: Added support for Facebook Instant Articles plugin
+- NEW: Organizational Improvements To Avada Welcome Screen
+- NEW: New FAQ Tab For Avada Welcome Screen
+- NEW: Blog Element Now Combines All Pagination Options Into One Set
+- NEW: Automatic database transient cleanup tasks for optimal performance
+- NEW: Using new jQuery appear library to avoid conflicts with Slider Revolution
+- NEW: Major Improvements For The Fusion Builder API Via New Filters & Action Hooks
+- NEW: New Fusion Page Option Filters & Action Hooks
+- NEW: It's now easier to override fusion builder elements
+- NEW: Show full element controls for Fusion Builder containers in backend, when the container is closed
+- NEW: All element related code, styles, scripts, options etc. won't be loaded if an element is disabled
+- NEW: Fusion Builder single demo pages are automatically updated now on theme update and also periodically
+- NEW: Each demo has been re-exported for option setup
+- NEW: Fusion Builder & Fusion Core Plugins Are Now Offloaded
+- NEW: Filter Added To Allow WOFF2 Upload Automatically
+- NEW: Lightbox element can open videos
+- NEW: Lightbox element now also available in main Fusion Builder
+- NEW: Avada CPTs are moved to Fusion Core plugin, incl. all needed assets and templates
+- NEW: WooCommerce placeholder image is now available on the shop page
+- IMPROVED: On System Status page only the last 3 versions will be shown now, to avoid clutter
+- IMPROVED: Removed IE8 compatibility for performance improvements
+- IMPROVED: Cloned elements in Fusion Builder are positioned directly below the original ones now
+- IMPROVED: Fusion Builder generator now loads elements tab before the nested columns tab now
+- IMPROVED: Fusion Builder element toolbar now uses a background color for better usability
+- IMPROVED: Updated Styling For Options That Are Set To Off for Clarity
+- IMPROVED: Updated several option names and descriptions to make usage easier
+- IMPROVED: Fusion Builder single page template imports
+- IMPROVED: Added number of posts option for carousel layout of portfolio element
+- IMPROVED: Added a default option for animation settings in content boxes, so that parent settings can be used throughout
+- IMPROVED: Made sure that Patcher and System Status values show same requirements
+- IMPROVED: Custom Font names in Theme Options upload can now contain spaces
+- IMPROVED: Made sure that "permalink" is not considered a keyword in SEO plugins and search engines
+- IMPROVED: Using wc_get_checkout_page() function now for checkout page linking
+- IMPROVED: Sliding bar is deactivated by default on new theme installs
+- IMPROVED: Better usage of available space in top header for email and phone number on mobiles
+- IMPROVED: Dynamic CSS cache is now cleared on Theme Options import and color preset change
+- IMPROVED: On demo imports the site logos are now directly imported to the media library
+- IMPROVED: WPML footer language switcher is now included in the footer parallax layout
+- IMPROVED: Removed 2 slow SHOW TABLES db queries
+- IMPROVED: Theme Options for database caching and compiling CSS are combined now to avoid confusion
+- IMPROVED: Fusion Slider and Elastic Slider items are removed from search results page
+- IMPROVED: Block quote elements has now increased top/bottom margin to stand out better
+- IMPROVED: Removed 'Install Plugins', 'Header' and 'Background' menu entries under 'Appearance' menu to avoid confusion
+- IMPROVED: Events Calendar Single Sidebar Layout section in Theme Options was moved below the Events Calendar main section
+- IMPROVED: Made sure that the background is faded the same amount for all kind of modal overlays in backend to improve usability
+- IMPROVED: Other improvements & fixes to the codebase for overall enhancements and maintainability
+- UPDATED: Select2 script library to version 4.0.3
+- UPDATED: Tooltip of YouTube social media icon was updated to correct branding
+- FIXED: Javascript code being added to the System Status report
+- FIXED: WooCommerce ordering boxes not always showing
+- FIXED: WooCommerce after add to cart button closing markup missing
+- FIXED: Compatibility issue with Fancy Product Designer plugin on WooCommerce order page
+- FIXED: Compatibility issue with YITH Ajax Product Filter plugin for WooCommerce
+- FIXED: Gravity Form Merge Tags not working
+- FIXED: Gravity Forms dropdown styling issue for dynamically / conditionally displayed drop downs
+- FIXED: A few alignment issues in Theme Options for RTL sites
+- FIXED: Issue with login redirection if specific ports are used
+- FIXED: Make main menu anchors work correctly also on search page of one page sites
+- FIXED: Login/register/password elements not using Theme Options button size setting
+- FIXED: Issue with slider height on scrolling when using Fusion Slider on an Android device
+- FIXED: Section separator overlap issue on Android devices
+- FIXED: Display issue with Fusion Slider full screen parallax layout
+- FIXED: Fatal error during short code conversion when WPML is used
+- FIXED: Fusion Page Options not changeable on translated pages when using WPML
+- FIXED: Header Tagline Theme Option setting missing for side header layouts
+- FIXED: Menu item padding of value 0 not working
+- FIXED: Password form fields not being styled for all elements
+- FIXED: Additional fix for background images and overlay colors on containers
+- FIXED: JavaScript error on page edit screen when using invalid values in Theme Options
+- FIXED: Responsive typography not working for blog titles on archive pages that use AJAX loading
+- FIXED: Breadcrumbs title issue on Events Calendar archive pages
+- FIXED: Issue on some servers when uploading WOFF or WOFF" fonts in Theme Options
+- FIXED: Styling issue on mobiles for the Events Calendar Filter Bar add-on
+- FIXED: pagination not working when using offset in portfolio element
+- FIXED: Infinite scrolling / load more button not working for portfolio items if only set in Theme Options and using Default on the element itself
+- FIXED: Double mobile menu and logo when using header v7 and custom sticky menu
+- FIXED: Import issue of images for shop demos
+- FIXED: Patcher notices not disappearing, even if permissions issue was resolved
+- FIXED: Sub-sub-menus not always being correctly aligned on RTL sites
+- FIXED: Legacy issue with sidebars not always being deletable when created with older theme versions
+- FIXED: First testimonial inside a modal window flowing over
+- FIXED: Scrollbar not being shown when using portfolio element and a filter that has not enough elements visible to enable scrolling on page load
+- FIXED: Search results page template changing to 100% width if first search result uses that template
+- FIXED: Images overflowing image frame elements in IE11
+- FIXED: Empty column height calculation for background images in empty columns not being correct in IE11
+- FIXED: a few header display issues on IE9 for headers v6 and v7
+- FIXED: Sticky header not working on tablets when deactivated for mobiles on certain tablet sizes
+- FIXED: Page title bar contents being misaligned on mobiles
+- FIXED: Upgrade issue with theme versions prior to 4.0
+- FIXED: Icons on top of counters in counter boxes element not being fully centered
+- FIXED: Fusion Builder child elements not editable when using very large browser font size
+- FIXED: Compatibility issue between Avada backend menu and User Role Editor plugin
+- FIXED: Image carousel element images overflowing bottom border when lift up hover effect is used
+- FIXED: Author page email address being double anti-spam encoded, which led to an error
+- FIXED: Fusion Builder throwing PHP notice when a CPT edit screen is used that does not have an editor
+- FIXED: Borders not being correct for columns that use background images and lift up hover effect
+- FIXED: Fusion Builder generator disappearing in some cases from visual editor toolbar
+- FIXED: positioning issue with WPML language switcher flags on mobile menu
+- FIXED: Horizontal menu widget active menu item not following hover color
+- FIXED: Title element breaking in backend in certain cases when a hashtag (#) is used as part of the heading
+- FIXED: Counter circle element inside of tabs element not working correctly
+- FIXED: Division by zero PHP warning in section separator element for some setups
+- FIXED: Button element preview being incorrect for certain old button short codes
+- FIXED: Content box title hover color not always being correct on touch device
+- FIXED: Container element name in backend showing &amp; instead of &
+- FIXED: Color pickers not being displayed correctly for all color choices
+- FIXED: Translation issue with the Avada style twitter widget
+- FIXED: Visibility option not working in tabs element
+- FIXED: A few PHP7 warning notices
+- FIXED: PHP notices for older PHP versions
+
+
+-----------------------------------------------------------------------------------------
+Version 5.0.6 - December 14th, 2016
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Updated LayerSlider to 6.1
+- NEW: Updated Slider Revolution to 5.3.1.5
+- FIXED: user roles for multiple sidebars
+- FIXED: logo images with filenames like logoname12x12.jpg not correctly displayed
+- FIXED: buttons inside mega menus not correctly displayed
+- FIXED: Fusion Slider buttons not resizing back to desktop site on page resize
+- FIXED: side navigation showing on search results pages where side nav pages belong to results
+- FIXED: issue with WPML translated menus not showing correctly on archive pages
+- FIXED: WPML language switcher not displayed when using custom menu per page
+- FIXED: header parallax effect not working in Firefox
+- FIXED: lightbox 404 issue with hand cursor asset
+- FIXED: element, footer and slidingbar columns not being in correct order on RTL sites
+- FIXED: author name can be undefined on author page in breadcrumbs
+- FIXED: PHP notice in breadcrumbs on yearly archive pages
+- FIXED: 'All' filter not translateable in FAQ element
+- FIXED: LayerSlider not correctly importing on technology demo
+- FIXED: contact page using older versions of alert element
+- FIXED: column and sidebar issue on WooCommerce attribute and other archive pages
+- FIXED: flip icon option not working for content boxes element
+- FIXED: edit custom template not working in Fusion Builder
+
+
+-----------------------------------------------------------------------------------------
+Version 5.0.5 - November 22nd, 2016
+-----------------------------------------------------------------------------------------
+
+
+- NEW: container collapse status is now saved, so collapsed containers remain collapsed on reload
+- IMPROVED: logo template, introducing dimension calc fallback for default logo and retina logo without default one
+- IMPROVED: premium slider plugin download, making instant retry possible, if download failed
+- IMPROVED: pagination next/prev arrow spacing auto adjusting to font size, fixed arrows getting cut off
+- UPDATED: token creation instructions on registration page
+- FIXED: dynamic elements (blog, portfolio Fusion Slider etc.) inside of vertical tabs
+- FIXED: issue on page edit screen, where old button shortcodes make it impossible to change from editor to Fusion Builder
+- FIXED: Infinite scroll and Load more button for portfolio archive text layouts
+- FIXED: rollover link icon getting cut off on retina screens
+- FIXED: columns with overlay bg colors having display issues on IE and Edge
+- FIXED: page templates always being "default", when importing Fusion Builder Avada demo pages
+- FIXED: columns alignment issues, when deprecated last parameter is used
+- FIXED: content box icon alignment being wrong due to doubled px unit
+- FIXED: container name reverting to default name under certain circumstances
+- FIXED: WooCommerce reply to reviews missing top margin
+- FIXED: single portfolio page related projects not showing video items correctly
+- FIXED: portfolio one archive layout button alignment
+- FIXED: RTL spacing and alignment issue with columns
+- FIXED: Fusion Builder generator not being available within already saved child elements
+
+
+-----------------------------------------------------------------------------------------
+Version 5.0.4 - November 14th, 2016
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Updated LayerSlider to 6.0.5
+- NEW: added new filters for single portfolio prev/next navigation link args
+- IMPROVED: The limit for custom fonts in Theme Options has been raised to 50
+- IMPROVED: Gravity Forms "Add Form" button is again available in the text editors inside of Fusion Builder
+- IMPROVED: "Add New" titles for portfolio items and FAQ items have post type name added now
+- IMPROVED: Avada autoloader transients are reset on theme update now
+- IMPROVED: address layout for Events Calendar list view
+- IMPROVED: Some dependent setting in Theme Options
+- IMPROVED: refactored Avada's custom excerpt function for better performance
+- UPDATED: a few demo pages for Fusion Builder import
+- FIXED: column background image issue for IE11 and Edge
+- FIXED: Avada skin for LayerSlider not working with LayerSlider v6
+- FIXED: LayerSlider demo imports for LayerSlider v6
+- FIXED: recent posts strip HTML option not being working
+- FIXED: Fusion Builder demo download and extraction problems, leading to page loading issues
+- FIXED: Issue with Polylang when selecting "All Languages" and saving Theme Options
+- FIXED: Compatibility issues on multilingual sites using the Polylang plugin when English is used but other than en_US
+- FIXED: Infinite scroll and Load more button for portfolio elements when used on pages with sidebars
+- FIXED: additional top padding on Custom Menu widget in footer and slidingbar
+- FIXED: Manual per patch zip download not working
+- FIXED: video autoplay parameter being used for all videos in lightbox gallery for portfolio items
+- FIXED: compatibility issue with easywplocalhost when loading Theme Options
+- FIXED: compatibility issue with WP Super Cache when loading Theme Options
+- FIXED: PHP notice thrown when using WPML and WooCommerce and a product is added to the cart
+- FIXED: shortcode generator not always working for WooCommerce product short description
+- FIXED: WooCommerce Carousel Element not working correctly, when more than one category is chosen
+- FIXED: WooCommerce popularity sorting causing recent posts loading to fail
+- FIXED: WooCommerce star rating being misaligned
+- FIXED: PHP notice when FS_METHOD constant was not defined
+- FIXED: alt attribute missing from testimonial element images
+- FIXED: issues with pricing table element editor and insertion
+- FIXED: design tab not working for tooltip element inside of tabs
+
+
+-----------------------------------------------------------------------------------------
+Version 5.0.3 - November 2nd, 2016
+-----------------------------------------------------------------------------------------
+
+
+- NEW: Updated Slider Revolution
+- NEW: Updated Layer Slider
+- NEW: Updated Font Awesome to 4.7
+- NEW: Columns can now use both, background color and background image, to create overlay effects with rgba colors
+- NEW: Opacity slider added to background colors for nested columns
+- NEW: Added possibility and notice for manually applying patches on restrictive hosting plans
+- IMPROVEMENT: updated several option descriptions for better user experience
+- IMPROVEMENT: moved Fusion Builder migration reversion to the Avada System Status tab
+- IMPROVEMENT: added fallback for column padding option if no unit is used
+- IMPROVEMENT: premium plugin download for very restrictive hosting plans
+- IMPROVEMENT: main menu hightlightbar size can now be set up to 40px
+- IMPROVEMENT: additional backend script files are now loaded in footer
+- IMPROVEMENT: portfolio items with a video are now also shown, when placeholders are deactivated
+- IMPROVEMENT: center column option is now also working without using equal height option
+- IMPROVEMENT: added compatibility with HHVM
+- IMPROVEMENT: consistency for 0 and -1 values for posts per page option for portfolio and blog elements
+- IMPROVEMENT: all shortcodes (also 3rd party ones) can be processed when changing from editor to builder now
+- FIXED: missing thumbnails for post slider attachment layout
+- FIXED: missing setting for currency position in Fusion Builder for pricing tables
+- FIXED: title element not respecting visibility options
+- FIXED: code block element modifying double quotation marks
+- FIXED: animations not working for columns that use an image hover type
+- FIXED: issue where custom names for containers were lost on saving the page
+- FIXED: conversion not working for post excerpts
+- FIXED: font previews in Theme Options for standard fonts
+- FIXED: issue with prev/next navigation in portfolio items for Polylang
+- FIXED: portfolio element not respecting default image size from Theme Options
+- FIXED: issue with empty text block elements not being converted correctly from editor to builder
+- FIXED: Classic shop demo missing from Fusion Builder demo imports
+- FIXED: animations not working for nested columns
+- FIXED: slider and accordion element opening tags not being correctly converted to new names
+- FIXED: right side header for RTL having styling issues
+- FIXED: issue with site width in percentage and nested columns
+- FIXED: modern mobile menu not being hidden when no menu is assigned
+- FIXED: auto updates not working from themes page
+- FIXED: some Fusion Builder elements using old textdomains
+- FIXED: mobile sticky header logo not working on header v7
+- FIXED: chosen google font not being used correctly on frontend
+- FIXED: compatibility issue with simple google adsense insertion plugin
+- FIXED: compatibilizy issue with Ecwid plugin
+- FIXED: mobile layout issue with bbPress replies
+- FIXED: border color missing from default button in tagline element
+- FIXED: WooCommerce element in generator not working the same as in Fusion Builder
+- FIXED: styling issue with WooCommerce add to cart shortcode
+- FIXED: compatibility issue with YITH WooCommerce Request a Quote
+- FIXED: compatibility issue with YITH Multi Vendor
+- FIXED: widget list arrow misaligned for WooCommerce Category Widget
+- FIXED: My Account and Cart menu items not being highlighted on corresponding pages
+- FIXED: imageframe element not always using correct image size
+- FIXED: testimonials random display option not working
+- FIXED: minor conversion issue with self enclosing shortcodes
+- FIXED: conversion issue for nested columns
+- FIXED: conversion issue with pricing tables
 
 
 -----------------------------------------------------------------------------------------
@@ -12,15 +1090,15 @@ Version 5.0.2 - October 18th, 2016
 
 - NEW: columns can now use a background image and also a semi transparent overlay color
 - NEW: Events Calendar 4.3 support
-- IMPROVED: increased line height on the Events Calendar Widget
-- IMPROVED: removed wc-cart-fragments.js from the theme-options
-- IMPROVED: clouds separator for mobile devices
-- IMPROVED: read me now has link to the important update notes doc
-- IMPROVED: added a fallback for column element to make sure last column is positioned correctly
+- IMPROVEMENT: increased line height on the Events Calendar Widget
+- IMPROVEMENT: removed wc-cart-fragments.js from the theme-options
+- IMPROVEMENT: clouds separator for mobile devices
+- IMPROVEMENT: read me now has link to the important update notes doc
+- IMPROVEMENT: added a fallback for column element to make sure last column is positioned correctly
 - FIXED: conversion stripping backslashes from page content
 - FIXED: Fusion Builder bug with empty text block elements causing builder activation to fail
 - FIXED: conversion issue for pages using Visual Composer
-- FIXED: checklist element causing Fusion Builderr options to be missing when used inside other elements
+- FIXED: checklist element causing Fusion Builder options to be missing when used inside other elements
 - FIXED: an issue with conversion page step size (caused e.g. by W3TC plugin)
 - FIXED: WPML issue with image elements (links and titles)
 - FIXED: single portfolio page details section padding issue
@@ -39,7 +1117,7 @@ Version 5.0.2 - October 18th, 2016
 - FIXED: image carousel element being always visible, even if wrapping column has animation applied
 - FIXED: menu search field being behind other menu dropdown items
 - FIXED: issue where Fusion Builder won't load when old button gradient color settings are used
-- FIXED: shortcode conversion issue with shortcodes startin with the same characters
+- FIXED: shortcode conversion issue with shortcodes starting with the same characters
 - FIXED: FAQ element not respecting category selection
 - FIXED: issue with Google map zoom level not always working
 - FIXED: compatibility issue with Jetpack mobile
@@ -69,7 +1147,6 @@ Version 5.0.1 - October 12th, 2016
 - UPDATED: the theme main assets folder
 
 
-
 -----------------------------------------------------------------------------------------
 Version 5.0 - October 12th, 2016
 -----------------------------------------------------------------------------------------
@@ -92,17 +1169,17 @@ Over the years we have had several feature, functionality and improvement reques
 - NEW: Sharing is caring, import and export all saved content from your Library to share with other Avada users or between different Avada installs
 - NEW: Easily manage all custom content through the Library
 - NEW: Nested columns element allows you to easily create even more unique layouts using our nested columns interface, the design opportunities this presents are incredible
-- NEW: New ‘Option Correlation’ technology in Fusion Builder, allows you to see global theme option values in the option description that link directly to the Fusion Theme Option panel
+- NEW: New 'Option Correlation' technology in Fusion Builder, allows you to see global theme option values in the option description that link directly to the Fusion Theme Option panel
 - NEW: Mobile visibility system for every Fusion Builder element that allows you to choose what your page looks like on small / medium / large screens
 - NEW: Mobile visibility system breakpoints in Fusion Theme Options for each screen size so you can easily control when your page breaks for each screen size
-- NEW: Fusion Builder slider options have a new ‘reset to default’ option in the description that quickly resets the value to the default theme option value
+- NEW: Fusion Builder slider options have a new "reset to default" option in the description that quickly resets the value to the default theme option value
 - NEW: Various load options when loading an entire page (replace all content, insert above current content, insert below current content)
-- NEW: Save function for everything you add to the page, click the Save icon to give your content a custom name, then it’s automatically added to the proper tab in the Library
+- NEW: Save function for everything you add to the page, click the Save icon to give your content a custom name, then itâ€™s automatically added to the proper tab in the Library
 - NEW: Reuse custom content over and over with ease on any page, post or registered custom post type that has Fusion Builder enabled
 - NEW: Any registered custom post type automatically shows up in Fusion Builder Settings to enable Fusion Builder
 - NEW: Enable or Disable any Fusion Builder pre-built element, for example, if you do not use the countdown clock, simply turn it off and it disappears from the interface
 - NEW: Option to enable Fusion Builder interface by default for all pages and post types so it automatically loads when creating or editing a page or post
-- NEW: Add custom css to any page that only affects that page, and it’s always accessible no matter where you are on the page due to the fixed main control bar
+- NEW: Add custom css to any page that only affects that page, and it's always accessible no matter where you are on the page due to the fixed main control bar
 - NEW: Saving full page templates gives you the entire page layout, page template, custom css and Fusion Page Option settings
 - NEW: When starting a new page or post, you see a help page to inform you of all controls and settings for Fusion Builder, along with a quick start video and documentation links
 - NEW: Built in column combination sets allow you to add an entire set of columns (ex: 1/3 + 1/3 + 1/3) with one click
@@ -138,7 +1215,7 @@ Avada 5.0 mainly focuses on the brand new Fusion Builder, which is absolutely am
 - NEW: Token registration is now required for auto updates / Avada demos / premium plugins (please see important update notes)
 - NEW: Avada demos and premium plugins are offloaded from our server for better overall maintenance, lighter theme size and easier installation (token registration required)
 - NEW: Removed FAQ and Portfolio page templates in favor of only using their new respective elements (please see important update notes)
-- NEW: FAQ now has an element that can be used through Fusion Builder along with several new options for categories and filter so you can place FAQ’s wherever you wish
+- NEW: FAQ now has an element that can be used through Fusion Builder along with several new options for categories and filter so you can place FAQâ€™s wherever you wish
 - NEW: Recent Work element is now named Portfolio element
 - NEW: Portfolio element has new options for Pagination Type; load more button, pagination, infinite scrolling or none
 - NEW: Several new options for portfolio text layouts to show/hide categories, align all text, boxed padding option added as global theme options and to Portfolio element
@@ -153,7 +1230,7 @@ Avada 5.0 mainly focuses on the brand new Fusion Builder, which is absolutely am
 - NEW: Order parameter for the blog element to order posts by; date, post title, post slug, author, comments, last modified and random
 - NEW: Now you can easily save and manage custom color schemes with just a few clicks in Fusion Theme Options
 - NEW: Avada social widget now picks up global Fusion Theme Option settings if options are left blank
-- NEW: New ‘Option Correlation’ technology in Fusion Page Options, allows you to see global theme option values in the option description that link directly to the the Fusion Theme Option panel
+- NEW: New "Option Correlation" technology in Fusion Page Options, allows you to see global theme option values in the option description that link directly to the the Fusion Theme Option panel
 - NEW: All custom social icons are now available in every element that utilizes them if the feature is set to yes
 - NEW: Cleaner and lighter theme zip file due to codebase cleanup and unneeded assets
 - NEW: Added design support for The Events Calendar Ticket Add on, tickets will now show in the main content area
@@ -240,7 +1317,6 @@ Avada 5.0 mainly focuses on the brand new Fusion Builder, which is absolutely am
 - FIXED: Menu caret for my account page on side headers
 - FIXED: content boxes button span alignment
 - FIXED: videos not being displayed correctly in tabs
-
 
 
 -----------------------------------------------------------------------------------------
@@ -377,7 +1453,7 @@ Version 4.0 - April 18th, 2016
 
 
 Completely Redesigned & Repurposed Theme Options Panel
-Avada 4.0 includes a brand new theme options panel with a fresh UI experience, powered by AvadaRedux. Avada theme options play an extremely important role in allowing you to easily customize the different parts of the site without having to modify any of the backend code. They  have depth, flexibility and power which ultimately provides you with a design tool to create professionally unique websites. With the continued desire to grow AvadaÕs powerful options for our customer base, there is a need to use a more advanced framework that allows us to continue building for the future.
+Avada 4.0 includes a brand new theme options panel with a fresh UI experience, powered by AvadaRedux. Avada theme options play an extremely important role in allowing you to easily customize the different parts of the site without having to modify any of the backend code. They  have depth, flexibility and power which ultimately provides you with a design tool to create professionally unique websites. With the continued desire to grow AvadaÃ•s powerful options for our customer base, there is a need to use a more advanced framework that allows us to continue building for the future.
 
 When you update to Avada v4, your current theme option values will be copied and stored in your database for safe keeping. No data is lost this way. The extra copy of theme options is then migrated over to AvadaRedux so you can enjoy the new options panel. Always make sure you backup your current theme folder before you upgrade.
 
@@ -409,7 +1485,7 @@ Full List of New Features
 - NEW: theme option sub panels fly out on hover for easier navigation
 - NEW: all retina size theme option fields have been removed and values are now auto calculated
 - NEW: all checkbox options have been changed to switches for convenience and consistency
-- NEW: all enable/disable settings have been changed to on/off switches and change to Ôturn onÕ for consistency
+- NEW: all enable/disable settings have been changed to on/off switches and change to Ã”turn onÃ• for consistency
 - NEW: import/export section allows to copy raw export data, or import and export via URL and file
 - NEW: options reset can now be done on a per section basis as well as the full panel
 - NEW: sticky theme options footer bar that has a save and reset button always visible
@@ -649,7 +1725,7 @@ Full List of New Features
 - new "clean" design option for WooCommerce product boxes
 - new option to add a counter circle beside the woo cart icon in the menu
 - new builder "User Login" element to add login, registration, lost password within the content area
-- new options for the â€œUser Loginâ€ element to control colors, styles, etc
+- new options for the Ã¢â‚¬Å“User LoginÃ¢â‚¬Â element to control colors, styles, etc
 - new animation settings to choose when the animation should start
 - new horizontal menu widget with several style options, can be seen in the new modern shop demo
 - new widget 'Horizontal Menu' to add a horizontal menu, perfect for the footer
@@ -755,7 +1831,7 @@ Version 3.8.8 - October 27th, 2015
 
 
 - NEW FEATURE: new responsive breakpoint settings for site content and portfolio/blog grid to combine with the header responsive breakpoint
-- new â€˜Responsiveâ€™ theme options tab that holds general responsive options like break points, responsive design, responsive typography, and pinch to zoom.
+- new Ã¢â‚¬ËœResponsiveÃ¢â‚¬â„¢ theme options tab that holds general responsive options like break points, responsive design, responsive typography, and pinch to zoom.
 - fixed sanitation from breaking urls with ports (fixes unique case of logo missing)
 - added a clearfix for Woo related posts
 - fixed image carousel not vertically aligned in firefox
@@ -892,7 +1968,7 @@ General Fixes & Improvements
 - improved the layout for WooCommerce checkout Paypal icon so it does not overlap others
 - improved the layout for using links in the header tagline field
 - fixed typos in System Status page errors
-- added support for translating â€Search results for:" and extra featured image fields
+- added support for translating Ã¢â‚¬ÂSearch results for:" and extra featured image fields
 - fixed issue of WooCommerce variable product description being doubled
 - improved bbPress integration, ensure the no "subscribe' link shows on bbPress forum pages
 - fixed minor empty space on right side of browser when using tablets
@@ -900,7 +1976,7 @@ General Fixes & Improvements
 - improved recent works active filter initialization so it is encapsulated
 - fixed issue of Google+ Share in Microsoft Edge
 - improved the layout for portfolio single post details section on tablets wen using a sidebar
-- fixed the issue of â€œautoâ€ not working for featured image size
+- fixed the issue of Ã¢â‚¬Å“autoÃ¢â‚¬Â not working for featured image size
 - updated modern and classic mobile menus when displaying certain header content
 - improved video backgrounds in full width container for IE11
 - made adjustments to ensure Q2W3 plugin compatibility
@@ -920,11 +1996,11 @@ General Fixes & Improvements
 - improved parallax footer setup / loading when on a page with a slider
 - fixed issue of side header logo overlapping in Firefox
 - improved iLightbox inline links
-- improved automated tab IDâ€™s to reduce conflict
+- improved automated tab IDÃ¢â‚¬â„¢s to reduce conflict
 - improved </textarea> usage with code block element
 - removed the use of glob() to include all files
 - added our custom alert message design for contact form 7 plugin
-- added 3rd party plugins to the â€œrecommendedâ€ plugin list
+- added 3rd party plugins to the Ã¢â‚¬Å“recommendedÃ¢â‚¬Â plugin list
 - improved the rendering of products inside of tabs element
 - fixed style issue of WooCommerce 'My Account' drop down being cut off when left aligned
 - improved overall sticky header + scrolling on shorter pages
@@ -1002,7 +2078,7 @@ Version 3.8.5 - July 19th, 2015
 -----------------------------------------------------------------------------------------
 
 Five New Demos To Show The Power of Avada
-Weâ€™ve added 5 new demos that are built entirely from our included options. These demos are unique and creatively designed for the specific industries they represent. Best of all, you can import them directly from the WordPress admin and use for your site. They are Avada Hotel, Avada Hosting, Avada Law, Avada Lifestyle and Avada Architecture.  More coming soon!
+WeÃ¢â‚¬â„¢ve added 5 new demos that are built entirely from our included options. These demos are unique and creatively designed for the specific industries they represent. Best of all, you can import them directly from the WordPress admin and use for your site. They are Avada Hotel, Avada Hosting, Avada Law, Avada Lifestyle and Avada Architecture.  More coming soon!
 
 
 Full List of New Features
@@ -1070,7 +2146,7 @@ General Fixes & Improvements
 - improved one page anchor link scrolling issue
 - fixed polyang theme options not saving for languages
 - improved side header setup for viewport / scrollable area
-- fixed â€œmy accountâ€ login from main/secondary menu
+- fixed Ã¢â‚¬Å“my accountÃ¢â‚¬Â login from main/secondary menu
 - improved WP Gallery Lightbox behavior when using multiple galleries on one page
 - use wp_remote_get for recaptcha instead of any other function
 - video embeds now work in all portfolio templates and recent work elements
@@ -1132,12 +2208,12 @@ Version 3.8.4 - May 1st, 2015
 - typography settings now apply to single post pages
 - improved smooth scroll in certain situations
 - youtube & vimeo videos will show at normal size in light box as long as video embed link is not used
-- fixed issue of â€œfixedâ€ featured image mode not working for carousels / recent work
+- fixed issue of Ã¢â‚¬Å“fixedÃ¢â‚¬Â featured image mode not working for carousels / recent work
 - fixed issue of header tagline font not working with font options
 - fixed formatting issues with Turkish language files
 - letter spacing menu option improvement
 - improved fusion slider max content width setting
-- removed the â€œdisable first featured image on productsâ€ setting since it does not apply
+- removed the Ã¢â‚¬Å“disable first featured image on productsÃ¢â‚¬Â setting since it does not apply
 - improved portfolio featured image loading
 - removed encoding from tracking code, space before head, space before body, and custom CSS to stop it from parsing code within TO and removing special characters e.g. +
 - woo login box now shows login fields for logged out users
@@ -1233,24 +2309,24 @@ Version 3.8 - April 13th, 2015
 -----------------------------------------------------------------------------------------
 
 Four New Demos To Show The Power of Avada
-Weâ€™ve added 4 new demos that are built entirely from our included options. These demos are unique and creatively designed for the specific industries they represent. Best of all, you can import them directly from the WordPress admin and use for your site. They are Avada Fashion, Avada Mobile App, Avada Cafe and Avada Travel.  More coming soon!
+WeÃ¢â‚¬â„¢ve added 4 new demos that are built entirely from our included options. These demos are unique and creatively designed for the specific industries they represent. Best of all, you can import them directly from the WordPress admin and use for your site. They are Avada Fashion, Avada Mobile App, Avada Cafe and Avada Travel.  More coming soon!
 
 New iLightBox Integration With 6 Skins & Additional Options
-We have replaced prettyPhoto light box with the faster, more feature rich iLightBox.  This new light box comes with 6 design skins that you can easily choose from our theme options panel. In addition, weâ€™ve added new theme options to control the position of the image thumbnail navigation panel. We have also simplified the titles and captions so it is consistent with what you see in the WordPress media section; image titles display as light box titles and image captions display as light box captions.
+We have replaced prettyPhoto light box with the faster, more feature rich iLightBox.  This new light box comes with 6 design skins that you can easily choose from our theme options panel. In addition, weÃ¢â‚¬â„¢ve added new theme options to control the position of the image thumbnail navigation panel. We have also simplified the titles and captions so it is consistent with what you see in the WordPress media section; image titles display as light box titles and image captions display as light box captions.
 
 New WooCommerce List View & Horizontal Product Tab Option
-A new â€œList Viewâ€ layout option has been added for the WooCommerce shop page. This gives you the option to display products in the standard â€œGridâ€ or  new â€œListâ€ layout.  A new theme option on the WooCommerce tab controls this. When selected, the shop page will display a grid/list icon set which allows your viewer to choose the view for your products on the front end.  In addition, we have added a new option that allows you to choose horizontal tabs for the single product page, in addition to our standard vertical tabs.
+A new Ã¢â‚¬Å“List ViewÃ¢â‚¬Â layout option has been added for the WooCommerce shop page. This gives you the option to display products in the standard Ã¢â‚¬Å“GridÃ¢â‚¬Â or  new Ã¢â‚¬Å“ListÃ¢â‚¬Â layout.  A new theme option on the WooCommerce tab controls this. When selected, the shop page will display a grid/list icon set which allows your viewer to choose the view for your products on the front end.  In addition, we have added a new option that allows you to choose horizontal tabs for the single product page, in addition to our standard vertical tabs.
 
 New Carousel Design Along With Several New Options
-Carousels were given a minor design change that allow the images to span the full width of the container. This allows the navigation arrows/boxes to sit on top of the images. In addition we have added several new options for customization.  Carousels can now be set to autoplay, choose column size, control column spacing all the way down to 0px, use mouse click to drag scrolling, show or hide navigation boxes, show or hide the border.  Each of these options have been added to these elements: image carousel, recent work carousel, WooCommerce product carousel and WooCommerce featured slider.  In addition, related posts & projects have the options added to the theme options panel under the â€œExtrasâ€ tab.
+Carousels were given a minor design change that allow the images to span the full width of the container. This allows the navigation arrows/boxes to sit on top of the images. In addition we have added several new options for customization.  Carousels can now be set to autoplay, choose column size, control column spacing all the way down to 0px, use mouse click to drag scrolling, show or hide navigation boxes, show or hide the border.  Each of these options have been added to these elements: image carousel, recent work carousel, WooCommerce product carousel and WooCommerce featured slider.  In addition, related posts & projects have the options added to the theme options panel under the Ã¢â‚¬Å“ExtrasÃ¢â‚¬Â tab.
 
-NOTE: Due to the new carousel options, we no longer need separate elements for client slider and image carousel. They have been consolidated into one element called â€œimage carouselsâ€.  When you update, your client sliders will be converted to image carousels when you open and edit the page.
+NOTE: Due to the new carousel options, we no longer need separate elements for client slider and image carousel. They have been consolidated into one element called Ã¢â‚¬Å“image carouselsÃ¢â‚¬Â.  When you update, your client sliders will be converted to image carousels when you open and edit the page.
 
 Over 40 New Theme & Page Options Added
-Weâ€™ve added over 40 new theme and page options to help you take your site design further. These options put you in the drivers seat, giving you control over your website.
+WeÃ¢â‚¬â„¢ve added over 40 new theme and page options to help you take your site design further. These options put you in the drivers seat, giving you control over your website.
 
 New Welcome Screen In WordPress Admin
-Weâ€™ve added a new Welcome Screen in the WordPress admin that provides a better user experience.  It will automatically show after you install Avada, and you can easily access it in the left sidebar of your admin at any time. This new addition has 4 different pages.
+WeÃ¢â‚¬â„¢ve added a new Welcome Screen in the WordPress admin that provides a better user experience.  It will automatically show after you install Avada, and you can easily access it in the left sidebar of your admin at any time. This new addition has 4 different pages.
 - Product registration page  -  this page allows you to fully register your product to be eligible for free support and auto theme updates. Previously this was located in theme options.
 - Support page -  contains important links to our support center and resources.
 - Install Demos - this is where you can easily import any of our demo content as well as preview a specific demo. Previously this was located in theme options.
@@ -1318,9 +2394,9 @@ Full List of New Features
 - full width and column elements can now use % and px as values for padding
 - updated font awesome to version 4.3
 - new page option that controls the sidebar color
-- new option  to display a â€Load More Postsâ€ button for blog and port posts instead of loading them automatically. This can be chosen in the pagination options.
-- new option to control the color of the â€œLoad More Postsâ€ button
-- implemented Google's new â€œNo CAPTCHA reCAPTCHAâ€ API
+- new option  to display a Ã¢â‚¬ÂLoad More PostsÃ¢â‚¬Â button for blog and port posts instead of loading them automatically. This can be chosen in the pagination options.
+- new option to control the color of the Ã¢â‚¬Å“Load More PostsÃ¢â‚¬Â button
+- implemented Google's new Ã¢â‚¬Å“No CAPTCHA reCAPTCHAÃ¢â‚¬Â API
 - updated demo content for Avada Classic
 - updated google fonts list
 - added compatibility for Geo Directory plugin
@@ -1330,10 +2406,10 @@ Full List of New Features
 - new options for full width container:  background image parallax, parallax speed, parallax on mobile, youtube & vimeo video backgrounds
 - implemented changes to allow elements to be used in the header 4 banner field , ex: button
 - added sound cloud boxed format
-- new â€œdelimiter digitâ€ option for counter boxes that allows any digit to be used in the counter number.  ex: ,
+- new Ã¢â‚¬Å“delimiter digitÃ¢â‚¬Â option for counter boxes that allows any digit to be used in the counter number.  ex: ,
 - new fusion_maps.js plugin for google maps that is more streamlined and solves various issues
 - added more space to custom css field in theme options
-- added unique names to "categories & postsâ€ in menu section for blog/portfolio/faq
+- added unique names to "categories & postsÃ¢â‚¬Â in menu section for blog/portfolio/faq
 - all language files updated from Transifex
 - new setup that enables image placeholders for portfolio featured images if none are added
 - tagline field in theme options for header 4 can now take HTML
@@ -1341,7 +2417,7 @@ Full List of New Features
 - added BuddyPress global sidebar control (combined with bbPress)
 - added support to extract plain text from fullwidth SC for excerpts
 - phone number field can now take elements
-- new shortcake parameter for title element to set divider to â€œnoneâ€
+- new shortcake parameter for title element to set divider to Ã¢â‚¬Å“noneÃ¢â‚¬Â
 - new Facebook widget integration, requires new facebook app id on June 23rd
 - code block element has added coding/decoding so WP editor does not mess with content
 - new theme option to control the height of all search field heights
@@ -1374,7 +2450,7 @@ Consolidate all retina image css media queries
 Cleaned up inconsistencies when retina versions of images would kick in. Now all use the same media query.
 
 General media query issue with side header
-Media queries for responsive layouts are now dynamic. That means if a side header layout is used, we no longer use fixed px based media queries, ex: â€œdo this at 800px screen width and below". Since the side header takes up a portion of the available screen width and since that width can be chosen by the user, we calculate the width newly at which mobile media queries need to kick in, so that the content behaves more or less the same as on top header layouts.
+Media queries for responsive layouts are now dynamic. That means if a side header layout is used, we no longer use fixed px based media queries, ex: Ã¢â‚¬Å“do this at 800px screen width and below". Since the side header takes up a portion of the available screen width and since that width can be chosen by the user, we calculate the width newly at which mobile media queries need to kick in, so that the content behaves more or less the same as on top header layouts.
 
 Major improvements to feature image loading for various areas of the theme
 we have it setup now for lazy loading images. Most prominent place to see are portfolio archive templates, where the pics are not shown all at once when they are all loaded, but are displayed one by one progressively.
@@ -1401,7 +2477,7 @@ General Fixes & Improvements
 - fixed section separator issue with fading animation
 - new one page setup that fixed a few minor issues with scroll
 - minor adjustments for Safari v5 compatibility
-- added styling for woo â€œOut of Stockâ€ message so it matches the â€œSaleâ€ badge
+- added styling for woo Ã¢â‚¬Å“Out of StockÃ¢â‚¬Â message so it matches the Ã¢â‚¬Å“SaleÃ¢â‚¬Â badge
 - contact form 7 button style fixes to ensure all the button theme options work
 - fixed samsung galaxy S3 responsive issue
 - added link button to our editor for RTL language
@@ -1496,7 +2572,7 @@ Version 3.7.1 - December 10th, 2014
 - google maps will now work with single quotes
 - fixed issue of equal height columns not working on iPad portrait
 - fixed issue of events calendar page title changing main blog page title
-- fixed google font loading issue of â€œnoneâ€
+- fixed google font loading issue of Ã¢â‚¬Å“noneÃ¢â‚¬Â
 
 
 -----------------------------------------------------------------------------------------
@@ -1529,11 +2605,11 @@ Version 3.7 - December 2nd, 2014
 - NEW: full width element option for interior content to be 100% width
 - NEW: Open Slide Link In New Window option added for Fusion Slider (full slide link)
 - NEW: modified theme option setup to accommodate new side headers
-- NEW: theme option to disable Avadaâ€™s custom styling for dropdown select boxes
-- NEW: theme option to disable Avadaâ€™s custom product gallery slideshow for WooCommerce
+- NEW: theme option to disable AvadaÃ¢â‚¬â„¢s custom styling for dropdown select boxes
+- NEW: theme option to disable AvadaÃ¢â‚¬â„¢s custom product gallery slideshow for WooCommerce
 - NEW: slider controls for font size in theme options
 - NEW: full width element option for equal column heights
-- NEW: design for post â€loading" graphic
+- NEW: design for post Ã¢â‚¬Âloading" graphic
 - updated google font list to all latest fonts
 - fixed multiple builder issues with the fullwidth container
 - fixed builder bug with 5/6+1/6 error
@@ -1556,7 +2632,7 @@ Version 3.7 - December 2nd, 2014
 - rtl fix for block quote
 - fixed issue of builder resizing of column to 3/4
 - minor style fixes in various areas for design improvements
-- the â€˜Disable Map Scroll Wheelâ€™ option now works for mobile scrolling
+- the Ã¢â‚¬ËœDisable Map Scroll WheelÃ¢â‚¬â„¢ option now works for mobile scrolling
 - fixed issue of fusion builder not fully loading if woo commerce is not installed
 - fixed issue with woo commerce and country field drop downs
 - fixed conflict of woo pay pal express checkout plugin
@@ -1586,7 +2662,7 @@ Version 3.6.2 - October 8th, 2014
 
 - NEW: global sidebar theme options for pages, blog posts, portfolio posts, woo products
 - NEW: mega menu column width setting, control each column width!
-- NEW: new builder element â€œCode Blockâ€ for adding any additional code
+- NEW: new builder element Ã¢â‚¬Å“Code BlockÃ¢â‚¬Â for adding any additional code
 - NEW: theme option to disable Fusion Builder
 - NEW: layer slider plugin 5.3.1
 - NEW: added infinite scroll option to all portfolio layouts
@@ -1595,7 +2671,7 @@ Version 3.6.2 - October 8th, 2014
 - NEW: theme option to control text shadow on image rollover text
 - NEW: added functionality so element generator can be accessed in WP Text editor
 - NEW: theme option to disable all rich snippets
-- NEW: added â€œEditâ€ button to image fields in popup window for easier editing
+- NEW: added Ã¢â‚¬Å“EditÃ¢â‚¬Â button to image fields in popup window for easier editing
 - builder UI improvement for expand/collapse items, the entire bar will expand/collapse now
 - updated translation files from Transifex
 - Fusion Slider element will now work on portfolio posts
@@ -1663,7 +2739,7 @@ Version 3.6.1 - September 17th, 2014
 - fixed issue of mailpoet text fields not being editable
 - fixed validation error in mega menu
 - changed name of jquery.cookie.js to jquery.bisquit.js to avoid host unnecessarily blocking it
-- sidebar 1 will be set to â€œdefaultâ€ sidebar for new blog posts
+- sidebar 1 will be set to Ã¢â‚¬Å“defaultÃ¢â‚¬Â sidebar for new blog posts
 - drop down styling fix on shipping and handling fields
 - fixed  woo order drop down query string php notice
 - fixed issue of sermon archive post title not always showing
@@ -1688,7 +2764,7 @@ Version 3.6 - September 10th, 2014
 - NEW: 5-6 column portfolio classic and text templates (main and archive pages)
 - NEW: 5-6 column options added to recent news, recent work, flip boxes, blog grid, content boxes, counter boxes, pricing tables
 - NEW: 1/5, 2/5, 3/5, 4/5, 1/6, 5/6 column elements added
-- NEW: theme option and page option for new â€œboxedâ€ layout option for portfolio text layouts
+- NEW: theme option and page option for new Ã¢â‚¬Å“boxedÃ¢â‚¬Â layout option for portfolio text layouts
 - NEW: redesigned page options for easier use
 - NEW: theme option to set number of columns for woo products 1-6 column
 - NEW: theme and page option to set number of columns for related woo products
@@ -1713,7 +2789,7 @@ Version 3.6 - September 10th, 2014
 - removed full width page template in light of new dual sidebar options
 - cleared out any necessary items in theme check (kb post to explain the rest)
 - made adjustments to non-responsive boxed mode
-- fixed the issue with â€œslideâ€ animation for fusion slider
+- fixed the issue with Ã¢â‚¬Å“slideÃ¢â‚¬Â animation for fusion slider
 - mobile visibility settings will now work for rev slider with Avada styles enabled
 - fixed issue of recent work widget in mega menu breaking portfolio & faq pages
 - fixed issue in call of flexslider plugin in main.js
@@ -1815,10 +2891,10 @@ Version 3.5.2 - July 24th, 2014
 - added support for dynamic elements in accordions
 - removed extra semicolon in faqs.php
 - removed button transitions in layer slider due to animation conflict
-- â€œopen social links in new window" theme option now works with person & social links element
+- Ã¢â‚¬Å“open social links in new window" theme option now works with person & social links element
 - RTL issues (cart page & order drop down alignment, mega menu submenu indentation, woo tabs on mobile, woo checkout button)
 - google map coloring function revised to reflect black and white and accurate colors. You may need to adjust color overlay
-- fixed custom css field issue of not taking /â€™s
+- fixed custom css field issue of not taking /Ã¢â‚¬â„¢s
 - icons in sections separator are all centered now
 - elastic slider now uses alt tags on images
 - fixed issue of tabs element not taking custom colors in sidebar
@@ -1829,7 +2905,7 @@ Version 3.5.2 - July 24th, 2014
 - adjusted styles to accommodate Rev slider preview navigation type
 - style fixes for review comments on woo single product pages
 - all buttons now work with font family via theme options
-- removed duplicate idâ€™s for mobile and sticky menu
+- removed duplicate idÃ¢â‚¬â„¢s for mobile and sticky menu
 - fixed IE8 child theme issue
 - accordion element is now tied to theme options correctly
 - bbPress buttons style fixes
@@ -1838,7 +2914,7 @@ Version 3.5.2 - July 24th, 2014
 - fixed issue of widgets showing wrong number of elements on portfolio archive page
 - column elements will now work inside modals
 - fixed random issue of full width background images not working on mobiles
-- improved demo content importer (after import, itâ€™s now recommended to regenerate thumbnails)
+- improved demo content importer (after import, itÃ¢â‚¬â„¢s now recommended to regenerate thumbnails)
 - fixed issue of google map options resetting when page refreshes
 
 
@@ -1867,7 +2943,7 @@ Version 3.5.1 - July 3rd, 2014
 - fixed woocommerce sorting drop down issue on tablets
 - misc style fixes for blog large alternate, slider arrows, wpml, main menu last item
 - improved alignment for social icons in top header area on mobile
-- dropcaps in post excerpts show styles if strip_html=â€œnoâ€
+- dropcaps in post excerpts show styles if strip_html=Ã¢â‚¬Å“noÃ¢â‚¬Â
 - fixed issue of date archive page showing %s in title ext
 - custom button colors now work with tagline boxes, portfolio pages, CF7 plugin, gravity forms
 - replaced get_the_permalink with get_permalink in single.php
@@ -1935,7 +3011,7 @@ Version 3.5
 - NEW: Google map element options (map design styling, color overlay, info box styling, colors, map markers)
 - NEW: Highlight element options (rounded edges)
 - NEW: Person element options (pic style type, style color, border size, border color, boxed social icons, custom icon & box colors, border radius, tooltip position)
-- NEW: Pricing table element options (new â€œfeaturedâ€ column option, hover effects & shadows, one more column per row)
+- NEW: Pricing table element options (new Ã¢â‚¬Å“featuredÃ¢â‚¬Â column option, hover effects & shadows, one more column per row)
 - NEW: Progress bars element options (striped filling, animated stripes, text color)
 - NEW: Separator element options (new styles, icon additions, width)
 - NEW: Social share box element options (text color, boxed or unboxed icons, custom icon & box colors, border radius, tooltip position)
@@ -2051,7 +3127,7 @@ Version 3.4.3 - April 24th, 2014
 - counter box issue with unit in back, can now go front or back
 - dark skin color fixes (titles, arrows, woo)
 - xss bug in contact form
-- meta data issue with extra â€œ|â€ symbol
+- meta data issue with extra Ã¢â‚¬Å“|Ã¢â‚¬Â symbol
 - youtube video issue with video pausing and images on port/blog post
 - events manager support for recurring events on category/tag pages
 - Safari v5 menu issue, and page title bar issue
@@ -2090,9 +3166,9 @@ Version 3.4.1
 - NEW: option to disable mega menu
 - NEW: Vimeo/youtube api parameter added to elements
 - NEW: tag meta data added to blog posts, enable/disable
-- NEW: option to choose â€œnoneâ€ for testimonial icon
+- NEW: option to choose Ã¢â‚¬Å“noneÃ¢â‚¬Â for testimonial icon
 - NEW: new revolution slider
-- added option to choose â€œnoneâ€ for image frame alignment
+- added option to choose Ã¢â‚¬Å“noneÃ¢â‚¬Â for image frame alignment
 - improved option to choose background color for main menu woocommerce elements
 - enable/disable order notes on woo checkout page
 - styled woocommerce cross sells
@@ -2109,7 +3185,7 @@ Version 3.4.1
 - disable woocommerce shipping calculator
 - page title bar breadcrumb style improvements for 2 lines
 - IE11 text constrain issues fixed
-- added ability to use group idâ€™s for flickr widget
+- added ability to use group idÃ¢â‚¬â„¢s for flickr widget
 - added support for video resizing on bbpress forum replies
 - image link removed on single posts if light box disabled
 
@@ -2142,7 +3218,7 @@ Version 3.4
 - page title bar meta option will override theme options
 - reverted back to dynamic css/js in header file, see kb post
 - new options to disable related projects on portfolio posts
-- title text and icons link in content box with link=â€œâ€ option
+- title text and icons link in content box with link=Ã¢â‚¬Å“Ã¢â‚¬Â option
 - regular pages can now have a featured image slideshow
 - fixed issue of some content not showing in tabs
 - improved wpml menu flags on mobile device
@@ -2171,7 +3247,7 @@ Version 3.4
 - minor IE8 fixes
 - minor RTL styling adjustments
 - Facebook sharing icon fixed for mobile
-- fixed search issue in wp admin when using â€œadd mediaâ€
+- fixed search issue in wp admin when using Ã¢â‚¬Å“add mediaÃ¢â‚¬Â
 - fixed border issue when all meta data is removed
 - minor rev slider style adjustments
 - fixed issue of video embeds being stretched
@@ -2389,7 +3465,7 @@ Version 3.2
 - NEW: new option to enable/disable first featured image for video portfolio posts
 - NEW: new social icons color and link target option for contact widget
 - NEW: new main menu hover color styling option
-- NEW: new option to disable [â€¦]in excerpts
+- NEW: new option to disable [Ã¢â‚¬Â¦]in excerpts
 - NEW: new option for enabling "smooth height" for flex sliders
 - optimized overall theme performance
 - all.css is deprecated, all code is now in style.css, merged many jQuery plugin files into min.js

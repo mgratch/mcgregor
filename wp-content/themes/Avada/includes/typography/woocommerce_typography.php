@@ -1,6 +1,13 @@
 <?php
 /**
- * This file contains typography styles for WooCommerce plugin
+ * This file contains typography styles for WooCommerce plugin.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.0.0
  */
 
 // Do not allow directly accessing this file.
@@ -21,7 +28,7 @@ function avada_woocommerce_body_typography( $typography_elements ) {
 		$typography_elements['color'][]  = '.quantity .minus';
 		$typography_elements['color'][]  = '.quantity .plus';
 		$typography_elements['family'][] = '.woocommerce-success-message .button';
-		$typography_elements['family'][] = '.woocommerce .shipping-calculator-form .button';
+		// $typography_elements['family'][] = '.woocommerce .shipping-calculator-form .button';
 		$typography_elements['family'][] = '.widget.woocommerce .product-title';
 	}
 
@@ -78,11 +85,16 @@ function avada_woocommerce_h3_typography( $typography_elements ) {
 		$typography_elements['color'][]  = '.woocommerce-container .product-title';
 		$typography_elements['family'][] = '.woocommerce-container .product-title';
 		$typography_elements['size'][]   = '.woocommerce-container .product-title';
-		$typography_elements['size'][]   = 'p.demo_store';
+		$typography_elements['size'][]   = 'p.woocommerce-store-notice';
+		$typography_elements['size'][]   = 'body #wrapper h2.woocommerce-loop-category__title';
 
 		$typography_elements['color'][]  = '.woocommerce-tabs .entry-content h3';
 		$typography_elements['family'][] = '.woocommerce-tabs .entry-content h3';
 		$typography_elements['weight'][] = '.woocommerce-tabs .entry-content h3';
+
+		$typography_elements['color'][]  = 'body #wrapper h2.woocommerce-loop-category__title';
+		$typography_elements['family'][] = 'body #wrapper h2.woocommerce-loop-category__title';
+		$typography_elements['weight'][] = 'body #wrapper h2.woocommerce-loop-category__title';
 
 		$typography_elements['color'][]  = '.upsells.products h3';
 		$typography_elements['family'][] = '.upsells.products h3';

@@ -11,8 +11,8 @@
 		</ul>
 
 		<div class="fusion-page-builder-controls">
-			<a href="#" class="fusion-builder-layout-buttons fusion-builder-layout-buttons-toggle-containers" title="{{ fusionBuilderText.toggle_all_sections }}"><span class="dashicons-before dashicons-arrow-up"></span></a>
-			<a href="#" class="fusion-builder-layout-buttons fusion-builder-layout-custom-css <?php echo $has_custom_css; ?>" title="{{ fusionBuilderText.custom_css }}"><span class="fusiona-code"></span></a>
+			<a href="#" class="fusion-builder-layout-buttons fusion-builder-layout-buttons-toggle-containers" title="{{ fusionBuilderText.toggle_all_sections }}"><span class="dashicons-before dashicons-arrow-down"></span></a>
+			<a href="#" class="fusion-builder-layout-buttons fusion-builder-layout-custom-css <?php echo esc_attr( $has_custom_css ); ?>" title="{{ fusionBuilderText.custom_css }}"><span class="fusiona-code"></span></a>
 			<a href="#" class="fusion-builder-layout-buttons fusion-builder-template-buttons-save" title="{{ fusionBuilderText.save_page_layout }}"><span class="fusiona-drive"></span></a>
 			<a href="#" class="fusion-builder-layout-buttons fusion-builder-layout-buttons-clear" title="{{ fusionBuilderText.delete_page_layout }}"><span class="fusiona-trash-o"></span></a>
 			<a href="javascript:void(0)" class="fusion-builder-layout-buttons fusion-builder-layout-buttons-history" title="{{ fusionBuilderText.history }}">
@@ -28,8 +28,9 @@
 			$echo_custom_css = '';
 			if ( '' != $saved_custom_css ) {
 				$echo_custom_css = $saved_custom_css;
-			} ?>
-			<textarea name="_fusion_builder_custom_css" id="fusion-custom-css-field" placeholder="{{ fusionBuilderText.add_css_code_here }}"><?php echo $echo_custom_css; ?></textarea>
+			}
+			?>
+			<textarea name="_fusion_builder_custom_css" id="fusion-custom-css-field" placeholder="{{ fusionBuilderText.add_css_code_here }}"><?php echo $echo_custom_css; // WPCS: XSS ok. ?></textarea>
 		</div>
 
 	</div>

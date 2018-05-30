@@ -1,4 +1,13 @@
 <?php
+/**
+ * Footer Metabox options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +22,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Yes', 'Avada' ),
 		'no'      => esc_attr__( 'No', 'Avada' ),
 	),
-	esc_html__( 'Choose to show or hide the footer.', 'Avada' ) . Avada()->settings->get_default_description( 'footer_widgets', '', 'yesno' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to show or hide the footer. %s', 'Avada' ), Avada()->settings->get_default_description( 'footer_widgets', '', 'yesno' ) )
 );
 
 $this->radio_buttonset(
@@ -24,7 +34,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Yes', 'Avada' ),
 		'no'      => esc_attr__( 'No', 'Avada' ),
 	),
-	esc_html__( 'Choose to show or hide the copyright area.', 'Avada' ) . Avada()->settings->get_default_description( 'footer_copyright', '', 'yesno' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to show or hide the copyright area. %s', 'Avada' ), Avada()->settings->get_default_description( 'footer_copyright', '', 'yesno' ) )
 );
 
 $this->radio_buttonset(
@@ -35,7 +46,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Yes', 'Avada' ),
 		'no'      => esc_attr__( 'No', 'Avada' ),
 	),
-	esc_html__( 'Choose to set footer width to 100% of the browser width. Select "No" for site width.', 'Avada' ) . Avada()->settings->get_default_description( 'footer_100_width', '', 'yesno' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to set footer width to 100&#37; of the browser width. Select "No" for site width. %s', 'Avada' ), Avada()->settings->get_default_description( 'footer_100_width', '', 'yesno' ) )
 );
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

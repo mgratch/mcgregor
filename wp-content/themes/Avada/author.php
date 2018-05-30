@@ -1,4 +1,10 @@
 <?php
+/**
+ * Authors template.
+ *
+ * @package Avada
+ * @subpackage Templates
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -6,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <?php get_header(); ?>
-<div id="content" <?php Avada()->layout->add_class( 'content_class' ); ?> <?php Avada()->layout->add_style( 'content_style' ); ?>>
+<section id="content" <?php Avada()->layout->add_class( 'content_class' ); ?> <?php Avada()->layout->add_style( 'content_style' ); ?>>
 	<?php
 	/**
 	 * Author Info Hook avada_author_info.
@@ -17,8 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	?>
 
 	<?php get_template_part( 'templates/blog', 'layout' ); ?>
-</div>
+</section>
 <?php do_action( 'avada_after_content' ); ?>
-<?php get_footer();
+<?php
+get_footer();
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

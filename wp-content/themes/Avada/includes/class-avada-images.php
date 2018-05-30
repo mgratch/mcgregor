@@ -1,4 +1,15 @@
 <?php
+/**
+ * Handle images in Avada.
+ * Includes responsive-images tweaks.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      3.8
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -8,10 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handle images in Avada.
  * Includes responsive-images tweaks.
- *
- * @since 3.8
  */
-class Avada_Images {
+class Avada_Images extends Fusion_Images {
 
 	/**
 	 * The grid image meta.
@@ -43,13 +52,16 @@ class Avada_Images {
 	/**
 	 * Constructor.
 	 *
-	 * @access  public
+	 * @access public
 	 */
 	public function __construct() {
 
-		self::$grid_image_meta = array();
-		self::$grid_accepted_widths = array( '200', '400', '600', '800', '1200' );
-		self::$supported_grid_layouts = array( 'grid', 'timeline', 'large', 'portfolio_full', 'related-posts' );
+		// The parent-class constructor.
+		parent::__construct();
+
+		self::$grid_image_meta        = array();
+		self::$grid_accepted_widths   = array( '200', '400', '600', '800', '1200' );
+		self::$supported_grid_layouts = array( 'masonry', 'grid', 'timeline', 'large', 'portfolio_full', 'related-posts' );
 
 		$options = get_option( Avada::get_option_name() );
 		if ( isset( $options['status_lightbox'] ) && $options['status_lightbox'] ) {
@@ -58,37 +70,19 @@ class Avada_Images {
 
 		add_filter( 'jpeg_quality', array( $this, 'set_jpeg_quality' ) );
 		add_filter( 'wp_editor_set_quality', array( $this, 'set_jpeg_quality' ) );
-		add_filter( 'max_srcset_image_width', array( $this, 'set_max_srcset_image_width' ) );
-		add_filter( 'wp_calculate_image_srcset', array( $this, 'set_largest_image_size' ), '10', '5' );
-		add_filter( 'wp_calculate_image_srcset', array( $this, 'edit_grid_image_srcset' ), '15', '5' );
-		add_filter( 'wp_calculate_image_sizes', array( $this, 'edit_grid_image_sizes' ), '10', '5' );
-		add_filter( 'post_thumbnail_html', array( $this, 'edit_grid_image_src' ), '10', '5' );
-		add_action( 'delete_attachment', array( $this, 'delete_resized_images' ) );
-	}
 
-	/**
-	 * Adds lightbox attributes to links.
-	 *
-	 * @param  string $content The content.
-	 */
-	public function prepare_lightbox_links( $content ) {
-
-		preg_match_all( '/<a[^>]+href=([\'"])(.+?)\1[^>]*>/i', $content, $matches );
-		$attachment_id = self::get_attachment_id_from_url( $matches[2][0] );
-		$attachment_id = apply_filters( 'wpml_object_id', $attachment_id, 'attachment' );
-		$title = get_post_field( 'post_title', $attachment_id );
-		$caption = get_post_field( 'post_excerpt', $attachment_id );
-
-		$content = preg_replace( '/<a/', '<a data-rel="iLightbox[postimages]" data-title="' . $title . '" data-caption="' . $caption . '"' , $content, 1 );
-
-		return $content;
+		add_filter( 'fusion_library_content_break_point', array( $this, 'content_break_point' ) );
+		add_filter( 'fusion_library_content_width', array( $this, 'content_width' ) );
+		add_filter( 'fusion_library_main_image_breakpoint', array( $this, 'main_image_breakpoint' ) );
+		add_filter( 'fusion_library_image_base_size_width', array( $this, 'base_size_width' ), 10, 4 );
+		add_filter( 'fusion_library_grid_main_break_point', array( $this, 'grid_main_break_point' ) );
+		add_filter( 'fusion_library_image_grid_initial_sizes', array( $this, 'image_grid_initial_sizes' ), 10, 3 );
 	}
 
 	/**
 	 * Modify the image quality and set it to chosen Theme Options value.
 	 *
 	 * @since 3.9
-	 *
 	 * @return string The new image quality.
 	 */
 	public function set_jpeg_quality() {
@@ -96,440 +90,95 @@ class Avada_Images {
 	}
 
 	/**
-	 * Modify the maximum image width to be included in srcset attribute.
+	 * Returns the content break-point.
 	 *
-	 * @since 3.9
-	 *
-	 * @param int $max_width  The maximum image width to be included in the 'srcset'. Default '1600'.
-	 *
-	 * @return int 	The new max width.
+	 * @access public
+	 * @since 5.1.0
+	 * @return int
 	 */
-	public function set_max_srcset_image_width( $max_width ) {
-		return 1920;
+	public function content_break_point() {
+		$side_header_width   = ( 'Top' === Avada()->settings->get( 'header_position' ) ) ? 0 : intval( Avada()->settings->get( 'side_header_width' ) );
+		return $side_header_width + intval( Avada()->settings->get( 'content_break_point' ) );
 	}
 
 	/**
-	 * Add the fullsize image to the scrset attribute.
+	 * Returns the content-width.
 	 *
-	 * @since 3.9.0
-	 *
-	 * @param array  $sources {
-	 *     One or more arrays of source data to include in the 'srcset'.
-	 *
-	 *     @type array $width {
-	 *         @type string $url        The URL of an image source.
-	 *         @type string $descriptor The descriptor type used in the image candidate string,
-	 *                                  either 'w' or 'x'.
-	 *         @type int    $value      The source width if paired with a 'w' descriptor, or a
-	 *                                  pixel density value if paired with an 'x' descriptor.
-	 *     }
-	 * }
-	 * @param array  $size_array    Array of width and height values in pixels (in that order).
-	 * @param string $image_src     The 'src' of the image.
-	 * @param array  $image_meta    The image meta data as returned by 'wp_get_attachment_metadata()'.
-	 * @param int    $attachment_id Image attachment ID or 0.
-	 *
-	 * @return array $sources 		One or more arrays of source data to include in the 'srcset'.
+	 * @access public
+	 * @since 5.1.0
+	 * @return int
 	 */
-	public function set_largest_image_size( $sources, $size_array, $image_src, $image_meta, $attachment_id ) {
-		$cropped_image = false;
-
-		foreach ( $sources as $source => $details ) {
-			if ( $details['url'] == $image_src ) {
-				$cropped_image = true;
-			}
-		}
-
-		if ( ! $cropped_image ) {
-			$full_image_src = wp_get_attachment_image_src( $attachment_id, 'full' );
-
-			$full_size = array(
-				'url'        => $full_image_src[0],
-				'descriptor' => 'w',
-				'value'      => $image_meta['width'],
-			);
-
-			$sources[ $image_meta['width'] ] = $full_size;
-		}
-
-		return $sources;
+	public function content_width() {
+		return Avada()->layout->get_content_width();
 	}
 
 	/**
-	 * Filter out all srcset attributes, that do not fit current grid layout.
+	 * Returns the main image breakpoint.
 	 *
-	 * @since 4.0.0
-	 *
-	 * @param array  $sources {
-	 *     One or more arrays of source data to include in the 'srcset'.
-	 *
-	 *     @type array $width {
-	 *         @type string $url        The URL of an image source.
-	 *         @type string $descriptor The descriptor type used in the image candidate string,
-	 *                                  either 'w' or 'x'.
-	 *         @type int    $value      The source width if paired with a 'w' descriptor, or a
-	 *                                  pixel density value if paired with an 'x' descriptor.
-	 *     }
-	 * }
-	 * @param array  $size_array    Array of width and height values in pixels (in that order).
-	 * @param string $image_src     The 'src' of the image.
-	 * @param array  $image_meta    The image meta data as returned by 'wp_get_attachment_metadata()'.
-	 * @param int    $attachment_id Image attachment ID or 0.
-	 *
-	 * @return array $sources 		One or more arrays of source data to include in the 'srcset'.
+	 * @access public
+	 * @since 5.1.0
+	 * @return int
 	 */
-	public function edit_grid_image_srcset( $sources, $size_array, $image_src, $image_meta, $attachment_id ) {
-		// Only do manipulation for blog images.
-		if ( ! empty( self::$grid_image_meta ) ) {
-
-			// Check if Safari below version 9 is used.
-			$is_safari_below_v9 = false;
-			if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-				$user_agent = $_SERVER['HTTP_USER_AGENT'];
-
-				preg_match( '/(?:version\/|(?:safari) )([\d.]+)/i', $user_agent, $matches );
-				$version = isset( $matches[1] ) ? $matches[1] : false;
-
-				if ( false !== stripos( $user_agent, 'safari' ) && false === stripos( $user_agent, 'chrome' ) && version_compare( $version, '9.0.0', '<' ) ) {
-					$is_safari_below_v9 = true;
-				}
-			}
-
-			// All browsers except Safari below version 9.
-			if ( ! $is_safari_below_v9 ) {
-				// Only include the uncropped sizes in srcset.
-				foreach ( $sources as $width => $source ) {
-
-					// Make sure the original image isn't deleted.
-					preg_match( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif|tiff|svg)$)/i', $source['url'], $matches );
-
-					if ( ! in_array( $width, self::$grid_accepted_widths ) && isset( $matches[0] )  ) {
-						unset( $sources[ $width ] );
-					}
-				}
-				// Safari below version 9.
-			} else {
-				$accepted_widths = array( '400', '800', '1200' );
-
-				foreach ( $sources as $width => $source ) {
-					if ( ! in_array( $width, $accepted_widths ) ) {
-						// Unset cropped sizes.
-						unset( $sources[ $width ] );
-					} else {
-						// Reset the sources to x descriptor.
-						if ( in_array( $width, $accepted_widths ) ) {
-							$sources[ $width ]['descriptor'] = 'x';
-							$sources[ $width ]['value'] = array_search( $width, $accepted_widths ) + 1;
-						}
-					}
-				}
-			}
-		}
-
-		ksort( $sources );
-
-		return $sources;
+	public function main_image_breakpoint() {
+		$main_break_point  = (int) Avada()->settings->get( 'grid_main_break_point' );
+		$side_header_width = ( 'Top' === Avada()->settings->get( 'header_position' ) ) ? 0 : intval( Avada()->settings->get( 'side_header_width' ) );
+		return $main_break_point + $side_header_width;
 	}
 
 	/**
-	 * Edits the'sizes' attribute for grid images.
+	 * Returns bas width of an image container.
 	 *
-	 * @since 4.0
-	 *
-	 * @param string       $sizes         A source size value for use in a 'sizes' attribute.
-	 * @param array|string $size          Image size to retrieve. Accepts any valid image size, or an array
-	 *                                    of width and height values in pixels (in that order). Default 'medium'.
-	 * @param string       $image_src     Optional. The URL to the image file. Default null.
-	 * @param array        $image_meta    Optional. The image meta data as returned by 'wp_get_attachment_metadata()'.
-	 *                                    Default null.
-	 * @param int          $attachment_id Optional. Image attachment ID. Either `$image_meta` or `$attachment_id`
-	 *                                    is needed when using the image size name as argument for `$size`. Default 0.
-	 * @return string|bool A valid source size value for use in a 'sizes' attribute or false.
+	 * @since 5.1.0
+	 * @access public
+	 * @param int    $width        The image width in pixels.
+	 * @param string $layout       The layout name.
+	 * @param int    $columns      The number of columns used as a divider.
+	 * @param int    $gutter_width The gutter width - in pixels.
+	 * @return int
 	 */
-	public function edit_grid_image_sizes( $sizes, $size, $image_src, $image_meta, $attachment_id ) {
-		if ( isset( self::$grid_image_meta['layout'] ) ) {
-			$side_header_width = ( 'Top' == Avada()->settings->get( 'header_position' ) ) ? 0 : intval( Avada()->settings->get( 'side_header_width' ) );
-			$content_break_point = $side_header_width + intval( Avada()->settings->get( 'content_break_point' ) );
-			$content_width = Avada()->layout->get_content_width();
-
-			if ( isset( self::$grid_image_meta['gutter_width'] ) ) {
-				$content_width -= self::$grid_image_meta['gutter_width'] * ( (int) self::$grid_image_meta['columns'] - 1 );
-			}
-
-			// Grid.
-			if ( in_array( self::$grid_image_meta['layout'], array( 'grid', 'portfolio_full', 'related-posts' ) ) ) {
-
-				$main_break_point = (int) Avada()->settings->get( 'grid_main_break_point' );
-				if ( 640 < $main_break_point ) {
-					$breakpoint_range = $main_break_point - 640;
-				} else {
-					$breakpoint_range = 360;
-				}
-
-				$breakpoint_interval = $breakpoint_range / 5;
-
-				$break_points[6] = $main_break_point + $side_header_width;
-				$break_points[5] = $break_points[6] - $breakpoint_interval;
-				$break_points[4] = $break_points[6] - 2 * $breakpoint_interval;
-				$break_points[3] = $break_points[6] - 3 * $breakpoint_interval;
-				$break_points[2] = $break_points[6] - 4 * $breakpoint_interval;
-				$break_points[1] = $break_points[6] - 5 * $breakpoint_interval;
-				$sizes = '';
-
-				// Make sure image sizes will be correct for 100% width pages.
-				if ( Avada()->layout->is_current_wrapper_hundred_percent() ) {
-
-					$largest_breakpoint = $main_break_point + 200;
-					$columns = (int) self::$grid_image_meta['columns'];
-					$width   = round( 100 / $columns );
-					$sizes  .= '(min-width: ' . $largest_breakpoint . 'px) ' . $width . 'vw, ';
-
-				}
-
-				foreach ( $break_points as $columns => $breakpoint ) {
-					if ( $columns <= (int) self::$grid_image_meta['columns'] ) {
-						$width = $content_width / $columns;
-						if ( $breakpoint < $width ) {
-							$width = $breakpoint + $breakpoint_interval;
-						}
-						$sizes .= '(min-width: ' . round( $breakpoint ) . 'px) ' . round( $width ) . 'px, ';
-					}
-				}
-				$sizes .= '100vw';
-
-				// Timeline.
-			} elseif ( 'timeline' == self::$grid_image_meta['layout'] ) {
-				$width = 40;
-				$sizes = '(max-width: ' . $content_break_point . 'px) 100vw, ' . $width . 'vw';
-
-				// Large Layouts.
-			} elseif ( false !== strpos( self::$grid_image_meta['layout'], 'large' ) ) {
-				$sizes = '(max-width: ' . $content_break_point . 'px) 100vw, ' . $content_width . 'px';
-			}
-		}
-
-		return $sizes;
-	}
-
-	/**
-	 * Change the src attribute for grid images.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @param string       $html              The post thumbnail HTML.
-	 * @param int          $post_id           The post ID.
-	 * @param string       $post_thumbnail_id The post thumbnail ID.
-	 * @param string|array $size              The post thumbnail size. Image size or array of width and height
-	 *                                        values (in that order). Default 'post-thumbnail'.
-	 * @param string       $attr              Query string of attributes.
-	 * @return string The html markup of the image.
-	 */
-	public function edit_grid_image_src( $html, $post_id = null, $post_thumbnail_id = null, $size = null, $attr = null ) {
-		if ( isset( self::$grid_image_meta['layout'] ) && in_array( self::$grid_image_meta['layout'], self::$supported_grid_layouts ) && 'full' === $size ) {
-
-			$image_size = $this->get_grid_image_base_size( $post_thumbnail_id, self::$grid_image_meta['layout'], self::$grid_image_meta['columns'] );
-
-			$full_image_src = wp_get_attachment_image_src( $post_thumbnail_id, $image_size );
-
-			$html = preg_replace( '@src="([^"]+)"@', 'src="' . $full_image_src[0] . '"', $html );
-		}
-
-		return $html;
-	}
-
-	/**
-	 * Get image size based on column size.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @param null|int    $post_thumbnail_id Attachment ID.
-	 * @param null|string $layout            The layout.
-	 * @param null|int    $columns           Number of columns.
-	 * @return string Image size name.
-	 */
-	public function get_grid_image_base_size( $post_thumbnail_id = null, $layout = null, $columns = null ) {
-		// @codingStandardsIgnoreStart
-		global $is_IE;
-		// @codingStandardsIgnoreEnd
-		$sizes = array();
-		$width = '';
-
-		// Get image metadata.
-		$image_meta = wp_get_attachment_metadata( $post_thumbnail_id );
-
-		if ( $image_meta ) {
-			$image_sizes = $image_meta['sizes'];
-
-			if ( $image_sizes && is_array( $image_sizes ) ) {
-				foreach ( $image_sizes as $name => $image ) {
-					if ( in_array( $name, self::$grid_accepted_widths ) ) {
-						// Create accepted sizes array.
-						if ( $image['width'] ) {
-							$sizes[ $image['width'] ] = $name;
-						}
-					}
-				}
-			}
-			$sizes[ $image_meta['width'] ] = 'full';
-		}
-
+	public function base_size_width( $width, $layout, $columns = 1, $gutter_width = 30 ) {
 		if ( false !== strpos( $layout, 'large' ) ) {
-			$width = Avada()->layout->get_content_width();
-		} elseif ( 'timeline' == $layout ) {
-			$width = Avada()->layout->get_content_width() * 0.8 / $columns;
-		} else {
-			$width = Avada()->layout->get_content_width();
-
-			if ( isset( self::$grid_image_meta['gutter_width'] ) ) {
-				$width -= self::$grid_image_meta['gutter_width'] * ( $columns - 1 );
-			}
-
-			$width = $width / $columns;
+			return (int) Avada()->layout->get_content_width();
 		}
-
-		ksort( $sizes );
-
-		// Find closest size match.
-		$image_size = null;
-		$size_name = null;
-
-		foreach ( $sizes as $size => $name ) {
-			if ( null === $image_size || abs( $width - $image_size ) > abs( $size - $width ) ) {
-				$image_size = $size;
-				$size_name = $name;
-			}
+		$columns = ( 1 > intval( $columns ) ) ? 1 : intval( $columns );
+		if ( 'timeline' === $layout ) {
+			return absint( Avada()->layout->get_content_width() * 0.8 / $columns );
 		}
+		$width = Avada()->layout->get_content_width();
 
-		// Fallback to 'full' image size if no match was found or Internet Explorer is used.
-		// @codingStandardsIgnoreStart
-		if ( null == $size_name || '' == $size_name || $is_IE ) {
-			$size_name = 'full';
+		if ( isset( $gutter_width ) ) {
+			$width -= intval( $gutter_width ) * ( $columns - 1 );
 		}
-		// @codingStandardsIgnoreEnd
-
-		return $size_name;
+		return absint( $width / $columns );
 	}
 
 	/**
-	 * Setter function for the $grid_image_meta variable.
+	 * Returns the main image breakpoint.
 	 *
-	 * @since 4.0
-	 *
-	 * @param array $grid_image_meta    Array containing layout and number of columns.
-	 *
-	 * @return void
+	 * @access public
+	 * @since 5.1.0
+	 * @return int
 	 */
-	public function set_grid_image_meta( $grid_image_meta ) {
-		self::$grid_image_meta = $grid_image_meta;
+	public function grid_main_break_point() {
+		return (int) Avada()->settings->get( 'grid_main_break_point' );
 	}
 
 	/**
-	 * Gets the attachment ID from the url.
+	 * Returns the initial $sizes.
 	 *
-	 * @param string $attachment_url The url of the attachment.
-	 * @return string The attachment ID
+	 * @access public
+	 * @since 5.1.0
+	 * @param string $sizes      The sizes formatted as a media query or empty.
+	 * @param int    $breakpoint The breakpoint in pixels.
+	 * @param int    $columns    The number of columns.
+	 * @return string
 	 */
-	public static function get_attachment_id_from_url( $attachment_url = '' ) {
-		global $wpdb;
-		$attachment_id = false;
-
-		if ( '' == $attachment_url || ! is_string( $attachment_url ) ) {
-			return '';
+	public function image_grid_initial_sizes( $sizes = '', $breakpoint = 800, $columns = 1 ) {
+		// Make sure image sizes will be correct for 100% width pages.
+		if ( Avada()->layout->is_current_wrapper_hundred_percent() ) {
+			return '(min-width: ' . ( $breakpoint + 200 ) . 'px) ' . round( 100 / $columns ) . 'vw, ';
 		}
-
-		$upload_dir_paths = wp_upload_dir();
-		$upload_dir_paths_baseurl = $upload_dir_paths['baseurl'];
-
-		if ( substr( $attachment_url, 0, 2 ) == '//' ) {
-			$upload_dir_paths_baseurl = Avada_Sanitize::get_url_with_correct_scheme( $upload_dir_paths_baseurl );
-		}
-
-		// Make sure the upload path base directory exists in the attachment URL, to verify that we're working with a media library image.
-		if ( false !== strpos( $attachment_url, $upload_dir_paths_baseurl ) ) {
-
-			// If this is the URL of an auto-generated thumbnail, get the URL of the original image.
-			$attachment_url = preg_replace( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif|tiff|svg)$)/i', '', $attachment_url );
-
-			// Remove the upload path base directory from the attachment URL.
-			$attachment_url = str_replace( $upload_dir_paths_baseurl . '/', '', $attachment_url );
-
-			// Run a custom database query to get the attachment ID from the modified attachment URL.
-			$attachment_id = $wpdb->get_var( $wpdb->prepare( "SELECT wposts.ID FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta WHERE wposts.ID = wpostmeta.post_id AND wpostmeta.meta_key = '_wp_attached_file' AND wpostmeta.meta_value = '%s' AND wposts.post_type = 'attachment'", $attachment_url ) );
-			$attachment_id = apply_filters( 'wpml_object_id', $attachment_id, 'attachment' );
-		}
-
-		return $attachment_id;
-	}
-
-	/**
-	 * Gets the most important attachment data from the url.
-	 *
-	 * @since 4.0
-	 * @param string $attachment_url The url of the used attachment.
-	 * @return array/bool The attachment data of the image, false if the url is empty or attachment not found.
-	 */
-	public static function get_attachment_data_from_url( $attachment_url = '' ) {
-
-		if ( '' == $attachment_url ) {
-			return false;
-		}
-
-		$attachment_data['url'] = preg_replace( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif)$)/i', '', $attachment_url );
-		$attachment_data['id'] = self::get_attachment_id_from_url( $attachment_data['url'] );
-
-		if ( ! $attachment_data['id'] ) {
-			return false;
-		}
-
-		preg_match( '/\d+x\d+(?=\.(jpg|jpeg|png|gif)$)/i', $attachment_url, $matches );
-		if ( count( $matches ) > 0 ) {
-			$dimensions = explode( 'x', $matches[0] );
-			$attachment_data['width'] = $dimensions[0];
-			$attachment_data['height'] = $dimensions[1];
-		} else {
-			$attachment_src = wp_get_attachment_image_src( $attachment_data['id'], 'full' );
-			$attachment_data['width'] = $attachment_src[1];
-			$attachment_data['height'] = $attachment_src[2];
-		}
-
-		$attachment_data['alt'] = get_post_field( '_wp_attachment_image_alt', $attachment_data['id'] );
-		$attachment_data['caption'] = get_post_field( 'post_excerpt', $attachment_data['id'] );
-		$attachment_data['title'] = get_post_field( 'post_title', $attachment_data['id'] );
-
-		return $attachment_data;
-	}
-
-	/**
-	 * Deletes the resized images when the original image is deleted from the Wordpress Media Library.
-	 * This is necessary in order to handle custom image sizes created from the Fusion_Image_Resizer class.
-	 *
-	 * @param  int $post_id The post ID.
-	 */
-	function delete_resized_images( $post_id ) {
-		// Get attachment image metadata.
-		$metadata = wp_get_attachment_metadata( $post_id );
-		if ( ! $metadata ) {
-			return;
-		}
-		// Do some bailing if we cannot continue.
-		if ( ! isset( $metadata['file'] ) || ! isset( $metadata['image_meta']['resized_images'] ) ) {
-			return;
-		}
-		$pathinfo = pathinfo( $metadata['file'] );
-		$resized_images = $metadata['image_meta']['resized_images'];
-		// Get Wordpress uploads directory (and bail if it doesn't exist).
-		$wp_upload_dir = wp_upload_dir();
-		$upload_dir    = $wp_upload_dir['basedir'];
-		if ( ! is_dir( $upload_dir ) ) {
-			return;
-		}
-		// Delete the resized images.
-		foreach ( $resized_images as $dims ) {
-			// Get the resized images filename.
-			$file = $upload_dir . '/' . $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '-' . $dims . '.' . $pathinfo['extension'];
-			// Delete the resized image.
-			@unlink( $file );
-		}
+		return $sizes;
 	}
 
 	/**
@@ -547,39 +196,138 @@ class Avada_Images {
 			'height' => '',
 		);
 
-		$logo_url = Avada_Sanitize::get_url_with_correct_scheme( Avada()->settings->get( $logo_option_name, 'url' ) );
+		$logo_url = set_url_scheme( Avada()->settings->get( $logo_option_name, 'url' ) );
 
 		if ( $logo_url ) {
 			$logo_data['url'] = $logo_url;
 
-			if ( false !== strpos( $logo_option_name, 'retina' ) ) {
-				$logo_url = Avada_Sanitize::get_url_with_correct_scheme( Avada()->settings->get( str_replace( '_retina', '', $logo_option_name ), 'url' ) );
+			/*
+			 * Get data from normal logo, if we are checking a retina logo.
+			 * Except for the main retina logo, because it can be set witout default one because of BC.
+			 */
+			if ( false !== strpos( $logo_option_name, 'retina' ) && 'logo_retina' !== $logo_option_name ) {
+				$logo_url = set_url_scheme( Avada()->settings->get( str_replace( '_retina', '', $logo_option_name ), 'url' ) );
 			}
 
-			$logo_attachment_data = self::get_attachment_data_from_url( $logo_url );
+			$logo_attachment_data = $this->get_attachment_data_from_url( $logo_url );
 
 			if ( $logo_attachment_data ) {
-				$logo_data['width']  = $logo_attachment_data['width'];
-				$logo_data['height'] = $logo_attachment_data['height'];
-			} else {
-				if ( function_exists( 'getimagesize' ) ) {
-					$image_data = @getimagesize( 'https:' . $logo_data['url'] );
-					if ( ! $image_data ) {
-						$image_data = @getimagesize( 'http:' . $logo_data['url'] );
-					}
-					if ( $image_data ) {
-						$logo_data['width']  = absint( $image_data[0] );
-						$logo_data['height'] = absint( $image_data[1] );
-						if ( false !== strpos( $logo_option_name, 'retina' ) ) {
-							$logo_data['width']  = absint( $image_data[0] / 2 );
-							$logo_data['height'] = absint( $image_data[1] / 2 );
-						}
-					}
+				// For the main retina logo, we have to set the sizes correctly, for all others they are correct.
+				if ( 'logo_retina' === $logo_option_name ) {
+					$logo_data['width']  = $logo_attachment_data['width'] / 2;
+					$logo_data['height'] = $logo_attachment_data['height'] / 2;
+				} else {
+					$logo_data['width']  = $logo_attachment_data['width'];
+					$logo_data['height'] = $logo_attachment_data['height'];
 				}
 			}
 		}
 
 		return $logo_data;
+	}
+
+	/**
+	 * Get normal and retina logo images in srcset.
+	 *
+	 * @since 5.3
+	 * @param string $normla_logo The name of the normal logo option.
+	 * @param string $retina_logo The name of the retina logo option.
+	 * @return array The logo data.
+	 */
+	public function get_logo_image_srcset( $normla_logo, $retina_logo ) {
+
+		$logo_srcset_data = array(
+			'url'       => '',
+			'srcset'    => '',
+			'style'     => '',
+			'is_retina' => false,
+			'width'     => '',
+			'height'    => '',
+		);
+
+		$logo_url                     = set_url_scheme( Avada()->settings->get( $normla_logo, 'url' ) );
+		$logo_srcset_data['srcset']   = $logo_url . ' 1x';
+
+		// Get retina logo, if default one is not set.
+		if ( '' === $logo_url ) {
+			$logo_url                      = set_url_scheme( Avada()->settings->get( $retina_logo, 'url' ) );
+			$logo_data                     = self::get_logo_data( $retina_logo );
+			$logo_srcset_data['style']     = '';
+			$logo_srcset_data['srcset']    = $logo_url . ' 1x';
+			$logo_srcset_data['url']       = $logo_url;
+
+			if ( '' !== $logo_data['width'] ) {
+				$logo_srcset_data['style'] = ' style="max-height:' . $logo_data['height'] . 'px;height:auto;"';
+			}
+		} else {
+			$logo_data = Avada()->images->get_logo_data( $normla_logo );
+			$logo_srcset_data['style']     = '';
+			$logo_srcset_data['url']       = $logo_url;
+			$logo_srcset_data['is_retina'] = false;
+		}
+
+		$logo_srcset_data['width']  = $logo_data['width'];
+		$logo_srcset_data['height'] = $logo_data['height'];
+
+		if ( Avada()->settings->get( $retina_logo, 'url' ) && '' !== Avada()->settings->get( $retina_logo, 'url' ) && '' !== Avada()->settings->get( $retina_logo, 'width' ) && '' !== Avada()->settings->get( $retina_logo, 'height' ) ) {
+			$retina_logo                   = set_url_scheme( Avada()->settings->get( $retina_logo, 'url' ) );
+			$logo_srcset_data['srcset']   .= ', ' . $retina_logo . ' 2x';
+			$logo_srcset_data['is_retina'] = $retina_logo;
+
+			if ( '' !== $logo_data['width'] ) {
+				$logo_srcset_data['style'] = ' style="max-height:' . $logo_data['height'] . 'px;height:auto;"';
+			}
+		}
+		return $logo_srcset_data;
+	}
+
+	/**
+	 * Action to output a placeholder image.
+	 *
+	 * @param  string $featured_image_size     Size of the featured image that should be emulated.
+	 *
+	 * @return void
+	 */
+	public function render_placeholder_image( $featured_image_size = 'full' ) {
+		global $_wp_additional_image_sizes;
+
+		if ( in_array( $featured_image_size, array( 'full', 'fixed' ) ) ) {
+			$height = apply_filters( 'avada_set_placeholder_image_height', '150' );
+			$width  = '1500px';
+		} else {
+			// @codingStandardsIgnoreStart
+			@$height = $_wp_additional_image_sizes[ $featured_image_size ]['height'];
+			@$width  = $_wp_additional_image_sizes[ $featured_image_size ]['width'] . 'px';
+			// @codingStandardsIgnoreEnd
+		}
+		?>
+		<div class="fusion-placeholder-image" data-origheight="<?php echo esc_attr( $height ); ?>" data-origwidth="<?php echo esc_attr( $width ); ?>" style="height:<?php echo esc_attr( $height ); ?>px;width:<?php echo esc_attr( $width ); ?>;"></div>
+		<?php
+	}
+
+	/**
+	 * Returns the image class according to aspect ratio.
+	 *
+	 * @param  array $attachment The attachment.
+	 * @return string The image class.
+	 */
+	public function get_image_orientation_class( $attachment ) {
+
+		$sixteen_to_nine_ratio = 1.77;
+
+		if ( ! isset( $attachment[1] ) || ! isset( $attachment[2] ) || empty( $attachment[1] ) || empty( $attachment[2] ) ) {
+			return 'fusion-image-grid';
+		}
+
+		// Landscape.
+		if ( $attachment[1] / $attachment[2] > $sixteen_to_nine_ratio ) {
+			return 'fusion-image-landscape';
+		}
+
+		// Portrait.
+		if ( $attachment[2] / $attachment[1] > $sixteen_to_nine_ratio ) {
+			return 'fusion-image-portrait';
+		}
 	}
 }
 

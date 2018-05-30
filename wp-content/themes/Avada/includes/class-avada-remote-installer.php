@@ -1,4 +1,14 @@
 <?php
+/**
+ * Handles remotely installing premium plugins.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,22 +41,34 @@ class Avada_Remote_installer {
 	}
 
 	/**
-	 * Checks token against API
+	 * Checks token against API.
 	 *
 	 * @access private
-	 * @param string $download The name of the download..
+	 * @param string $download The name of the download.
 	 * @param string $token    The token.
 	 * @return false|string    Returns false if invalid.
 	 *                         If valid, then returns a nonce from the remote server.
 	 */
-	private function _get_nonce( $download, $token ) {
+	private function _get_nonce( $download, $token = false ) {
+
+		// Tweak for Envato Hosted.
+		$is_envato_hosted = (bool) ( defined( 'ENVATO_HOSTED_SITE' ) && ENVATO_HOSTED_SITE && defined( 'SUBSCRIPTION_CODE' ) && SUBSCRIPTION_CODE );
+		$token = ( $is_envato_hosted ) ? SUBSCRIPTION_CODE : $token;
 
 		// Get any existing copy of our transient data.
-		if ( false === ( $saved_nonce = get_transient( 'avada_ri_' . $download . $token ) ) ) {
+		$saved_nonce = get_transient( 'avada_ri_' . $download . $token );
+		if ( false === $saved_nonce ) {
 			// It wasn't there, so regenerate the data and save the transient.
-			$url      = $this->api_url . '?avada_action=request_download&item_name=' . urlencode( $download ) . '&token=' . $token;
-			$response = wp_remote_get( $url );
-			$body     = wp_remote_retrieve_body( $response );
+			$avada_version = Avada::get_theme_version();
+			$url           = $this->api_url . '?avada_action=request_download&item_name=' . rawurlencode( $download ) . '&token=' . $token . '&ver=' . $avada_version;
+			$url .= ( $is_envato_hosted ) ? '&envato-hosted=true' : '';
+
+			$response      = wp_remote_get(
+				$url, array(
+					'user-agent' => 'avada-user-agent',
+				)
+			);
+			$body          = wp_remote_retrieve_body( $response );
 
 			// Check for errors.
 			$error_responses = array(
@@ -59,7 +81,7 @@ class Avada_Remote_installer {
 				}
 			}
 			$trimmed = trim( $body );
-			$parts   = explode( '|', $body );
+			$parts   = explode( '|', $trimmed );
 
 			$saved_nonce = array();
 
@@ -69,10 +91,12 @@ class Avada_Remote_installer {
 					esc_attr( $parts[0] ),
 					esc_attr( $parts[1] ),
 				);
+			} else {
+				return false;
 			}
 
 			set_transient( 'avada_ri_' . $download . $token, $saved_nonce, 600 );
-		}
+		} // End if().
 
 		return $saved_nonce;
 
@@ -83,10 +107,11 @@ class Avada_Remote_installer {
 	 *
 	 * @access public
 	 * @since 5.0.0
-	 * @param string $download The plugin to download.
+	 * @param string       $download The plugin to download.
+	 * @param string|false $token    Force-use a token, or use default if false.
 	 * @return string|false
 	 */
-	public function get_package( $download ) {
+	public function get_package( $download, $token = false ) {
 
 		// Try to get a cached response.
 		$download_src = get_transient( 'avada_remote_installer_package_' . $download );
@@ -96,15 +121,21 @@ class Avada_Remote_installer {
 			return $download_src;
 		}
 
+		$token = ( ! $token ) ? Avada()->registration->get_token() : $token;
+
 		// Source is not cached, retrieve it and cache it.
 		// Check for token and then install if it's valid.
-		$nonces = $this->_get_nonce( $download,  Avada()->registration->get_token() );
-		if ( false !== $nonces && Avada()->registration->is_registered() ) {
+		$nonces = $this->_get_nonce( $download, $token );
+
+		$registered = ( ! in_array( $download, array( 'Fusion Builder', 'Fusion Core' ), true ) ) ? Avada()->registration->is_registered() : true;
+
+		if ( false !== $nonces && $registered ) {
 			$api_args = array(
 				'avada_action' => 'get_download',
-				'item_name'    => urlencode( $download ),
+				'item_name'    => rawurlencode( $download ),
 				'nonce'        => isset( $nonces[0] ) ? $nonces[0] : '',
 				't'            => isset( $nonces[1] ) ? $nonces[1] : '',
+				'ver'          => Avada::get_theme_version(),
 			);
 
 			$download_src = add_query_arg( $api_args, $this->api_url );
@@ -114,6 +145,23 @@ class Avada_Remote_installer {
 		}
 
 		// Something went wrong, return false.
+		return false;
+	}
+
+	/**
+	 * Gets the download URL for a plugin.
+	 *
+	 * @since 5.3
+	 * @access public
+	 * @return bool True if subscription code is valid, false otherwise.
+	 */
+	public function validate_envato_hosted_subscription_code() {
+		$nonce = $this->_get_nonce( 'Avada' );
+
+		if ( is_array( $nonce ) ) {
+			return true;
+		}
+
 		return false;
 	}
 }

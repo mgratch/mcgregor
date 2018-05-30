@@ -1,101 +1,85 @@
 <?php
+/**
+ * Logo template.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit( 'Direct script access denied.' );
 }
-
-if ( 'v7' === Avada()->settings->get( 'header_layout' ) ) {
+$logo_opening_markup = '<div class="';
+$logo_closing_markup = '</div>';
+if ( 'v7' === Avada()->settings->get( 'header_layout' ) && ! Avada()->settings->get( 'logo_background' ) ) {
 	$logo_opening_markup = '<li class="fusion-middle-logo-menu-logo ';
 	$logo_closing_markup = '</li>';
-} else {
-	$logo_opening_markup = '<div class="';
-	$logo_closing_markup = '</div>';
+} elseif ( 'v7' === Avada()->settings->get( 'header_layout' ) && Avada()->settings->get( 'logo_background' ) && 'Top' === Avada()->settings->get( 'header_position' ) ) {
+	$logo_opening_markup = '<li class="fusion-logo-background fusion-middle-logo-menu-logo"><div class="';
+	$logo_closing_markup = '</div></li>';
+} elseif ( Avada()->settings->get( 'logo_background' ) && 'v4' !== Avada()->settings->get( 'header_layout' ) && 'v5' !== Avada()->settings->get( 'header_layout' ) && 'Top' === Avada()->settings->get( 'header_position' ) ) {
+	$logo_opening_markup = '<div class="fusion-logo-background"><div class="';
+	$logo_closing_markup = '</div></div>';
 }
-?>
-
-<?php echo $logo_opening_markup;?>fusion-logo" data-margin-top="<?php echo Avada()->settings->get( 'logo_margin', 'top' ); ?>" data-margin-bottom="<?php echo Avada()->settings->get( 'logo_margin', 'bottom' ); ?>" data-margin-left="<?php echo Avada()->settings->get( 'logo_margin', 'left' ); ?>" data-margin-right="<?php echo Avada()->settings->get( 'logo_margin', 'right' ); ?>">
+if ( '' !== Avada()->settings->get( 'logo', 'url' ) || '' !== Avada()->settings->get( 'logo_retina', 'url' ) ) {
+	// @codingStandardsIgnoreLine
+	echo $logo_opening_markup; ?>fusion-logo" data-margin-top="<?php echo esc_attr( Avada()->settings->get( 'logo_margin', 'top' ) ); ?>" data-margin-bottom="<?php echo esc_attr( Avada()->settings->get( 'logo_margin', 'bottom' ) ); ?>" data-margin-left="<?php echo esc_attr( Avada()->settings->get( 'logo_margin', 'left' ) ); ?>" data-margin-right="<?php echo esc_attr( Avada()->settings->get( 'logo_margin', 'right' ) ); ?>">
 	<?php
+} else {
+	// @codingStandardsIgnoreLine
+	echo $logo_opening_markup; ?>fusion-logo" data-margin-top="0px" data-margin-bottom="0px" data-margin-left="0px" data-margin-right="0px">
+	<?php
+}
 	/**
 	 * The avada_logo_prepend hook.
 	 */
 	do_action( 'avada_logo_prepend' );
+
+	$logo_anchor_tag_attributes = '';
+	$logo_anchor_tag_attributes_array = apply_filters( 'avada_logo_anchor_tag_attributes',
+		array(
+			'class' => 'fusion-logo-link',
+			// @codingStandardsIgnoreLine Squiz.PHP.DisallowMultipleAssignments.Found
+			'href'  => ( $custom_link = Avada()->settings->get( 'logo_custom_link' ) ) ? esc_url( $custom_link ) : esc_url( home_url( '/' ) ), // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+		)
+	);
+
+	foreach ( $logo_anchor_tag_attributes_array as $attribute => $value ) {
+		if ( 'href' === $attribute ) {
+			$value = esc_url( $value );
+		} else {
+			$value = esc_attr( $value );
+		}
+
+		$logo_anchor_tag_attributes .= ' ' . $attribute . '="' . $value . '" ';
+	}
 	?>
 	<?php if ( ( Avada()->settings->get( 'logo', 'url' ) && '' !== Avada()->settings->get( 'logo', 'url' ) ) || ( Avada()->settings->get( 'logo_retina', 'url' ) && '' !== Avada()->settings->get( 'logo_retina', 'url' ) ) ) : ?>
-		<a class="fusion-logo-link" href="<?php echo home_url( '/' ); ?>">
+		<a<?php echo $logo_anchor_tag_attributes; // WPCS: XSS ok. ?>>
+
+			<?php $standard_logo = Avada()->images->get_logo_image_srcset( 'logo', 'logo_retina' ); ?>
+			<!-- standard logo -->
+			<img src="<?php echo esc_url_raw( $standard_logo['url'] ); ?>" srcset="<?php echo esc_attr( $standard_logo['srcset'] ); ?>" width="<?php echo esc_attr( $standard_logo['width'] ); ?>" height="<?php echo esc_attr( $standard_logo['height'] ); ?>"<?php echo $standard_logo['style']; // WPCS: XSS ok. ?> alt="<?php bloginfo( 'name' ); ?> <?php esc_attr_e( 'Logo', 'Avada' ); ?>" retina_logo_url="<?php echo esc_url_raw( $standard_logo['is_retina'] ); ?>" class="fusion-standard-logo" />
+
 			<?php
-			$base_logo = 'default';
-			$logo_url = Avada_Sanitize::get_url_with_correct_scheme( Avada()->settings->get( 'logo', 'url' ) );
-			$matches = array();
-
-			if ( '' === $logo_url ) {
-				$base_logo = 'retina';
-				$logo_url = Avada_Sanitize::get_url_with_correct_scheme( Avada()->settings->get( 'logo_retina', 'url' ) );
-			}
-
-			preg_match( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif|tiff|svg)$)/i', $logo_url, $matches );
-			$logo_attachment_id = Avada()->images->get_attachment_id_from_url( $logo_url );
-
-			if ( isset( $matches[0] ) && $logo_attachment_id ) {
-				$thumbnail_dimensions = explode( 'x', $matches[0] );
-				$logo_size['width']  = trim( $thumbnail_dimensions[0], '-' );
-				$logo_size['height'] = $thumbnail_dimensions[1];
-
-			} else if ( $logo_attachment_id ) {
-				$logo_data = wp_get_attachment_image_src( $logo_attachment_id, 'full' );
-				if ( 'retina' == $base_logo ) {
-					$logo_size['width'] = $logo_data[1] / 2;
-					$logo_size['height'] = $logo_data[2] / 2;
-				} else {
-					$logo_size['width'] = $logo_data[1];
-					$logo_size['height'] = $logo_data[2];
-				}
-			} else {
-				$logo_size['width']  = '';
-				$logo_size['height'] = '';
-			}
+			if ( Avada()->settings->get( 'mobile_logo', 'url' ) && '' !== Avada()->settings->get( 'mobile_logo', 'url' ) ) {
+				$mobile_logo = Avada()->images->get_logo_image_srcset( 'mobile_logo', 'mobile_logo_retina' );
 			?>
-			<img src="<?php echo $logo_url; ?>" width="<?php echo $logo_size['width']; ?>" height="<?php echo $logo_size['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" class="fusion-logo-1x fusion-standard-logo" />
+				<!-- mobile logo -->
+				<img src="<?php echo esc_url_raw( $mobile_logo['url'] ); ?>" srcset="<?php echo esc_attr( $mobile_logo['srcset'] ); ?>" width="<?php echo esc_attr( $mobile_logo['width'] ); ?>" height="<?php echo esc_attr( $mobile_logo['height'] ); ?>"<?php echo $mobile_logo['style']; // WPCS: XSS ok. ?> alt="<?php bloginfo( 'name' ); ?> <?php esc_attr_e( 'Logo', 'Avada' ); ?>" retina_logo_url="<?php echo esc_url_raw( $mobile_logo['is_retina'] ); ?>" class="fusion-mobile-logo" />
+			<?php } ?>
 
-			<?php if ( Avada()->settings->get( 'logo_retina', 'url' ) && '' !== Avada()->settings->get( 'logo_retina', 'url' ) ) : ?>
-				<?php $retina_logo = Avada_Sanitize::get_url_with_correct_scheme( Avada()->settings->get( 'logo_retina', 'url' ) ); ?>
-				<?php $style = 'style="max-height: ' . $logo_size['height'] . 'px; height: auto;"'; ?>
-				<img src="<?php echo $retina_logo; ?>" width="<?php echo $logo_size['width']; ?>" height="<?php echo $logo_size['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" <?php echo $style; ?> class="fusion-standard-logo fusion-logo-2x" />
-			<?php else : ?>
-				<img src="<?php echo $logo_url; ?>" width="<?php echo $logo_size['width']; ?>" height="<?php echo $logo_size['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" class="fusion-standard-logo fusion-logo-2x" />
-			<?php endif; ?>
-
-			<!-- mobile logo -->
-			<?php if ( Avada()->settings->get( 'mobile_logo', 'url' ) && '' !== Avada()->settings->get( 'mobile_logo', 'url' ) ) : ?>
-				<?php $mobile_logo_data = Avada()->images->get_logo_data( 'mobile_logo' ); ?>
-				<img src="<?php echo $mobile_logo_data['url']; ?>" width="<?php echo $mobile_logo_data['width']; ?>" height="<?php echo $mobile_logo_data['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" class="fusion-logo-1x fusion-mobile-logo-1x" />
-
-				<?php if ( Avada()->settings->get( 'mobile_logo_retina', 'url' ) && '' != Avada()->settings->get( 'mobile_logo_retina', 'url' ) ) : ?>
-					<?php
-					$retina_mobile_logo_data = Avada()->images->get_logo_data( 'mobile_logo_retina' );
-					$style = 'style="max-height: ' . $retina_mobile_logo_data['height'] . 'px; height: auto;"';
-					?>
-					<img src="<?php echo $retina_mobile_logo_data['url']; ?>" width="<?php echo $retina_mobile_logo_data['width']; ?>" height="<?php echo $retina_mobile_logo_data['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" <?php echo $style; ?> class="fusion-logo-2x fusion-mobile-logo-2x" />
-				<?php else : ?>
-					<img src="<?php echo $mobile_logo_data['url']; ?>" width="<?php echo $mobile_logo_data['width']; ?>" height="<?php echo $mobile_logo_data['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" class="fusion-logo-2x fusion-mobile-logo-2x" />
-				<?php endif; ?>
-			<?php endif; ?>
-
-			<!-- sticky header logo -->
-			<?php if ( Avada()->settings->get( 'sticky_header_logo', 'url' ) && '' !== Avada()->settings->get( 'sticky_header_logo', 'url' ) && ( in_array( Avada()->settings->get( 'header_layout' ), array( 'v1', 'v2', 'v3', 'v6', 'v7' ) ) || ( ( in_array( Avada()->settings->get( 'header_layout' ), array( 'v4', 'v5' ) ) && 'menu_and_logo' === Avada()->settings->get( 'header_sticky_type2_layout' ) ) ) ) ) : ?>
-				<?php $sticky_logo_data = Avada()->images->get_logo_data( 'sticky_header_logo' ); ?>
-				<img src="<?php echo $sticky_logo_data['url']; ?>" width="<?php echo $sticky_logo_data['width']; ?>" height="<?php echo $sticky_logo_data['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" class="fusion-logo-1x fusion-sticky-logo-1x" />
-
-				<?php if ( Avada()->settings->get( 'sticky_header_logo_retina', 'url' ) && '' !== Avada()->settings->get( 'sticky_header_logo_retina', 'url' ) ) : ?>
-					<?php
-					$retina_sticky_logo_data = Avada()->images->get_logo_data( 'sticky_header_logo_retina' );
-					$style = 'style="max-height: ' . $retina_sticky_logo_data['height'] . 'px; height: auto;"';
-					?>
-					<img src="<?php echo $retina_sticky_logo_data['url']; ?>" width="<?php echo $retina_sticky_logo_data['width']; ?>" height="<?php echo $retina_sticky_logo_data['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" <?php echo $style; ?> class="fusion-logo-2x fusion-sticky-logo-2x" />
-				<?php else : ?>
-					<img src="<?php echo $sticky_logo_data['url']; ?>" width="<?php echo $sticky_logo_data['width']; ?>" height="<?php echo $sticky_logo_data['height']; ?>" alt="<?php bloginfo( 'name' ); ?>" class="fusion-logo-2x fusion-sticky-logo-2x" />
-				<?php endif; ?>
-			<?php endif; ?>
+			<?php
+			if ( Avada()->settings->get( 'sticky_header_logo', 'url' ) && '' !== Avada()->settings->get( 'sticky_header_logo', 'url' ) && ( in_array( Avada()->settings->get( 'header_layout' ), array( 'v1', 'v2', 'v3', 'v6', 'v7' ) ) || ( ( in_array( Avada()->settings->get( 'header_layout' ), array( 'v4', 'v5' ) ) && 'menu_and_logo' === Avada()->settings->get( 'header_sticky_type2_layout' ) ) ) ) ) {
+				$sticky_logo = Avada()->images->get_logo_image_srcset( 'sticky_header_logo', 'sticky_header_logo_retina' );
+			?>
+				<!-- sticky header logo -->
+				<img src="<?php echo esc_url_raw( $sticky_logo['url'] ); ?>" srcset="<?php echo esc_attr( $sticky_logo['srcset'] ); ?>" width="<?php echo esc_attr( $sticky_logo['width'] ); ?>" height="<?php echo esc_attr( $sticky_logo['height'] ); ?>"<?php echo $sticky_logo['style']; // WPCS: XSS ok. ?> alt="<?php bloginfo( 'name' ); ?> <?php esc_attr_e( 'Logo', 'Avada' ); ?>" retina_logo_url="<?php echo esc_url_raw( $sticky_logo['is_retina'] ); ?>" class="fusion-sticky-logo" />
+			<?php } ?>
 		</a>
 	<?php endif; ?>
 	<?php
@@ -107,4 +91,7 @@ if ( 'v7' === Avada()->settings->get( 'header_layout' ) ) {
 	do_action( 'avada_logo_append' );
 
 	?>
-<?php echo $logo_closing_markup; ?>
+<?php
+echo $logo_closing_markup; // WPCS: XSS ok.
+
+/* Omit closing PHP tag to avoid "Headers already sent" issues. */

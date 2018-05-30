@@ -1375,10 +1375,3 @@ if (!class_exists('dup_pro_aws_autoload'))
 
 	spl_autoload_register('dup_pro_aws_autoload', true);
 }
-
-//spl_autoload_register(function ($class) use ($mapping) {
-//    error_log("#### mapping = " . print_r($mapping, true));
-//	if (isset($mapping[$class])) {
-//        require $mapping[$class];
-//    }
-//}, true);

@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -79,7 +89,8 @@ function avada_options_section_advanced( $sections ) {
 					),
 					'pw_jpeg_quality' => array(
 						'label'       => esc_html__( 'WordPress jpeg Quality', 'Avada' ),
-						'description' => sprintf( esc_html__( 'Controls the quality of the generated image sizes for every uploaded image. Ranges between 0 and 100 percent. Higher values lead to better image qualities but also higher file sizes. NOTE: After changing this value, please install and run the %s plugin once.', 'Avada' ), '<a href="' . admin_url( 'plugin-install.php?tab=plugin-information&amp;plugin=regenerate-thumbnails&amp;TB_iframe=true&amp;width=830&amp;height=472' ) . '" class="thickbox" title="' . esc_html__( 'Regenerate Thumbnails', 'Avada' ) . '">' . esc_html__( 'Regenerate Thumbnails', 'Avada' ) . '</a>' ),
+						/* translators: "Regenerate Thumbnails" plugin link. */
+						'description' => sprintf( esc_html__( 'Controls the quality of the generated image sizes for every uploaded image. Ranges between 0 and 100 percent. Higher values lead to better image qualities but also higher file sizes. NOTE: After changing this value, please install and run the %s plugin once.', 'Avada' ), '<a target="_blank" href="' . admin_url( 'plugin-install.php?s=Regenerate+Thumbnails&tab=search&type=term' ) . '" title="' . esc_html__( 'Regenerate Thumbnails', 'Avada' ) . '">' . esc_html__( 'Regenerate Thumbnails', 'Avada' ) . '</a>' ),
 						'id'          => 'pw_jpeg_quality',
 						'default'     => '82',
 						'type'        => 'slider',
@@ -210,45 +221,71 @@ function avada_options_section_advanced( $sections ) {
 					),
 					'disable_date_rich_snippet_pages' => array(
 						'label'       => esc_html__( 'Rich Snippets', 'Avada' ),
-						'description' => esc_html__( 'Turn on to enable rich snippets data site wide.', 'Avada' ),
+						'description' => esc_html__( 'Turn on to enable rich snippets data site wide. If set to "On", you can also control individual items below. If set to "Off" all items will be disabled.', 'Avada' ),
 						'id'          => 'disable_date_rich_snippet_pages',
 						'default'     => '1',
 						'type'        => 'switch',
 					),
-					'dev_mode' => array(
-						'label'       => esc_html__( 'Activate Developers Mode', 'Avada' ),
-						'description' => esc_html__( 'By default all the javascript files are combined and minified. Activating developers mode will load non-combined and non-minified javascript files, which is used for development only. This will have an impact on the performance of your site.', 'Avada' ),
-						'id'          => 'dev_mode',
-						'default'     => '0',
-						'type'        => 'switch',
-					),
-				),
-			),
-			'dynamic_css_compiler_section' => array(
-				'label'       => esc_html__( 'Dynamic CSS', 'Avada' ),
-				'id'          => 'dynamic_css_section',
-				'icon'        => true,
-				'type'        => 'sub-section',
-				'fields'      => array(
-					'dynamic_css_compiler' => array(
-						'label'       => esc_html__( 'CSS Compiler', 'Avada' ),
-						'description' => esc_html__( 'Turn on to compile the dynamic CSS into a file. A separate file will be created for each of your pages & posts inside of the uploads/avada-styles folder.', 'Avada' ),
-						'id'          => 'dynamic_css_compiler',
+					'disable_rich_snippet_title' => array(
+						'label'       => esc_html__( 'Rich Snippets Title', 'Avada' ),
+						'description' => esc_html__( 'Turn on to enable title rich snippet data site wide.', 'Avada' ),
+						'id'          => 'disable_rich_snippet_title',
 						'default'     => '1',
-						'type'        => 'switch',
-					),
-					'dynamic_css_db_caching' => array(
-						'label'       => esc_html__( 'Database Caching for Dynamic CSS', 'Avada' ),
-						'description' => esc_html__( 'Turn on to enable caching the dynamic CSS in your database.', 'Avada' ),
-						'id'          => 'dynamic_css_db_caching',
-						'default'     => '0',
 						'type'        => 'switch',
 						'required'    => array(
 							array(
-								'setting'  => 'dynamic_css_compiler',
-								'operator' => '!=',
+								'setting'  => 'disable_date_rich_snippet_pages',
+								'operator' => '==',
 								'value'    => '1',
 							),
+						),
+					),
+					'disable_rich_snippet_author' => array(
+						'label'       => esc_html__( 'Rich Snippets Author Info', 'Avada' ),
+						'description' => esc_html__( 'Turn on to enable author rich snippet data site wide.', 'Avada' ),
+						'id'          => 'disable_rich_snippet_author',
+						'default'     => '1',
+						'type'        => 'switch',
+						'required'    => array(
+							array(
+								'setting'  => 'disable_date_rich_snippet_pages',
+								'operator' => '==',
+								'value'    => '1',
+							),
+						),
+					),
+					'disable_rich_snippet_date' => array(
+						'label'       => esc_html__( 'Rich Snippets Publish Date', 'Avada' ),
+						'description' => esc_html__( 'Turn on to enable date rich snippet data site wide.', 'Avada' ),
+						'id'          => 'disable_rich_snippet_date',
+						'default'     => '1',
+						'type'        => 'switch',
+						'required'    => array(
+							array(
+								'setting'  => 'disable_date_rich_snippet_pages',
+								'operator' => '==',
+								'value'    => '1',
+							),
+						),
+					),
+				),
+			),
+			'dynamic_compiler_section' => array(
+				'label'       => esc_html__( 'Dynamic CSS & JS', 'Avada' ),
+				'id'          => 'dynamic_compiler_section',
+				'icon'        => true,
+				'type'        => 'sub-section',
+				'fields'      => array(
+					'css_cache_method' => array(
+						'label'       => esc_html__( 'CSS Compiling method', 'Avada' ),
+						'description' => esc_html__( 'Select "File" mode to compile the dynamic CSS to files (a separate file will be created for each of your pages & posts inside of the uploads/fusion-styles folder), "Database" mode to cache the CSS in your database, or select "Disabled" to disable.', 'Avada' ),
+						'id'          => 'css_cache_method',
+						'default'     => 'file',
+						'type'        => 'radio-buttonset',
+						'choices'     => array(
+							'file' => esc_attr__( 'File', 'Avada' ),
+							'db'   => esc_attr__( 'Database', 'Avada' ),
+							'off'  => esc_attr__( 'Disabled', 'Avada' ),
 						),
 					),
 					'cache_server_ip' => array(
@@ -257,6 +294,29 @@ function avada_options_section_advanced( $sections ) {
 						'id'          => 'cache_server_ip',
 						'default'     => '',
 						'type'        => 'text',
+					),
+					'js_compiler_note' => ( 'no' != get_transient( 'fusion_dynamic_js_readable' ) ) ? array() : array(
+						'label'       => '',
+						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> JS Compiler is disabled. File does not exist or access is restricted.', 'Avada' ) . '</div>',
+						'id'          => 'js_compiler_note',
+						'type'        => 'custom',
+					),
+					'js_compiler' => array(
+						'label'       => esc_html__( 'Enable JS Compiler', 'Avada' ),
+						'description' => ( Fusion_Dynamic_JS::is_http2() ) ? esc_html__( 'We have detected that your server supports HTTP/2. We recommend you leave the compiler disabled as that will improve performance of your site by allowing multiple JS files to be downloaded simultaneously.', 'Avada' ) : esc_html__( 'By default all the javascript files are combined. Disabling the JS compiler will load non-combined javascript files. This will have an impact on the performance of your site.', 'Avada' ),
+						'id'          => 'js_compiler',
+						'default'     => ( Fusion_Dynamic_JS::is_http2() ) ? '0' : '1',
+						'type'        => 'switch',
+					),
+					'reset_caches_button' => array(
+						'label'       => esc_html__( 'Reset Fusion Caches', 'Avada' ),
+						/* translators: %1$s: <code>uploads/fusion-styles</code>. %2$s: <code>uploads/fusion-scripts</code>. */
+						'description' => ( is_multisite() && is_main_site() ) ? sprintf( esc_html__( 'Resets all Dynamic CSS & Dynamic JS, cleans-up the database and deletes the %1$s and %2$s folders. When resetting the caches on the main site of a multisite installation, caches for all sub-sites will be reset. IMPORTANT NOTE: On large multisite installations with a low PHP timeout setting, bulk-resetting the caches may timeout.', 'Avada' ), '<code>uploads/fusion-styles</code>', '<code>uploads/fusion-scripts</code>' ) : sprintf( esc_html__( 'Resets all Dynamic CSS & Dynamic JS, cleans-up the database and deletes the %1$s and %2$s folders.', 'Avada' ), '<code>uploads/fusion-styles</code>', '<code>uploads/fusion-scripts</code>' ),
+						'id'          => 'reset_caches_button',
+						'default'     => '',
+						'type'        => 'raw',
+						'content'     => '<a class="button button-secondary" href="#" onclick="fusionResetCaches(event);" target="_self" >' . esc_attr__( 'Reset Fusion Caches', 'Avada' ) . '</a><span class="spinner fusion-spinner"></span>',
+						'full_width'  => false,
 					),
 				),
 			),

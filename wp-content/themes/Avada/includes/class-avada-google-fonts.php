@@ -60,6 +60,8 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 
 		/**
 		 * The class constructor.
+		 *
+		 * @access public
 		 */
 		public function __construct() {
 
@@ -69,12 +71,17 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 			// Enqueue link.
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ), 105 );
 
+			add_filter( 'fusion_dynamic_css_final', array( $this, 'add_inline_css' ) );
+
 		}
 
 		/**
-		 * Calls all the other necessary methods to populate and create the link.
+		 * Init.
+		 *
+		 * @access protected
+		 * @since 5.2.0
 		 */
-		public function enqueue() {
+		protected function init() {
 
 			// Go through our fields and populate $this->fonts.
 			$this->loop_fields();
@@ -85,20 +92,54 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 			// Go through $this->fonts and populate $this->link.
 			$this->create_link();
 
+		}
+
+		/**
+		 * Calls all the other necessary methods to populate and create the link.
+		 *
+		 * @access public
+		 */
+		public function enqueue() {
+
+			$this->init();
+
 			// If $this->link is not empty then enqueue it.
-			if ( '' !== $this->link ) {
+			if ( '' !== $this->link && false === $this->get_fonts_inline_styles() ) {
 				wp_enqueue_style( 'avada_google_fonts', $this->link, array(), null );
 			}
 
 		}
 
 		/**
+		 * Adds googlefont styles inline in dynamic-css.
+		 *
+		 * @access public
+		 * @since 5.1.5
+		 * @param string $original_styles The dynamic-css styles.
+		 * @return string The dynamic-css styles with any additional stylesheets appended.
+		 */
+		public function add_inline_css( $original_styles ) {
+
+			$this->init();
+
+			$font_styles = $this->get_fonts_inline_styles();
+			if ( false === $font_styles ) {
+				return $original_styles;
+			}
+			return $font_styles . $original_styles;
+
+		}
+
+		/**
 		 * Goes through all our fields and then populates the $this->fonts property.
+		 *
+		 * @access private
 		 */
 		private function loop_fields() {
 			$fields  = array(
 				'footer_headings_typography',
 				'nav_typography',
+				'mobile_menu_typography',
 				'button_typography',
 				'body_typography',
 				'h1_typography',
@@ -116,6 +157,7 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 		/**
 		 * Processes the field.
 		 *
+		 * @access private
 		 * @param array $field The field arguments.
 		 */
 		private function generate_google_font( $field ) {
@@ -138,10 +180,13 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 				$value['variant'] = '400';
 			}
 
-			// Add "i" to font-weight to make italics properly load.
+			// Make italics properly load.
 			if ( is_numeric( $value['variant'] ) ) {
 				if ( isset( $value['font-style'] ) && 'italic' === $value['font-style'] ) {
-					$value['variant'] .= 'i';
+					$value['variant'] .= 'italic';
+				}
+				if ( '400italic' === $value['variant'] ) {
+					$value['variant'] = 'italic';
 				}
 			}
 
@@ -166,12 +211,29 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 				$this->fonts[ $value['font-family'] ][] = $value['variant'];
 			}
 
+			// Tweak for 400.
+			if ( 400 === $value['variant'] || '400' === $value['variant'] ) {
+				$this->fonts[ $value['font-family'] ][] = 'regular';
+			}
+
+			// Make italic, regular and bold available for body_typography.
+			if ( 'body_typography' === $field ) {
+				$this->fonts[ $value['font-family'] ][] = 'regular';
+				$this->fonts[ $value['font-family'] ][] = 'italic';
+				$this->fonts[ $value['font-family'] ][] = '700';
+				$this->fonts[ $value['font-family'] ][] = '700italic';
+			}
+			// Make sure there are no duplicate entries.
+			$this->fonts[ $value['font-family'] ] = array_unique( $this->fonts[ $value['font-family'] ] );
+
 		}
 
 		/**
 		 * Determines the validity of the selected font as well as its properties.
 		 * This is vital to make sure that the google-font script that we'll generate later
 		 * does not contain any invalid options.
+		 *
+		 * @access private
 		 */
 		private function process_fonts() {
 
@@ -196,6 +258,9 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 					$font_variants = $this->google_fonts[ $font ]['variants'];
 				}
 
+				// Only use valid variants.
+				$this->fonts[ $font ] = array_intersect( $variants, $font_variants );
+
 				// Check if the selected subsets exist, even in one of the selected fonts.
 				// If they don't, then they have to be removed otherwise the link will fail.
 				if ( isset( $this->google_fonts[ $font ]['subsets'] ) ) {
@@ -211,6 +276,8 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 
 		/**
 		 * Creates the google-fonts link.
+		 *
+		 * @access private
 		 */
 		private function create_link() {
 
@@ -236,23 +303,26 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 				$this->subsets = array_unique( $this->subsets );
 			}
 
-			$this->link = add_query_arg( array(
-				'family' => str_replace( '%2B', '+', urlencode( implode( '|', $link_fonts ) ) ),
-				'subset' => urlencode( implode( ',', $this->subsets ) ),
-			), 'https://fonts.googleapis.com/css' );
+			$this->link = add_query_arg(
+				array(
+					'family' => str_replace( '%2B', '+', urlencode( implode( '|', $link_fonts ) ) ),
+					'subset' => urlencode( implode( ',', $this->subsets ) ),
+				), 'https://fonts.googleapis.com/css'
+			);
 
 		}
 
 		/**
 		 * Return an array of all available Google Fonts.
 		 *
-		 * @return array    All Google Fonts.
+		 * @access private
+		 * @return array All Google Fonts.
 		 */
 		private function get_google_fonts() {
 
 			if ( null === $this->google_fonts || empty( $this->google_fonts ) ) {
 
-				$fonts = include_once wp_normalize_path( Avada::$template_dir_path . '/includes/avadaredux/custom-fields/typography/googlefonts-array.php' );
+				$fonts = include_once wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/redux/custom-fields/typography/googlefonts-array.php' );
 
 				$google_fonts = array();
 				if ( is_array( $fonts ) ) {
@@ -272,5 +342,58 @@ if ( ! class_exists( 'Avada_Google_Fonts' ) ) {
 			return $this->google_fonts;
 
 		}
+
+		/**
+		 * Get the contents of googlefonts so that they can be added inline.
+		 *
+		 * @access protected
+		 * @since 5.1.5
+		 * @return string|false
+		 */
+		protected function get_fonts_inline_styles() {
+
+			$contents = get_transient( 'avada_googlefonts_contents' );
+			if ( false === $contents ) {
+
+				// Create the link.
+				if ( '' === $this->link ) {
+					$this->create_link();
+				}
+
+				// If link is empty, early exit.
+				if ( '' === $this->link || ! $this->link ) {
+					set_transient( 'avada_googlefonts_contents', 'failed', DAY_IN_SECONDS );
+					return false;
+				}
+
+				// Get remote HTML file.
+				$response = wp_remote_get( $this->link );
+
+				// Check for errors.
+				if ( is_wp_error( $response ) ) {
+					set_transient( 'avada_googlefonts_contents', 'failed', DAY_IN_SECONDS );
+					return false;
+				}
+
+				// Parse remote HTML file.
+				$contents = wp_remote_retrieve_body( $response );
+				// Check for error.
+				if ( is_wp_error( $contents ) || ! $contents ) {
+					set_transient( 'avada_googlefonts_contents', 'failed', DAY_IN_SECONDS );
+					return false;
+				}
+
+				// Store remote HTML file in transient, expire after 24 hours.
+				set_transient( 'avada_googlefonts_contents', $contents, DAY_IN_SECONDS );
+			}
+
+			// Return false if we were unable to get the contents of the googlefonts from remote.
+			if ( 'failed' === $contents ) {
+				return false;
+			}
+
+			// If we got this far then we can safely return the contents.
+			return $contents;
+		}
 	}
-}
+} // End if().

@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -54,6 +64,19 @@ function avada_options_section_sidebars( $sections ) {
 				'icon'        => true,
 				'type'        => 'sub-section',
 				'fields'      => array(
+					'sidebar_sticky' => array(
+						'label'       => esc_html__( 'Sticky Sidebars', 'Avada' ),
+						'description' => esc_html__( 'Select the sidebar(s) that should remain sticky when scrolling the page. If the sidebar content is taller than the screen, it acts like a normal sidebar until the bottom of the sidebar is within the viewport, which will then remain fixed in place as you scroll down.', 'Avada' ),
+						'id'          => 'sidebar_sticky',
+						'default'     => 'none',
+						'type'        => 'radio-buttonset',
+						'choices'     => array(
+							'none'         => esc_html__( 'None', 'Avada' ),
+							'sidebar_one'  => esc_html__( 'Sidebar 1', 'Avada' ),
+							'sidebar_two'  => esc_html__( 'Sidebar 2', 'Avada' ),
+							'both'         => esc_html__( 'Both', 'Avada' ),
+						),
+					),
 					'sidebar_padding' => array(
 						'label'       => esc_html__( 'Sidebar Padding', 'Avada' ),
 						'description' => esc_html__( 'Controls the sidebar padding.', 'Avada' ),
@@ -70,7 +93,7 @@ function avada_options_section_sidebars( $sections ) {
 						'type'        => 'color-alpha',
 					),
 					'sidebar_widget_bg_color' => array(
-						'label'       => esc_html__( 'Sidebar Widget Title Background Color', 'Avada' ),
+						'label'       => esc_html__( 'Sidebar Widget Heading Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color of the widget title box. If left transparent the widget title will be unboxed.', 'Avada' ),
 						'id'          => 'sidebar_widget_bg_color',
 						'default'     => 'rgba(255,255,255,0)',
@@ -185,6 +208,13 @@ function avada_options_section_sidebars( $sections ) {
 				'icon'        => true,
 				'type'        => 'sub-section',
 				'fields'      => array(
+					'portfolio_archive_important_note_info' => array(
+						'label'       => '',
+						/* translators: "Portfolio Posts sidebar" link. */
+						'description' => '<div class="fusion-redux-important-notice">' . sprintf( __( '<strong>IMPORTANT NOTE:</strong> The sidebar position for portfolio archive pages is controlled by the option on the %s tab.', 'Avada' ), '<a href="' . admin_url( 'themes.php?page=avada_options&amp;lang=en#portfolio_sidebar' ) . '" target="_blank">' . esc_attr__( 'Portfolio Posts sidebar', 'Avada' ) . '</a>' ) . '</div>',
+						'id'          => 'portfolio_archive_important_note_info',
+						'type'        => 'custom',
+					),
 					'portfolio_archive_sidebar' => array(
 						'label'       => esc_html__( 'Portfolio Archive Sidebar 1', 'Avada' ),
 						'description' => esc_html__( 'Select sidebar 1 that will display on the portfolio archive pages.', 'Avada' ),
@@ -253,6 +283,13 @@ function avada_options_section_sidebars( $sections ) {
 				'icon'        => true,
 				'type'        => 'sub-section',
 				'fields'      => array(
+					'blog_archive_important_note_info' => array(
+						'label'       => '',
+						/* translators: "Blog Posts sidebar" link. */
+						'description' => '<div class="fusion-redux-important-notice">' . sprintf( __( '<strong>IMPORTANT NOTE:</strong> The sidebar position for blog archive pages is controlled by the option on the %s tab.', 'Avada' ), '<a href="' . admin_url( 'themes.php?page=avada_options&amp;lang=en#posts_sidebar' ) . '" target="_blank">' . esc_attr__( 'Blog Posts sidebar', 'Avada' ) . '</a>' ) . '</div>',
+						'id'          => 'blog_archive_important_note_info',
+						'type'        => 'custom',
+					),
 					'blog_archive_sidebar' => array(
 						'label'       => esc_html__( 'Blog Archive Sidebar 1', 'Avada' ),
 						'description' => esc_html__( 'Select sidebar 1 that will display on the blog archive pages.', 'Avada' ),
@@ -362,6 +399,13 @@ function avada_options_section_sidebars( $sections ) {
 				'type'            => 'sub-section',
 				'active_callback' => array( 'Avada_Options_Conditionals', 'is_woo' ),
 				'fields'          => array(
+					'woocommerce_archive_important_note_info' => array(
+						'label'       => '',
+						/* translators: "WooCommerce Products sidebar" link. */
+						'description' => '<div class="fusion-redux-important-notice">' . sprintf( __( '<strong>IMPORTANT NOTE:</strong> The sidebar position for WooCommerce archive pages is controlled by the option on the %s tab.', 'Avada' ), '<a href="' . admin_url( 'themes.php?page=avada_options&amp;lang=en#woo_sidebar' ) . '" target="_blank">' . esc_attr__( 'WooCommerce Products sidebar', 'Avada' ) . '</a>' ) . '</div>',
+						'id'          => 'woocommerce_archive_important_note_info',
+						'type'        => 'custom',
+					),
 					'woocommerce_archive_sidebar' => array(
 						'label'           => esc_html__( 'Woocommerce Archive Sidebar 1', 'Avada' ),
 						'description'     => esc_html__( 'Select sidebar 1 that will display on the WooCommerce archive pages.', 'Avada' ),
@@ -383,7 +427,7 @@ function avada_options_section_sidebars( $sections ) {
 				),
 			) : array(),
 			'ec_global_sidebar_heading' => ( Avada::$is_updating || class_exists( 'Tribe__Events__Main' ) ) ? array(
-				'label'  => esc_html__( 'Events Calendar Posts', 'Avada' ),
+				'label'  => esc_html__( 'Events Calendar', 'Avada' ),
 				'id'     => 'ec_global_sidebar_heading',
 				'type'   => 'sub-section',
 				'fields' => array(
@@ -395,16 +439,16 @@ function avada_options_section_sidebars( $sections ) {
 						'type'        => 'switch',
 					),
 					'ec_sidebar' => array(
-						'label'       => esc_html__( 'Global Events Calendar Post Sidebar 1', 'Avada' ),
-						'description' => esc_html__( 'Select sidebar 1 that will display on all Events Calendar posts.', 'Avada' ),
+						'label'       => esc_html__( 'Global Events Calendar Sidebar 1', 'Avada' ),
+						'description' => esc_html__( 'Select sidebar 1 that will display on all Events Calendar posts and archives pages.', 'Avada' ),
 						'id'          => 'ec_sidebar',
 						'default'     => 'None',
 						'type'        => 'select',
 						'choices'     => $sidebar_options,
 					),
 					'ec_sidebar_2' => array(
-						'label'       => esc_html__( 'Global Events Calendar Post Sidebar 2', 'Avada' ),
-						'description' => esc_html__( 'Select sidebar 2 that will display on all all Events Calendar posts. Sidebar 2 can only be used if sidebar 1 is selected.', 'Avada' ),
+						'label'       => esc_html__( 'Global Events Calendar Sidebar 2', 'Avada' ),
+						'description' => esc_html__( 'Select sidebar 2 that will display on all all Events Calendar posts and archive pages. Sidebar 2 can only be used if sidebar 1 is selected.', 'Avada' ),
 						'id'          => 'ec_sidebar_2',
 						'default'     => 'None',
 						'type'        => 'select',

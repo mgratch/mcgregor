@@ -30,46 +30,34 @@ function layerslider_settings_menu() {
 
 	// Add "All Sliders" submenu
 	add_submenu_page(
-		'layerslider', 'LayerSlider WP', __('All Sliders', 'LayerSlider'),
+		'layerslider', 'LayerSlider WP', __('Sliders', 'LayerSlider'),
 		$capability, 'layerslider', 'layerslider_router'
 	);
 
-	// Add "Skin Editor" submenu
+
+	// Add "Settings" submenu
 	add_submenu_page(
-		'layerslider', 'LayerSlider WP Skin Editor', __('Skin Editor', 'LayerSlider'),
-		$capability, 'ls-skin-editor', 'layerslider_router'
+		'layerslider', 'LayerSlider Options', __('Options', 'LayerSlider'),
+		$capability, 'layerslider-options', 'layerslider_router'
 	);
 
-	// Add "CSS Editor submenu"
+	// Add "Add-Ons" submenu
 	add_submenu_page(
-		'layerslider', 'LayerSlider WP CSS Editor', __('CSS Editor', 'LayerSlider'),
-		$capability, 'ls-style-editor', 'layerslider_router');
+		'layerslider', 'LayerSlider Add-Ons', __('Add-Ons', 'LayerSlider'),
+		$capability, 'layerslider-addons', 'layerslider_router'
+	);
 
-	// Add "Transition Builder" submenu
-	add_submenu_page(
-		'layerslider', 'LayerSlider WP Transition Builder', __('Transition Builder', 'LayerSlider'),
-		$capability, 'ls-transition-builder', 'layerslider_router');
-
-	// Add "System Status" submenu
-	add_submenu_page(
-		'layerslider', 'LayerSlider WP System Status', __('System Status', 'LayerSlider'),
-		$capability, 'ls-system-status', 'layerslider_router');
-
-	// Add "About" submenu
-	add_submenu_page(
-		'layerslider', 'About LayerSlider WP', __('About', 'LayerSlider'),
-		$capability, 'ls-about', 'layerslider_router');
 }
 
 // Help menu
 add_filter('contextual_help', 'layerslider_help', 10, 3);
 function layerslider_help($contextual_help, $screen_id, $screen) {
 
-	if(strpos($screen->base, 'layerslider') !== false && (!empty($_GET['page']) && $_GET['page'] !== 'ls-about')) {
+	if( strpos( $screen->base, 'layerslider') !== false ) {
 		$screen->add_help_tab(array(
 			'id' => 'help',
-			'title' => 'Getting Help',
-			'content' => '<p>Please read our  <a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html" target="_blank">Online Documentation</a> carefully, it will likely answer all of your questions.</p><p>You can also check the <a href="https://support.kreaturamedia.com/faq/4/layerslider-for-wordpress/" target="_blank">FAQs</a> for additional information, including our support policies and licensing rules.</p>'
+			'title' => __('Getting Help', 'LayerSlider'),
+			'content' => '<p>'. sprintf(__('Please read our  %sOnline Documentation%s carefully, it will likely answer all of your questions.<br><br>You can also check the %sFAQs%s for additional information, including our support policies and licensing rules.', 'LayerSlider'), '<a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html" target="_blank">', '</a>', '<a href="https://support.kreaturamedia.com/faq/4/layerslider-for-wordpress/" target="_blank">', '</a>').'</p>'
 		));
 	}
 }
@@ -80,28 +68,44 @@ function layerslider_router() {
 	$screen = get_current_screen();
 
 
-	if(strpos($screen->base, 'ls-skin-editor') !== false) {
-		include(LS_ROOT_PATH.'/views/skin_editor.php');
+	if( strpos( $screen->base, 'layerslider-options' ) !== false ) {
 
-	} elseif(strpos($screen->base, 'ls-transition-builder') !== false) {
-		include(LS_ROOT_PATH.'/views/transition_builder.php');
+		// Avoid PHP undef notice
+		$section = ! empty( $_GET['section'] ) ? $_GET['section'] : false;
 
-	} elseif(strpos($screen->base, 'ls-system-status') !== false) {
-		include(LS_ROOT_PATH.'/views/system_status.php');
+		switch( $section ) {
+			case 'system-status':
+				include(LS_ROOT_PATH.'/views/system_status.php');
+				break;
 
-	} elseif(strpos($screen->base, 'ls-about') !== false) {
-		if(!empty($_GET['section']) && $_GET['section'] == 'getting-started') {
-			include(LS_ROOT_PATH.'/views/getting-started.php');
+			case 'revisions':
+				include(LS_ROOT_PATH.'/views/revisions.php');
+				break;
 
-		} elseif(!empty($_GET['section']) && $_GET['section'] == 'faqs') {
-			include(LS_ROOT_PATH.'/views/faqs.php');
+			case 'about':
+				include(LS_ROOT_PATH.'/views/about.php');
+				break;
 
-		} else {
-			include(LS_ROOT_PATH.'/views/about.php');
+			case 'skin-editor':
+				include(LS_ROOT_PATH.'/views/skin_editor.php');
+				break;
+
+			case 'css-editor':
+				include(LS_ROOT_PATH.'/views/css_editor.php');
+				break;
+
+			case 'transition-builder':
+				include(LS_ROOT_PATH.'/views/transition_builder.php');
+				break;
+
+			default:
+				include(LS_ROOT_PATH.'/views/settings.php');
+				break;
 		}
 
-	} elseif(strpos($screen->base, 'ls-style-editor') !== false) {
-		include(LS_ROOT_PATH.'/views/style_editor.php');
+
+	} elseif( strpos( $screen->base, 'layerslider-addons') !== false ) {
+		include(LS_ROOT_PATH.'/views/addons.php');
 
 	} elseif(isset($_GET['action']) && $_GET['action'] == 'edit') {
 		include(LS_ROOT_PATH.'/views/slider_edit.php');

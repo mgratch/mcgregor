@@ -6,7 +6,7 @@
 		<# var choices = ''; #>
 	<# } #>
 
-	<# _.each( param.value, function( value, name ) { #>
+	<# _.each( param.value, function( name, value ) { #>
 		<# var selected = ( jQuery.inArray( value, choices ) > -1 ) ? ' selected="selected"' : ''; #>
 		<option value="{{ value }}"{{ selected }} >{{ name }}</option>
 	<# } ); #>

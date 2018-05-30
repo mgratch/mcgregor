@@ -1,4 +1,13 @@
 <?php
+/**
+ * Post Metabox options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,11 +44,12 @@ $this->radio_buttonset(
 	'portfolio_width_100',
 	esc_html__( 'Use 100% Width Page', 'Avada' ),
 	array(
-		'default' 	=> esc_attr__( 'Default', 'Avada' ),
-		'no'  		=> esc_attr__( 'No', 'Avada' ),
-		'yes' 		=> esc_attr__( 'Yes', 'Avada' ),
+		'default'   => esc_attr__( 'Default', 'Avada' ),
+		'no'        => esc_attr__( 'No', 'Avada' ),
+		'yes'       => esc_attr__( 'Yes', 'Avada' ),
 	),
-	esc_html__( 'Choose to set this post to 100% browser width.', 'Avada' ) . Avada()->settings->get_default_description( 'blog_width_100', '', 'yesno' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to set this post to 100&#37; browser width. %s', 'Avada' ), Avada()->settings->get_default_description( 'blog_width_100', '', 'yesno' ) )
 );
 
 $this->textarea(
@@ -60,46 +70,26 @@ if ( 'avada_faq' !== $screen->post_type ) {
 			'zoom'     => esc_attr__( 'Zoom', 'Avada' ),
 			'no'       => esc_attr__( 'No Icons', 'Avada' ),
 		),
-		esc_html__( 'Choose which icons display on this post.', 'Avada' ) . Avada()->settings->get_default_description( 'image_rollover', '', 'rollover' )
+		/* translators: Additional description (defaults). */
+		sprintf( esc_html__( 'Choose which icons display on this post. %s', 'Avada' ), Avada()->settings->get_default_description( 'image_rollover', '', 'rollover' ) )
 	);
 
-	// Dependency check for whether link icon is showing.
-	$link_dependency = array(
-		array(
-			'field'      => 'image_rollover_icons',
-			'value'      => 'zoom',
-			'comparison' => '!=',
-		),
-		array(
-			'field'      => 'image_rollover_icons',
-			'value'      => 'no',
-			'comparison' => '!=',
-		),
-	);
-	if ( 0 == Avada()->settings->get( 'image_rollover' ) || 0 == Avada()->settings->get( 'link_image_rollover' ) ) {
-		$link_dependency[] = array(
-			'field'      => 'image_rollover_icons',
-			'value'      => 'default',
-			'comparison' => '!=',
-		);
-	}
 	$this->text(
 		'link_icon_url',
-		esc_attr__( 'Link Icon URL', 'Avada' ),
-		esc_attr__( 'Leave blank for post URL.', 'Avada' ),
-		$link_dependency
+		esc_attr__( 'Custom Link URL On Archives', 'Avada' ),
+		esc_attr__( 'Link URL that will be used on archives either for the rollover link icon or on the image if rollover icons are disabled. Leave blank for post URL.', 'Avada' )
 	);
 
 	$this->radio_buttonset(
 		'post_links_target',
-		esc_html__( 'Open Post Links In New Window', 'Avada' ),
+		esc_html__( 'Open Blog Links In New Window', 'Avada' ),
 		array(
 			'no'  => esc_attr__( 'No', 'Avada' ),
 			'yes' => esc_attr__( 'Yes', 'Avada' ),
 		),
 		esc_html__( 'Choose to open the single post page link in a new window.', 'Avada' )
 	);
-}
+} // End if().
 
 $this->radio_buttonset(
 	'related_posts',
@@ -109,7 +99,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Show', 'Avada' ),
 		'no'      => esc_attr__( 'Hide', 'Avada' ),
 	),
-	esc_html__( 'Choose to show or hide related posts on this post.', 'Avada' ) . Avada()->settings->get_default_description( 'related_posts', '', 'showhide' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to show or hide related posts on this post. %s', 'Avada' ), Avada()->settings->get_default_description( 'related_posts', '', 'showhide' ) )
 );
 
 $this->radio_buttonset(
@@ -120,7 +111,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Show', 'Avada' ),
 		'no'      => esc_attr__( 'Hide', 'Avada' ),
 	),
-	esc_html__( 'Choose to show or hide the social share box', 'Avada' ) . Avada()->settings->get_default_description( 'social_sharing_box', '', 'showhide' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to show or hide the social share box. %s', 'Avada' ), Avada()->settings->get_default_description( 'social_sharing_box', '', 'showhide' ) )
 );
 
 $this->radio_buttonset(
@@ -131,7 +123,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Show', 'Avada' ),
 		'no'      => esc_attr__( 'Hide', 'Avada' ),
 	),
-	esc_html__( 'Choose to show or hide the post navigation', 'Avada' ) . Avada()->settings->get_default_description( 'blog_pn_nav', '', 'showhide' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to show or hide the post navigation. %s', 'Avada' ), Avada()->settings->get_default_description( 'blog_pn_nav', '', 'showhide' ) )
 );
 
 $this->radio_buttonset(
@@ -142,7 +135,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Show', 'Avada' ),
 		'no'      => esc_attr__( 'Hide', 'Avada' ),
 	),
-	esc_html__( 'Choose to show or hide the author info box', 'Avada' ) . Avada()->settings->get_default_description( 'author_info', '', 'showhide' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to show or hide the author info box. %s', 'Avada' ), Avada()->settings->get_default_description( 'author_info', '', 'showhide' ) )
 );
 
 $this->radio_buttonset(
@@ -153,7 +147,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Show', 'Avada' ),
 		'no'      => esc_attr__( 'Hide', 'Avada' ),
 	),
-	esc_html__( 'Choose to show or hide the post meta', 'Avada' ) . Avada()->settings->get_default_description( 'post_meta', '', 'showhide' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_html__( 'Choose to show or hide the post meta. %s', 'Avada' ), Avada()->settings->get_default_description( 'post_meta', '', 'showhide' ) )
 );
 
 $this->radio_buttonset(
@@ -164,7 +159,8 @@ $this->radio_buttonset(
 		'yes'     => esc_attr__( 'Show', 'Avada' ),
 		'no'      => esc_attr__( 'Hide', 'Avada' ),
 	),
-	esc_attr__( 'Choose to show or hide comments area', 'Avada' ) . Avada()->settings->get_default_description( 'blog_comments', '', 'showhide' )
+	/* translators: Additional description (defaults). */
+	sprintf( esc_attr__( 'Choose to show or hide comments area. %s', 'Avada' ), Avada()->settings->get_default_description( 'blog_comments', '', 'showhide' ) )
 );
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

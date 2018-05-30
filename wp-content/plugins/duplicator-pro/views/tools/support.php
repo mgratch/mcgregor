@@ -1,5 +1,5 @@
-<?php
-DUP_PRO_Util::CheckPermissions('read');
+<?phpdefined("ABSPATH") or die("");
+DUP_PRO_U::hasCapability('read');
 
 $thanks_display = 'none';
 $error_display = 'none';
@@ -30,63 +30,50 @@ $message = '';
 <div class="dup-support-all">
     <div style="display:<?php echo $form_display; ?>;">
 
-        <!--table>
-            <tr>
-                <td style="width:70px"><i class="fa fa-question-circle fa-5x"></i></td>
-                <td valign="top" style="padding-top:10px; font-size:13px">
-        <?php
-        DUP_PRO_U::_e("Migrating WordPress is a complex process and the logic to make all the magic happen smoothly may not work quickly with every site.  With over 30,000 plugins and a very complex server eco-system some migrations may run into issues.  This is why the Duplicator includes a detailed knowledgebase that can help with many common issues.  Resources to additional support, approved hosting, and alternatives to fit your needs can be found below.");
-        ?>
-                </td>
+		<div style="width:800px; margin:auto; margin-top: 20px">
+			<!-- HELP LINKS -->
+			<div class="dup-support-hlp-area" >
+				<div class="dup-support-hlp-hdrs">
+					<i class="fa fa-cube fa-2x pull-left"></i>
+					<div><?php DUP_PRO_U::_e('Knowledgebase') ?></div>
+				</div>
+				<div class="dup-support-hlp-txt">
+					<?php DUP_PRO_U::_e('Complete Online Documentation'); ?><br/>
+					<select id="dup-support-kb-lnks" style="margin-top:18px; font-size:16px; min-width: 170px">
+						<option value="NULL"> <?php DUP_PRO_U::_e('Choose A Section') ?> </option>
+						<option value="https://snapcreek.com/duplicator/docs/quick-start/"><?php DUP_PRO_U::_e('Quick Start') ?></option>
+						<option value="https://snapcreek.com/duplicator/docs/guide/"><?php DUP_PRO_U::_e('User Guide') ?></option>
+						<option value="https://snapcreek.com/duplicator/docs/faqs-tech/"><?php DUP_PRO_U::_e('FAQs') ?></option>
+						<option value="https://snapcreek.com/duplicator/docs/changelog/"><?php DUP_PRO_U::_e('Change Log') ?></option>
+						<option value="https://snapcreek.com/dashboard"><?php DUP_PRO_U::_e('Dashboard') ?></option>
+					</select>
+				</div>
+			</div>
 
-            </tr>
-        </table-->
-        <!-- HELP LINKS 
-        <div style="display:none" class="dup-support-hlp-area" >
-            <div class="dup-support-hlp-hdrs">
-                <i class="fa fa-cube fa-2x pull-left"></i>
-                <div><?php DUP_PRO_U::_e('Knowledgebase') ?></div>
-            </div>
-            <div class="dup-support-hlp-txt">
-        <?php DUP_PRO_U::_e('Complete Online Documentation'); ?><br/>
-                <select id="dup-support-kb-lnks" style="margin-top:18px; font-size:16px; min-width: 170px">
-                    <option> <?php DUP_PRO_U::_e('Choose A Section') ?> </option>
-                    <option value="https://snapcreek.com/duplicator-quick"><?php DUP_PRO_U::_e('Quick Start') ?></option>
-                    <option value="https://snapcreek.com/duplicator-guide"><?php DUP_PRO_U::_e('User Guide') ?></option>
-                    <option value="https://snapcreek.com/duplicator-faq"><?php DUP_PRO_U::_e('FAQs') ?></option>
-                    <option value="https://snapcreek.com/duplicator-log"><?php DUP_PRO_U::_e('Change Log') ?></option>
-                    <option value="https://snapcreek.com/labs/duplicator"><?php DUP_PRO_U::_e('Product Page') ?></option>
-                </select>
-            </div>
-        </div>-->
-
-        <!-- ONLINE SUPPORT -->
-
-        <div style="margin: auto; height: 350px;  text-align: center">
-
-            <!-- HELP TICKET-->
-            <div class="dup-support-hlp-area">
-                <div class="dup-support-hlp-hdrs">
-                    <i class="fa fa-lightbulb-o fa-2x pull-left"></i>
-                    <div><?php DUP_PRO_U::_e('Submit Help Ticket') ?></div>
-                </div>
-                <div class="dup-support-hlp-txt">
-                    <?php DUP_PRO_U::_e("Submit support ticket to Duplicator Pro support."); ?> <br/>
-                    <i>
-                        <?php DUP_PRO_U::_e("Please have your"); ?>
-                        <a href="admin.php?page=duplicator-pro-settings&tab=licensing"><?php DUP_PRO_U::_e("license key"); ?></a>
-                        <?php DUP_PRO_U::_e("ready to enter ticket."); ?>
-                    </i>
-                    <br/><br/>
-                    <div class="dup-support-txts-links">
-                        <button class="button  button-primary button-large" onclick="DupPro.Support.OpenSupportWindow();
-                                return false;"><?php DUP_PRO_U::_e('Get Support!') ?></button> &nbsp; 
-                    </div>	
-                </div>
-            </div>   
-
-
-        </div>
+			<!-- ONLINE SUPPORT -->
+			<div style="margin: auto; height: 350px;  text-align: center">
+				<!-- HELP TICKET-->
+				<div class="dup-support-hlp-area">
+					<div class="dup-support-hlp-hdrs">
+						<i class="fa fa-lightbulb-o fa-2x pull-left"></i>
+						<div><?php DUP_PRO_U::_e('Submit Help Ticket') ?></div>
+					</div>
+					<div class="dup-support-hlp-txt">
+						<?php DUP_PRO_U::_e("Submit support ticket to Duplicator Pro support."); ?> <br/>
+						<i>
+							<?php DUP_PRO_U::_e("Please have your"); ?>
+							<a href="admin.php?page=duplicator-pro-settings&tab=licensing"><?php DUP_PRO_U::_e("license key"); ?></a>
+							<?php DUP_PRO_U::_e("ready to enter ticket."); ?>
+						</i>
+						<br/><br/>
+						<div class="dup-support-txts-links">
+							<button class="button  button-primary button-large" onclick="DupPro.Support.OpenSupportWindow();
+									return false;"><?php DUP_PRO_U::_e('Get Support!') ?></button> &nbsp;
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
 
     </div>
@@ -102,7 +89,7 @@ $message = '';
     </div>
 </div><br/><br/><br/><br/>
 
-<script type="text/javascript">
+<script>
     jQuery(document).ready(function ($) {
 
         DupPro.Support.OpenSupportWindow = function () {
@@ -112,7 +99,7 @@ $message = '';
 
         //ATTACHED EVENTS
         jQuery('#dup-support-kb-lnks').change(function () {
-            if (jQuery(this).val() != "null")
+            if (jQuery(this).val() != "NULL")
                 window.open(jQuery(this).val())
         });
 

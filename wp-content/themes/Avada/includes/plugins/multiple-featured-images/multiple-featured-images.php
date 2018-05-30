@@ -1,374 +1,198 @@
 <?php
-/*
-Plugin Name: Multiple Featured Images
-Description: Enables multiple featured images for posts and pages. If you like my plugin, feel free to give me reward ;) <a href="http://www.amazon.de/registry/wishlist/16KTW9ZG027C8" title="Amazon Wishlist" target="_blank">Amazon Wishlist</a>
-Version: 0.3
-Author: Marcus Kober
-Author URI: http://www.koeln-dialog.de/
-*/
+/**
+ * Initializes an addional featured image for use in backend and frontend.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.2
+ */
 
-/*  Copyright 2012 Marcus Kober (m.kober@koeln-dialog.de)
+if ( ! class_exists( 'Avada_Featured_Image' ) ) {
+	/**
+	 * Featured image class.
+	 */
+	class Avada_Featured_Image {
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License, version 2, as
-	published by the Free Software Foundation.
+		/**
+		 * The class arguments.
+		 *
+		 * @access private
+		 * @var array
+		 */
+		private $args = array();
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
-if( !class_exists( 'kdMultipleFeaturedImages' ) ) {
-
-	class kdMultipleFeaturedImages {
-
-		private $id				 	= '';
-		private $post_type		  	= '';
-
-		private $labels			 = array();
-
-		private $metabox_id		 	= '';
-
-		private $post_meta_key	  	= '';
-
-		private $nonce			  	= '';
-
-		private $default_labels	 = array(
-			'name'	  => 'Featured Image 2',
-			'set'	   => 'Set featured image 2',
-			'remove'	=> 'Remove featured image 2',
-			'use'	   => 'Use as featured image 2',
-		);
-
-		private $default_args	   = array(
-			'id'		=> 'featured-image-2',
-			'post_type' => 'page',
+		/**
+		 * The class defaults.
+		 *
+		 * @access private
+		 * @var array
+		 */
+		private $defaults = array(
+			'id'           => 'featured-image-2',
+			'post_type'    => 'page',
+			'name'         => 'Featured Image 2',
+			'label_set'    => 'Set featured image 2',
+			'label_remove' => 'Remove featured image 2',
 		);
 
 		/**
-		 * Initialize the plugin
+		 * Constructor.
 		 *
-		 * @param array $args
+		 * @since 5.2
+		 * @access public
+		 * @param array $args The arguments.
 		 * @return void
 		 */
 		public function __construct( $args ) {
-			$this->labels	   = wp_parse_args( $args['labels'], $this->default_labels );
-			unset( $args['labels'] );
-			$args			   = wp_parse_args( $args, $this->default_args );
-			$this->id		   = $args['id'];
-			$this->post_type	= $args['post_type'];
+			$this->args                  = wp_parse_args( $args, $this->defaults );
+			$this->args['metabox_id']    = $this->args['id'] . '_' . $this->args['post_type'];
+			$this->args['post_meta_key'] = 'kd_' . $this->args['metabox_id'] . '_id';
+			$this->args['nonce_action']  = $this->args['metabox_id'] . '_nonce_action';
+			$this->args['nonce_name']    = $this->args['metabox_id'] . '_nonce_name';
 
-			$this->metabox_id   = $this->id.'_'.$this->post_type;
-
-			$this->post_meta_key= 'kd_'.$this->id.'_'.$this->post_type.'_id';
-
-			$this->nonce		= 'mfi-'.$this->id.$this->post_type;
-
-			if( !current_theme_supports( 'post-thumbnails' ) ) {
-				add_theme_support( 'post-thumbnails' );
-			}
-
-			add_action( 'admin_init', array( &$this, 'kd_admin_init' ) );
-			add_action( 'add_meta_boxes', array( &$this, 'kd_add_meta_box' ) );
-			add_filter( 'attachment_fields_to_edit', array( &$this, 'kd_add_attachment_field' ), 11, 2 );
-
-			add_action( 'wp_ajax_set-MuFeaImg-'.$this->id.'-'.$this->post_type, array( &$this, 'kd_ajax_set_image' ) );
-
-			add_action( 'delete_attachment', array( &$this, 'kd_delete_attachment' ) );
+			add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
+			add_action( 'save_post', array( $this, 'save_meta_box' ) );
 
 		}
 
 		/**
-		 * Add admin-Javascript
+		 * Add admin metabox for an additional featured image.
 		 *
+		 * @since 5.2
+		 * @access public
 		 * @return void
 		 */
-		public function kd_admin_init() {
-			if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/media-upload.php')) {
-				wp_enqueue_script(
-						'kd-multiple-featured-images',
-						Avada::$template_dir_url . '/includes/plugins/multiple-featured-images/js/kd-admin.js',
-						'jquery'
-				);
-			}
-		}
-
-		/**
-		 * Add admin metabox for choosing additional featured images
-		 *
-		 * @return void
-		 */
-		public function kd_add_meta_box() {
+		public function add_meta_box() {
 			add_meta_box(
-					$this->metabox_id,
-					$this->labels['name'],
-					array( $this, 'kd_meta_box_content' ),
-					$this->post_type,
-					'side',
-					'low'
+				$this->args['metabox_id'],
+				$this->args['name'],
+				array( $this, 'meta_box_content' ),
+				$this->args['post_type'],
+				'side',
+				'low'
 			);
 		}
 
 		/**
-		 * Output the metabox content
+		 * Output the metabox content.
 		 *
+		 * @since 5.2
+		 * @access public
 		 * @global object $post
 		 * @return void
 		 */
-		public function kd_meta_box_content() {
+		public function meta_box_content() {
 			global $post;
 
 			$image_id = get_post_meta(
-					$post->ID,
-					$this->post_meta_key,
-					true
+				$post->ID,
+				$this->args['post_meta_key'],
+				true
 			);
-
-		   echo $this->kd_meta_box_output( $image_id );
-		}
-
-		/**
-		 * Generate the metabox content
-		 *
-		 * @global int $post_ID
-		 * @param int $image_id
-		 * @return string
-		 */
-		public function kd_meta_box_output( $image_id = NULL ) {
-			global $post_ID;
 
 			$output = '';
+			$preview_image_css = ' style="display:none;"';
+			$remove_image_css  = ' style="display:none;"';
 
-			$setImageLink = sprintf(
-					'<p class="hide-if-no-js"><a title="%2$s" href="%1$s" id="kd_%3$s" class="thickbox">%%s</a></p>',
-					get_upload_iframe_src( 'image' ),
-					$this->labels['set'],
-					$this->id
-			);
-
-			if( $image_id && get_post( $image_id ) ) {
-				$nonce_field = wp_create_nonce( $this->nonce.$post_ID );
-
-				$thumbnail = wp_get_attachment_image( $image_id, array( 266, 266 ) );
-				$output.= sprintf( $setImageLink, $thumbnail );
-				$output.= '<p class="hide-if-no-js">';
-				$output.= sprintf(
-						'<a href="#" id="remove-%1$s-image" onclick="kdMuFeaImgRemove( \'%1$s\', \'%2$s\', \'%3$s\' ); return false;">',
-						$this->id,
-						$this->post_type,
-						$nonce_field
+			if ( $image_id ) {
+				$preview_image = wp_get_attachment_image(
+					$image_id, array( 266, 266 ), false, array(
+						'class' => 'fusion-preview-image',
+					)
 				);
-				$output.= $this->labels['remove'];
-				$output.= '</a>';
-				$output.= '</p>';
-
-				return $output;
-			}
-			else {
-				return sprintf( $setImageLink, $this->labels['set'] );
+				$remove_image_css = '';
+			} else {
+				$preview_image = '<img class="fusion-preview-image" src="" style="display:none;">';
+				$preview_image_css = '';
 			}
 
+			$preview_image = '<span class="fusion-set-featured-image"' . $preview_image_css . '>' . $this->args['label_set'] . '</span>' . $preview_image;
+
+			$set_image_link = '<p class="hide-if-no-js">';
+				$set_image_link .= '<a aria-label="' . $this->args['label_set'] . '" href="#" id="' . $this->args['id'] . '" class="fusion_upload_button">';
+					$set_image_link .= $preview_image;
+				$set_image_link .= '</a>';
+				$set_image_link .= '<input class="upload_field" id="' . $this->args['post_meta_key'] . '" name="' . $this->args['post_meta_key'] . '" value="' . $image_id . '" type="hidden">';
+			$set_image_link .= '</p>';
+
+			$remove_image_link = '<p class="hide-if-no-js fusion-remove-featured-image"' . $remove_image_css . '>';
+				$remove_image_link .= '<a aria-label="' . $this->args['label_remove'] . '" href="#" id="' . $this->args['id'] . '" class="fusion-remove-image">' . $this->args['label_remove'] . '</a>';
+			$remove_image_link .= '</p>';
+
+			$nonce_field = wp_nonce_field( $this->args['nonce_action'], $this->args['nonce_name'], true, false );
+
+			$output = '<div class="fusion-featured-image-meta-box">' . $set_image_link . $remove_image_link . $nonce_field . '</div>';
+
+			echo $output; // WPCS: XSS ok.
 		}
 
 		/**
-		 * Create a new field in the image upload form
+		 * Saves the metabox.
 		 *
-		 * @param string $form_fields
-		 * @param object $post
-		 * @return string
+		 * @since 5.2
+		 * @access public
+		 * @param string|int $post_id The post ID.
+		 * @return void.
 		 */
-		public function kd_add_attachment_field( $form_fields, $post ) {
-			$calling_id = 0;
-			if( isset( $_GET['post_id'] ) ) {
-				$calling_id = absint( $_GET['post_id'] );
-			}
-			elseif( isset( $_POST ) && count( $_POST ) ) {
-				$calling_id = $post->post_parent;
-			}
+		public function save_meta_box( $post_id ) {
 
-			$calling_post = get_post( $calling_id );
-
-			if( is_null( $calling_post ) || $calling_post->post_type != $this->post_type ) {
-				return $form_fields;
-			}
-
-			$nonce_field = wp_create_nonce( $this->nonce.$calling_id );
-
-			$output = sprintf(
-					'<a href="#" id="%1$s-featuredimage" onclick="kdMuFeaImgSet( %3$s, \'%1$s\', \'%2$s\', \'%6$s\' ); return false;">%5$s</a>',
-					$this->id,
-					$this->post_type,
-					$post->ID,
-					$this->labels['name'],
-					$this->labels['use'],
-					$nonce_field
-			);
-
-			$form_fields['MuFeaImg-'.$this->id.'-'.$this->post_type] = array(
-				'label' => $this->labels['name'],
-				'input' => 'html',
-				'html'  => $output
-			);
-
-			return $form_fields;
-		}
-
-		/**
-		 * Ajax function: set and delete featured image
-		 *
-		 * @global int $post_ID
-		 * @return void
-		 */
-		public function kd_ajax_set_image() {
-			global $post_ID;
-
-			$post_ID = intval( $_POST['post_id'] );
-
-			if( !current_user_can( 'edit_post', $post_ID ) ) {
-				die( '-1' );
-			}
-
-			$thumb_id = intval( $_POST['thumbnail_id'] );
-
-			if( $thumb_id == '-1' ) {
-				delete_post_meta( $post_ID, $this->post_meta_key );
-
-				die( $this->kd_meta_box_output( NULL ) );
-			}
-
-			if( $thumb_id && get_post( $thumb_id ) ) {
-				$thumb_html = wp_get_attachment_image( $thumb_id, 'thumbnail' );
-
-				if( !empty( $thumb_html ) ) {
-					update_post_meta( $post_ID, $this->post_meta_key, $thumb_id );
-
-					die( $this->kd_meta_box_output( $thumb_id ) );
+			if ( isset( $_POST[ $this->args['nonce_name'] ] ) ) {
+				// @codingStandardsIgnoreLine
+				if ( ! wp_verify_nonce( wp_unslash( $_POST[ $this->args['nonce_name'] ] ), $this->args['nonce_action'] ) ) {
+					return;
+				}
+				if ( ! current_user_can( 'edit_post', $post_id ) ) {
+					return;
+				}
+				if ( isset( $_POST[ $this->args['post_meta_key'] ] ) ) {
+					update_post_meta( $post_id, $this->args['post_meta_key'], sanitize_text_field( wp_unslash( $_POST[ $this->args['post_meta_key'] ] ) ) );
 				}
 			}
-
-			die( '0' );
-
 		}
 
 		/**
-		 * Delete custom featured image if attachmet is deleted
+		 * Retrieve the ID of the featured image.
 		 *
-		 * @global object $wpdb
-		 * @param int $post_id
-		 * @return void
-		 */
-		public function kd_delete_attachment( $post_id ) {
-			global $wpdb;
-
-			$wpdb->query(
-					$wpdb->prepare(
-							"DELETE FROM $wpdb->postmeta WHERE meta_key = '%s' AND meta_value = %d",
-							$this->post_meta_key,
-							$post_id
-					)
-			);
-		}
-
-		/**
-		 * Retrieve the id of the featured image
-		 *
+		 * @since 5.2
+		 * @static
+		 * @access public
 		 * @global object $post
-		 * @param string $image_id
-		 * @param string $post_type
-		 * @param int $post_id
-		 * @return int
+		 * @param string $image_id Internal ID of the featured image.
+		 * @param string $post_type The post type of the post the featured image belongs to.
+		 * @param int    $post_id A custom post ID.
+		 * @return int The featured image ID.
 		 */
-		public static function get_featured_image_id( $image_id, $post_type, $post_id = NULL) {
+		public static function get_featured_image_id( $image_id, $post_type, $post_id = null ) {
 			global $post;
 
-			if( is_null( $post_id ) ) {
+			if ( is_null( $post_id ) ) {
 				$post_id = get_the_ID();
 			}
 
-			return get_post_meta( $post_id, "kd_{$image_id}_{$post_type}_id", true);
-		}
-
-		/**
-		 * Return the featured image url
-		 *
-		 * @param string $image_id
-		 * @param string $post_type
-		 * @param int $post_id
-		 * @return string
-		 */
-		public static function get_featured_image_url( $image_id, $post_type, $size = 'full', $post_id = NULL ) {
-			$id = self::get_featured_image_id( $image_id, $post_type, $post_id);
-
-			if( $size != 'full' ) {
-				$url = wp_get_attachment_image_src( $id, $size );
-				$url = $url[0];
-			}
-			else {
-				$url = wp_get_attachment_url( $id );
-			}
-
-			return $url;
-		}
-
-		/**
-		 * Return the featured image html output
-		 *
-		 * @param string $image_id
-		 * @param string $post_type
-		 * @param string $size
-		 * @param int $post_id
-		 * @return string
-		 */
-		public static function get_the_featured_image( $image_id, $post_type, $size = 'full', $post_id = NULL ) {
-			$id = self::get_featured_image_id( $image_id, $post_type, $post_id);
-
-			$output = '';
-
-			if( $id ) {
-				$output = wp_get_attachment_image(
-						$id,
-						$size,
-						false
-				);
-			}
-
-			return $output;
-		}
-
-		/**
-		 * Output the featured image html output
-		 *
-		 * @param string $image_id
-		 * @param string $post_type
-		 * @param string $size
-		 * @param int $post_id
-		 * @return void
-		 */
-		public static function the_featured_image( $image_id, $post_type, $size = 'full', $post_id = NULL ) {
-			echo self::get_the_featured_image( $image_id, $post_type, $size, $post_id );
+			return get_post_meta( $post_id, 'kd_' . $image_id . '_' . $post_type . '_id', true );
 		}
 	}
-}
+} // End if().
 
-function kd_mfi_get_featured_image_id( $image_id, $post_type, $post_id = NULL ) {
-	return kdMultipleFeaturedImages::get_featured_image_id( $image_id, $post_type, $post_id );
-}
-
-function kd_mfi_get_featured_image_url( $image_id, $post_type, $size = 'full', $post_id = NULL ) {
-	return kdMultipleFeaturedImages::get_featured_image_url( $image_id, $post_type, $size, $post_id );
-}
-
-function kd_mfi_get_the_featured_image( $image_id, $post_type, $size = 'full', $post_id = NULL ) {
-	return kdMultipleFeaturedImages::get_the_featured_image( $image_id, $post_type, $size, $post_id );
-}
-
-function kd_mfi_the_featured_image( $image_id, $post_type, $size = 'full', $post_id = NULL ) {
-	return kdMultipleFeaturedImages::the_featured_image( $image_id, $post_type, $size, $post_id );
+if ( ! function_exists( 'fusion_get_featured_image_id' ) ) {
+	/**
+	 * Get the ID of the featured image.
+	 *
+	 * @since 5.2
+	 * @param int    $image_id  The image ID.
+	 * @param string $post_type The post-type.
+	 * @param int    $post_id   The post-ID.
+	 * @return int
+	 */
+	function fusion_get_featured_image_id( $image_id, $post_type, $post_id = null ) {
+		if ( ! class_exists( 'kdMultipleFeaturedImages' ) ) {
+			return 0;
+		}
+		return kdMultipleFeaturedImages::get_featured_image_id( $image_id, $post_type, $post_id );
+	}
 }
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

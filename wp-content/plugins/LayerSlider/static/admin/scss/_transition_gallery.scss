@@ -1,5 +1,15 @@
 #ls-transition-window {
 
+	&.hide-special-effects {
+		#tryorigami {
+			display: none;
+		}
+
+		#transitionmenu {
+			margin-top: 60px;
+		}
+	}
+
 	header {
 
 		#tryorigami {
@@ -185,14 +195,10 @@
 				h4 {
 					font-size: 20px !important;
 					margin: 0 !important;
-
-					.dashicons-star-filled {
-						color: #fd9148 !important;
-						margin: 4px 0 0 10px;
-					}
 				}
 
 				.ls-select-special-transition {
+					position: relative;
 					display: inline-block !important;
 					border-radius: 50px !important;
 					border: 3px solid #00a0d2 !important;
@@ -207,7 +213,7 @@
 					padding: 0 30px !important;
 					cursor: pointer !important;
 
-					.dashicons {
+					.dashicons-yes {
 						font-size: 50px !important;
 						height: 100% !important;
 						line-height: 42px !important;
@@ -216,10 +222,30 @@
 						display: none !important;
 					}
 
+					.dashicons-lock {
+						position: absolute;
+						left: 50%;
+						top: 6px;
+						width: 30px;
+						height: 30px;
+						margin-left: -11px;
+
+						color: #0085af !important;
+						font-size: 30px;
+						line-height: 30px;
+					}
+
 					&:hover,
 					&.on {
 						background: #00a0d2 !important;
 						color: white !important;
+					}
+
+					&.locked {
+						background: white !important;
+						color: rgba( 0, 160, 210, 0.3) !important;
+						border: 3px solid rgba( 0, 160, 210, 0.3) !important;
+						cursor: default !important;
 					}
 
 					&.on {

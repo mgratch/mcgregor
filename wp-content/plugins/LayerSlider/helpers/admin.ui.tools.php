@@ -6,6 +6,8 @@ function lsOptionRow( $type, $default, $current, $attrs = array(), $trClasses = 
 	$wrapperEnd = '';
 	$control = '';
 
+	$default['desc'] = ! empty( $default['desc'] ) ? $default['desc'] : '';
+
 
 	if( ! empty($default['advanced']) ) {
 		$trClasses .= ' ls-advanced ls-hidden';
@@ -13,9 +15,11 @@ function lsOptionRow( $type, $default, $current, $attrs = array(), $trClasses = 
 		$wrapperEnd = '</div>';
 
 	} else if( ! empty($default['premium']) ) {
-		$trClasses .= ' ls-premium';
-		$wrapperStart = '<div><a class="dashicons dashicons-star-filled" target="_blank" href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#activation" data-help="'.__('Premium feature. Click to learn more.', 'LayerSlider').'"></a>';
-		$wrapperEnd = '</div>';
+		if( ! get_option( 'layerslider-authorized-site', false ) ) {
+			$trClasses .= ' ls-premium';
+			$wrapperStart = '<div><a class="dashicons dashicons-lock" target="_blank" href="'.admin_url('admin.php?page=layerslider-addons' ).'" data-help="'.__('This feature requires product activation. Click on the padlock icon to learn more.', 'LayerSlider').'"></a>';
+			$wrapperEnd = '</div>';
+		}
 	}
 
 
@@ -77,6 +81,14 @@ function lsGetInput($default, $current, $attrs = array(), $return = false) {
 	$attributes['data-value'] = $attributes['value'];
 	$el->attr($attributes);
 
+	// Product activation check
+	if( ! empty( $default['premium'] ) ) {
+		if( ! get_option( 'layerslider-authorized-site', false ) ) {
+			$el->addClass('locked');
+			$el->attr('disabled', 'disabled');
+		}
+	}
+
 	$ret = (string) $el;
 	LayerSlider\PHPQuery\phpQuery::unloadDocuments();
 
@@ -116,6 +128,14 @@ function lsGetCheckbox($default, $current, $attrs = array(), $return = false) {
 
 	$attributes['value'] = $attributes['data-value'];
 	$el->attr($attributes);
+
+	// Product activation check
+	if( ! empty( $default['premium'] ) ) {
+		if( ! get_option( 'layerslider-authorized-site', false ) ) {
+			$el->addClass('locked');
+			$el->attr('disabled', 'disabled');
+		}
+	}
 
 	$ret = (string) $el;
 	LayerSlider\PHPQuery\phpQuery::unloadDocuments();
@@ -172,6 +192,14 @@ function lsGetSelect($default, $current, $attrs = array(), $forceOptionVal = fal
 
 	$attributes['data-value'] = $attributes['value'];
 	$el->append( implode('', $listItems) )->attr($attributes);
+
+	// Product activation check
+	if( ! empty( $default['premium'] ) ) {
+		if( ! get_option( 'layerslider-authorized-site', false ) ) {
+			$el->addClass('locked');
+			$el->attr('disabled', 'disabled');
+		}
+	}
 
 	$ret = (string) $el;
 	LayerSlider\PHPQuery\phpQuery::unloadDocuments();

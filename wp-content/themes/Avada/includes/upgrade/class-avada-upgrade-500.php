@@ -1,4 +1,13 @@
 <?php
+/**
+ * Upgrades Handler.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,7 +38,7 @@ class Avada_Upgrade_500 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migration_process() {
 
-		new Fusion_Builder_Migrate( $this->database_theme_version );
+		new Fusion_Builder_Migrate( $this->database_theme_version, $this->option_name );
 
 	}
 }

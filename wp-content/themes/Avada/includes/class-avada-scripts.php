@@ -1,4 +1,14 @@
 <?php
+/**
+ * Enqueues scripts and styles.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      5.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,14 +31,28 @@ class Avada_Scripts {
 	private static $version;
 
 	/**
+	 * The CSS-compiling mode.
+	 *
+	 * @access private
+	 * @since 5.1.5
+	 * @var string
+	 */
+	private $compiler_mode;
+
+	/**
 	 * The class construction
+	 *
+	 * @access public
 	 */
 	public function __construct() {
-
 		self::$version = Avada::get_theme_version();
 
+		$dynamic_css_obj     = Fusion_Dynamic_CSS::get_instance();
+		$this->compiler_mode = ( method_exists( $dynamic_css_obj, 'get_mode' ) ) ? $dynamic_css_obj->get_mode() : $dynamic_css_obj->mode;
+
 		if ( ! is_admin() && ! in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) ) ) {
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+			add_action( 'wp', array( $this, 'wp_action' ) );
+			add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 			add_action( 'script_loader_tag', array( $this, 'add_async' ), 10, 2 );
 		}
 
@@ -36,18 +60,591 @@ class Avada_Scripts {
 			add_filter( 'woocommerce_enqueue_styles', array( $this, 'remove_woo_scripts' ) );
 		}
 
-		add_action( 'admin_head', array( $this, 'admin_css' ) );
+		add_filter( 'fusion_dynamic_css_final', array( $this, 'combine_stylesheets' ) );
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_css' ), 999 );
+		add_action( 'admin_head', array( $this, 'admin_styles' ) );
+
+	}
+
+	/**
+	 * A method that runs on 'wp'.
+	 *
+	 * @access public
+	 * @since 5.1.0
+	 * @return void
+	 */
+	public function wp_action() {
+
+		$this->enqueue_scripts();
+		$this->localize_scripts();
+
+	}
+
+	/**
+	 * Adds our scripts using Fusion_Dynamic_JS.
+	 *
+	 * @access protected
+	 * @since 5.1.0
+	 * @return void
+	 */
+	protected function enqueue_scripts() {
+
+		global $wp_styles, $woocommerce, $fusion_library;
+		$multilingual = $fusion_library->multilingual;
+
+		$page_id = Avada()->fusion_library->get_page_id();
+
+		$js_folder_suffix = '/assets/min/js';
+		$js_folder_url = Avada::$template_dir_url . $js_folder_suffix;
+		$js_folder_path = Avada::$template_dir_path . $js_folder_suffix;
+
+		$scripts = array(
+			array(
+				'bootstrap-scrollspy',
+				$js_folder_url . '/library/bootstrap.scrollspy.js',
+				$js_folder_path . '/library/bootstrap.scrollspy.js',
+				array( 'jquery' ),
+				'3.3.2',
+				true,
+			),
+			array(
+				'avada-comments',
+				$js_folder_url . '/general/avada-comments.js',
+				$js_folder_path . '/general/avada-comments.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			),
+			array(
+				'avada-general-footer',
+				$js_folder_url . '/general/avada-general-footer.js',
+				$js_folder_path . '/general/avada-general-footer.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			),
+			array(
+				'avada-quantity',
+				$js_folder_url . '/general/avada-quantity.js',
+				$js_folder_path . '/general/avada-quantity.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			),
+			array(
+				'avada-scrollspy',
+				$js_folder_url . '/general/avada-scrollspy.js',
+				$js_folder_path . '/general/avada-scrollspy.js',
+				// @codingStandardsIgnoreLine
+				( ! is_page_template( 'blank.php' ) && 'no' != fusion_get_page_option( 'display_header', $page_id ) ) ? array( 'avada-header', 'fusion-waypoints', 'bootstrap-scrollspy' ) : array( 'fusion-waypoints', 'bootstrap-scrollspy' ),
+				self::$version,
+				true,
+			),
+			array(
+				'avada-select',
+				$js_folder_url . '/general/avada-select.js',
+				$js_folder_path . '/general/avada-select.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			),
+			array(
+				'avada-sidebars',
+				$js_folder_url . '/general/avada-sidebars.js',
+				$js_folder_path . '/general/avada-sidebars.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			),
+			$scripts[] = array(
+				'jquery-sticky-kit',
+				$js_folder_url . '/library/jquery.sticky-kit.js',
+				$js_folder_path . '/library/jquery.sticky-kit.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			),
+			array(
+				'avada-tabs-widget',
+				$js_folder_url . '/general/avada-tabs-widget.js',
+				$js_folder_path . '/general/avada-tabs-widget.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			),
+		);
+
+		// Conditional scripts.
+		$available_languages = $multilingual->get_available_languages();
+		if ( ! empty( $available_languages ) ) {
+			$scripts[] = array(
+				'avada-wpml',
+				$js_folder_url . '/general/avada-wpml.js',
+				$js_folder_path . '/general/avada-wpml.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( is_page_template( 'side-navigation.php' ) ) {
+			$scripts[] = array(
+				'avada-side-nav',
+				$js_folder_url . '/general/avada-side-nav.js',
+				$js_folder_path . '/general/avada-side-nav.js',
+				array( 'jquery', 'jquery-hover-intent' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( ! is_page_template( 'blank.php' ) && 'no' != fusion_get_page_option( 'display_header', $page_id ) ) {
+			$scripts[] = array(
+				'avada-header',
+				$js_folder_url . '/general/avada-header.js',
+				$js_folder_path . '/general/avada-header.js',
+				array( 'modernizr', 'jquery', 'jquery-easing' ),
+				self::$version,
+				true,
+			);
+			$scripts[] = array(
+				'avada-menu',
+				$js_folder_url . '/general/avada-menu.js',
+				$js_folder_path . '/general/avada-menu.js',
+				array( 'modernizr', 'jquery', 'avada-header' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( Avada()->settings->get( 'status_totop' ) || Avada()->settings->get( 'status_totop_mobile' ) ) {
+			$scripts[] = array(
+				'jquery-to-top',
+				$js_folder_url . '/library/jquery.toTop.js',
+				$js_folder_path . '/library/jquery.toTop.js',
+				array( 'jquery' ),
+				'1.2',
+				true,
+			);
+			$scripts[] = array(
+				'avada-to-top',
+				$js_folder_url . '/general/avada-to-top.js',
+				$js_folder_path . '/general/avada-to-top.js',
+				array( 'jquery', 'cssua', 'jquery-to-top' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( Avada()->settings->get( 'slidingbar_widgets' ) ) {
+			$scripts[] = array(
+				'avada-sliding-bar',
+				$js_folder_url . '/general/avada-sliding-bar.js',
+				$js_folder_path . '/general/avada-sliding-bar.js',
+				array( 'modernizr', 'jquery', 'jquery-easing' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( Avada()->settings->get( 'avada_styles_dropdowns' ) ) {
+			$scripts[] = array(
+				'avada-drop-down',
+				$js_folder_url . '/general/avada-drop-down.js',
+				$js_folder_path . '/general/avada-drop-down.js',
+				array( 'jquery', 'avada-select' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( 'Top' !== Avada()->settings->get( 'header_position' ) ) {
+			$scripts[] = array(
+				'avada-side-header-scroll',
+				$js_folder_url . '/general/avada-side-header-scroll.js',
+				$js_folder_path . '/general/avada-side-header-scroll.js',
+				array( 'modernizr', 'jquery' ),
+				self::$version,
+				true,
+			);
+		}
+
+		$avada_rev_styles = get_post_meta( $page_id, 'pyre_avada_rev_styles', true );
+		if ( class_exists( 'RevSliderFront' ) && ( 'no' === $avada_rev_styles || ( Avada()->settings->get( 'avada_rev_styles' ) && 'yes' !== $avada_rev_styles ) ) ) {
+
+			// If revolution slider is active.  Can't check for rev styles option as it can be enabled in page options.
+			$scripts[] = array(
+				'avada-rev-styles',
+				$js_folder_url . '/general/avada-rev-styles.js',
+				$js_folder_path . '/general/avada-rev-styles.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( 'footer_parallax_effect' === Avada()->settings->get( 'footer_special_effects' ) ) {
+			$scripts[] = array(
+				'avada-parallax-footer',
+				$js_folder_url . '/general/avada-parallax-footer.js',
+				$js_folder_path . '/general/avada-parallax-footer.js',
+				array( 'jquery', 'modernizr' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( ! Avada()->settings->get( 'disable_mobile_image_hovers' ) ) {
+			$scripts[] = array(
+				'avada-mobile-image-hover',
+				$js_folder_url . '/general/avada-mobile-image-hover.js',
+				$js_folder_path . '/general/avada-mobile-image-hover.js',
+				array( 'jquery', 'modernizr' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( Avada()->settings->get( 'page_title_fading' ) ) {
+
+			// If we add a page option for this, it will need to be changed here too.
+			$scripts[] = array(
+				'avada-fade',
+				$js_folder_url . '/general/avada-fade.js',
+				$js_folder_path . '/general/avada-fade.js',
+				array( 'jquery', 'cssua', 'jquery-fade' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( defined( 'WPCF7_PLUGIN' ) ) {
+			$scripts[] = array(
+				'avada-contact-form-7',
+				$js_folder_url . '/general/avada-contact-form-7.js',
+				$js_folder_path . '/general/avada-contact-form-7.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( class_exists( 'GFForms' ) && Avada()->settings->get( 'avada_styles_dropdowns' ) ) {
+			$scripts[] = array(
+				'avada-gravity-forms',
+				$js_folder_url . '/general/avada-gravity-forms.js',
+				$js_folder_path . '/general/avada-gravity-forms.js',
+				array( 'jquery', 'avada-select' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( Avada()->settings->get( 'status_eslider' ) ) {
+			$scripts[] = array(
+				'jquery-elastic-slider',
+				$js_folder_url . '/library/jquery.elasticslider.js',
+				$js_folder_path . '/library/jquery.elasticslider.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			);
+			$scripts[] = array(
+				'avada-elastic-slider',
+				$js_folder_url . '/general/avada-elastic-slider.js',
+				$js_folder_path . '/general/avada-elastic-slider.js',
+				array( 'jquery', 'jquery-elastic-slider' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( class_exists( 'WooCommerce' ) ) {
+			$scripts[] = array(
+				'avada-woocommerce',
+				$js_folder_url . '/general/avada-woocommerce.js',
+				$js_folder_path . '/general/avada-woocommerce.js',
+				array( 'jquery', 'fusion-equal-heights' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( function_exists( 'is_bbpress' ) ) {
+			$scripts[] = array(
+				'avada-bbpress',
+				$js_folder_url . '/general/avada-bbpress.js',
+				$js_folder_path . '/general/avada-bbpress.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			);
+		}
+		if ( class_exists( 'Tribe__Events__Main' ) ) {
+			$scripts[] = array(
+				'avada-events',
+				$js_folder_url . '/general/avada-events.js',
+				$js_folder_path . '/general/avada-events.js',
+				array( 'jquery' ),
+				self::$version,
+				true,
+			);
+		}
+
+		if ( Avada()->settings->get( 'smooth_scrolling' ) ) {
+			$scripts[] = array(
+				'jquery-nicescroll',
+				$js_folder_url . '/library/jquery.nicescroll.js',
+				$js_folder_path . '/library/jquery.nicescroll.js',
+				array( 'jquery' ),
+				'3.7.4',
+				true,
+			);
+			$scripts[] = array(
+				'avada-nicescroll',
+				$js_folder_url . '/general/avada-nicescroll.js',
+				$js_folder_path . '/general/avada-nicescroll.js',
+				array( 'jquery', 'jquery-nicescroll' ),
+				self::$version,
+				true,
+			);
+		}
+
+		if ( ! class_exists( 'FusionBuilder' ) ) {
+			$scripts[] = array(
+				'fusion-carousel',
+				str_replace( Avada::$template_dir_url, FUSION_LIBRARY_URL, $js_folder_url ) . '/general/fusion-carousel.js',
+				str_replace( Avada::$template_dir_path, FUSION_LIBRARY_PATH, $js_folder_path ) . '/general/fusion-carousel.js',
+				array( 'jquery-caroufredsel', 'jquery-touch-swipe' ),
+				'1',
+				true,
+			);
+			$scripts[] = array(
+				'fusion-blog',
+				str_replace( Avada::$template_dir_url, FUSION_LIBRARY_URL, $js_folder_url ) . '/general/fusion-blog.js',
+				str_replace( Avada::$template_dir_path, FUSION_LIBRARY_PATH, $js_folder_path ) . '/general/fusion-blog.js',
+				array( 'jquery', 'isotope', 'fusion-lightbox', 'fusion-flexslider', 'jquery-infinite-scroll', 'images-loaded' ),
+				'1',
+				true,
+			);
+		}
+
+		foreach ( $scripts as $script ) {
+			Fusion_Dynamic_JS::enqueue_script(
+				$script[0],
+				$script[1],
+				$script[2],
+				$script[3],
+				$script[4],
+				$script[5]
+			);
+		}
+
+		Fusion_Dynamic_JS::enqueue_script( 'fusion-alert' );
+
+		if ( ! class_exists( 'FusionBuilder' ) ) {
+			Fusion_Dynamic_CSS::enqueue_style( Avada::$template_dir_path . '/assets/css/shared.min.css', Avada::$template_dir_url . '/assets/css/shared.min.css' );
+		}
+
+		if ( Avada()->settings->get( 'status_lightbox' ) && ! class_exists( 'FusionBuilder' ) ) {
+			Fusion_Dynamic_CSS::enqueue_style( Avada::$template_dir_path . '/assets/css/ilightbox.min.css', Avada::$template_dir_url . '/assets/css/ilightbox.min.css' );
+		}
+
+		if ( Avada()->settings->get( 'use_animate_css' ) && ! class_exists( 'FusionBuilder' ) ) {
+			Fusion_Dynamic_CSS::enqueue_style( Avada::$template_dir_path . '/assets/css/animations.min.css', Avada::$template_dir_url . '/assets/css/animations.min.css' );
+		}
+
+		if ( class_exists( 'WooCommerce' ) ) {
+			Fusion_Dynamic_CSS::enqueue_style( Avada::$template_dir_path . '/assets/css/woocommerce.min.css', Avada::$template_dir_url . '/assets/css/woocommerce.min.css' );
+		}
+
+		if ( class_exists( 'bbPress' ) ) {
+			Fusion_Dynamic_CSS::enqueue_style( Avada::$template_dir_path . '/assets/css/bbpress.min.css', Avada::$template_dir_url . '/assets/css/bbpress.min.css' );
+		}
+	}
+
+	/**
+	 * Localize the dynamic JS files.
+	 *
+	 * @access protected
+	 * @since 5.1.0
+	 * @return void
+	 */
+	protected function localize_scripts() {
+
+		global $wp_styles, $woocommerce, $fusion_library;
+		$multilingual     = $fusion_library->multilingual;
+		$page_bg_layout   = get_post_meta( Avada()->fusion_library->get_page_id(), 'pyre_page_bg_layout', true );
+		$avada_rev_styles = get_post_meta( Avada()->fusion_library->get_page_id(), 'pyre_avada_rev_styles', true );
+		$layout           = ( 'boxed' === $page_bg_layout || 'wide' === $page_bg_layout ) ? $page_bg_layout : Avada()->settings->get( 'layout' );
+		$avada_rev_styles = ( 'no' === $avada_rev_styles || ( Avada()->settings->get( 'avada_rev_styles' ) && 'yes' !== $avada_rev_styles ) ) ? 1 : 0;
+
+		$scripts = array(
+			array(
+				'avada-header',
+				'avadaHeaderVars',
+				array(
+					'header_position'            => strtolower( Avada()->settings->get( 'header_position' ) ),
+					'header_layout'              => Avada()->settings->get( 'header_layout' ),
+					'header_sticky'              => Avada()->settings->get( 'header_sticky' ),
+					'header_sticky_type2_layout' => Avada()->settings->get( 'header_sticky_type2_layout' ),
+					'side_header_break_point'    => (int) Avada()->settings->get( 'side_header_break_point' ),
+					'header_sticky_mobile'       => Avada()->settings->get( 'header_sticky_mobile' ),
+					'header_sticky_tablet'       => Avada()->settings->get( 'header_sticky_tablet' ),
+					'mobile_menu_design'         => Avada()->settings->get( 'mobile_menu_design' ),
+					'sticky_header_shrinkage'    => Avada()->settings->get( 'header_sticky_shrinkage' ),
+					'nav_height'                 => (int) Avada()->settings->get( 'nav_height' ),
+					'nav_highlight_border'       => ( 'bar' === Avada()->settings->get( 'menu_highlight_style' ) ) ? (int) Avada()->settings->get( 'nav_highlight_border' ) : '0',
+					'logo_margin_top'            => ( '' !== Avada()->settings->get( 'logo', 'url' ) || '' !== Avada()->settings->get( 'logo_retina', 'url' ) ) ? Avada()->settings->get( 'logo_margin', 'top' ) : '0px',
+					'logo_margin_bottom'         => ( '' !== Avada()->settings->get( 'logo', 'url' ) || '' !== Avada()->settings->get( 'logo_retina', 'url' ) ) ? Avada()->settings->get( 'logo_margin', 'bottom' ) : '0px',
+					'layout_mode'                => strtolower( $layout ),
+					'header_padding_top'         => Avada()->settings->get( 'header_padding', 'top' ),
+					'header_padding_bottom'      => Avada()->settings->get( 'header_padding', 'bottom' ),
+					'offset_scroll'              => Avada()->settings->get( 'scroll_offset' ),
+				),
+			),
+			array(
+				'avada-menu',
+				'avadaMenuVars',
+				array(
+					'header_position'         => Avada()->settings->get( 'header_position' ),
+					'logo_alignment'          => Avada()->settings->get( 'logo_alignment' ),
+					'header_sticky'           => Avada()->settings->get( 'header_sticky' ),
+					'side_header_break_point' => (int) Avada()->settings->get( 'side_header_break_point' ),
+					'mobile_menu_design'      => Avada()->settings->get( 'mobile_menu_design' ),
+					'dropdown_goto'           => __( 'Go to...', 'Avada' ),
+					'mobile_nav_cart'         => __( 'Shopping Cart', 'Avada' ),
+					'submenu_slideout'        => Avada()->settings->get( 'mobile_nav_submenu_slideout' ),
+				),
+			),
+			array(
+				'avada-comments',
+				'avadaCommentVars',
+				array(
+					'title_style_type'    => Avada()->settings->get( 'title_style_type' ),
+					'title_margin_top'    => Avada()->settings->get( 'title_margin', 'top' ),
+					'title_margin_bottom' => Avada()->settings->get( 'title_margin', 'bottom' ),
+				),
+			),
+			array(
+				'jquery-to-top',
+				'toTopscreenReaderText',
+				array(
+					'label' => esc_attr__( 'Go to Top', 'Avada' ),
+				),
+			),
+			array(
+				'avada-to-top',
+				'avadaToTopVars',
+				array(
+					'status_totop_mobile' => Avada()->settings->get( 'status_totop_mobile' ),
+				),
+			),
+			array(
+				'avada-wpml',
+				'avadaLanguageVars',
+				array(
+					'language_flag' => $multilingual->get_active_language(),
+				),
+			),
+			array(
+				'avada-sidebars',
+				'avadaSidebarsVars',
+				array(
+					'header_position'            => strtolower( Avada()->settings->get( 'header_position' ) ),
+					'header_layout'              => Avada()->settings->get( 'header_layout' ),
+					'header_sticky'              => Avada()->settings->get( 'header_sticky' ),
+					'header_sticky_type2_layout' => Avada()->settings->get( 'header_sticky_type2_layout' ),
+					'side_header_break_point'    => (int) Avada()->settings->get( 'side_header_break_point' ),
+					'header_sticky_tablet'       => Avada()->settings->get( 'header_sticky_tablet' ),
+					'sticky_header_shrinkage'    => Avada()->settings->get( 'header_sticky_shrinkage' ),
+					'nav_height'                 => (int) Avada()->settings->get( 'nav_height' ),
+					'content_break_point'        => Avada()->settings->get( 'content_break_point' ),
+				),
+			),
+			array(
+				'avada-side-nav',
+				'avadaSideNavVars',
+				array(
+					'sidenav_behavior' => Avada()->settings->get( 'sidenav_behavior' ),
+				),
+			),
+			array(
+				'avada-side-header-scroll',
+				'avadaSideHeaderVars',
+				array(
+					'side_header_break_point' => (int) Avada()->settings->get( 'side_header_break_point' ),
+					'footer_special_effects'  => Avada()->settings->get( 'footer_special_effects' ),
+				),
+			),
+			array(
+				'avada-rev-styles',
+				'avadaRevVars',
+				array(
+					'avada_rev_styles' => $avada_rev_styles,
+				),
+			),
+			array(
+				'avada-parallax-footer',
+				'avadaParallaxFooterVars',
+				array(
+					'side_header_break_point' => (int) Avada()->settings->get( 'side_header_break_point' ),
+					'header_position'         => Avada()->settings->get( 'header_position' ),
+				),
+			),
+			array(
+				'avada-mobile-image-hover',
+				'avadaMobileImageVars',
+				array(
+					'side_header_break_point' => (int) Avada()->settings->get( 'side_header_break_point' ),
+				),
+			),
+			array(
+				'avada-nicescroll',
+				'avadaNiceScrollVars',
+				array(
+					'side_header_width' => ( 'Top' !== Avada()->settings->get( 'header_position' ) ) ? intval( Avada()->settings->get( 'side_header_width' ) ) : '0',
+					'smooth_scrolling'  => Avada()->settings->get( 'smooth_scrolling' ),
+				),
+			),
+			array(
+				'avada-woocommerce',
+				'avadaWooCommerceVars',
+				array(
+					'order_actions'                   => __( 'Details', 'Avada' ),
+					'title_style_type'                => Avada()->settings->get( 'title_style_type' ),
+					'woocommerce_shop_page_columns'   => Avada()->settings->get( 'woocommerce_shop_page_columns' ),
+					'woocommerce_checkout_error'      => esc_attr__( 'Not all fields have been filled in correctly.', 'Avada' ),
+					'woocommerce_single_gallery_size' => Fusion_Sanitize::number( Avada()->settings->get( 'woocommerce_single_gallery_size' ) ),
+				),
+			),
+			array(
+				'avada-elastic-slider',
+				'avadaElasticSliderVars',
+				array(
+					'tfes_autoplay'  => Avada()->settings->get( 'tfes_autoplay' ),
+					'tfes_animation' => Avada()->settings->get( 'tfes_animation' ),
+					'tfes_interval'  => (int) Avada()->settings->get( 'tfes_interval' ),
+					'tfes_speed'     => (int) Avada()->settings->get( 'tfes_speed' ),
+					'tfes_width'     => (int) Avada()->settings->get( 'tfes_width' ),
+				),
+			),
+			array(
+				'avada-fade',
+				'avadaFadeVars',
+				array(
+					'page_title_fading' => Avada()->settings->get( 'page_title_fading' ),
+					'header_position'   => Avada()->settings->get( 'header_position' ),
+				),
+			),
+		);
+
+		foreach ( $scripts as $script ) {
+			Fusion_Dynamic_JS::localize_script(
+				$script[0],
+				$script[1],
+				$script[2]
+			);
+
+		}
 
 	}
 
 	/**
 	 * Takes care of enqueueing all our scripts.
+	 *
+	 * @access public
 	 */
-	public function enqueue_scripts() {
+	public function wp_enqueue_scripts() {
 
-		global $wp_styles, $woocommerce;
-
-		wp_enqueue_script( 'jquery', false, array(), self::$version, true );
+		wp_enqueue_script( 'jquery' );
 
 		// The comment-reply script.
 		if ( is_singular() && get_option( 'thread_comments' ) ) {
@@ -55,374 +652,25 @@ class Avada_Scripts {
 		}
 
 		if ( function_exists( 'novagallery_shortcode' ) ) {
-			wp_deregister_script( 'novagallery_modernizr' );
+			wp_enqueue_script( 'novagallery_modernizr' );
 		}
 
 		if ( function_exists( 'ccgallery_shortcode' ) ) {
-			wp_deregister_script( 'ccgallery_modernizr' );
+			wp_enqueue_script( 'ccgallery_modernizr' );
 		}
-
-		if ( Avada()->settings->get( 'status_gmap' ) ) {
-			$map_protocol = 'http' . ( ( is_ssl() ) ? 's' : '' );
-			$map_key = ( ( Avada()->settings->get( 'gmap_api' ) ) ? 'key=' . Avada()->settings->get( 'gmap_api' ) . '&' : '' );
-			$map_api = $map_protocol . '://maps.googleapis.com/maps/api/js?' . $map_key . 'language=' . substr( get_locale(), 0, 2 );
-			wp_register_script( 'google-maps-api', $map_api, array(), self::$version, true );
-			wp_register_script( 'google-maps-infobox', Avada::$template_dir_url . '/assets/js/infobox_packed.js', array(), self::$version, true );
-		}
-
-		if ( Avada()->settings->get( 'dev_mode' ) ) {
-
-			$main_js = Avada::$template_dir_url . '/assets/js/theme.js';
-			wp_deregister_script( 'bootstrap' );
-			wp_register_script( 'bootstrap', Avada::$template_dir_url . '/assets/js/bootstrap.js', array(), self::$version, true );
-			wp_enqueue_script( 'bootstrap' );
-
-			wp_deregister_script( 'cssua' );
-			wp_register_script( 'cssua', Avada::$template_dir_url . '/assets/js/cssua.js', array(), self::$version, true );
-			wp_enqueue_script( 'cssua' );
-
-			wp_deregister_script( 'jquery.easyPieChart' );
-			wp_register_script( 'jquery.easyPieChart', Avada::$template_dir_url . '/assets/js/jquery.easyPieChart.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.easyPieChart' );
-
-			wp_deregister_script( 'Froogaloop' );
-			wp_register_script( 'Froogaloop', Avada::$template_dir_url . '/assets/js/Froogaloop.js', array(), self::$version, true );
-			wp_enqueue_script( 'Froogaloop' );
-
-			wp_deregister_script( 'imagesLoaded' );
-			wp_register_script( 'imagesLoaded', Avada::$template_dir_url . '/assets/js/imagesLoaded.js', array(), self::$version, true );
-			wp_enqueue_script( 'imagesLoaded' );
-
-			wp_deregister_script( 'jquery.infinitescroll' );
-			wp_register_script( 'jquery.infinitescroll', Avada::$template_dir_url . '/assets/js/jquery.infinitescroll.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.infinitescroll' );
-
-			wp_deregister_script( 'isotope' );
-			wp_register_script( 'isotope', Avada::$template_dir_url . '/assets/js/isotope.js', array(), self::$version, true );
-			wp_enqueue_script( 'isotope' );
-
-			wp_deregister_script( 'jquery.appear' );
-			wp_register_script( 'jquery.appear', Avada::$template_dir_url . '/assets/js/jquery.appear.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.appear' );
-
-			wp_deregister_script( 'jquery.touchSwipe' );
-			wp_register_script( 'jquery.touchSwipe', Avada::$template_dir_url . '/assets/js/jquery.touchSwipe.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.touchSwipe' );
-
-			wp_deregister_script( 'jquery.carouFredSel' );
-			wp_register_script( 'jquery.carouFredSel', Avada::$template_dir_url . '/assets/js/jquery.carouFredSel.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.carouFredSel' );
-
-			wp_deregister_script( 'jquery.countTo' );
-			wp_register_script( 'jquery.countTo', Avada::$template_dir_url . '/assets/js/jquery.countTo.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.countTo' );
-
-			wp_deregister_script( 'jquery.countdown' );
-			wp_register_script( 'jquery.countdown', Avada::$template_dir_url . '/assets/js/jquery.countdown.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.countdown' );
-
-			wp_deregister_script( 'jquery.cycle' );
-			wp_register_script( 'jquery.cycle', Avada::$template_dir_url . '/assets/js/jquery.cycle.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.cycle' );
-
-			wp_deregister_script( 'jquery.easing' );
-			wp_register_script( 'jquery.easing', Avada::$template_dir_url . '/assets/js/jquery.easing.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.easing' );
-
-			wp_deregister_script( 'jquery.elasticslider' );
-			wp_register_script( 'jquery.elasticslider', Avada::$template_dir_url . '/assets/js/jquery.elasticslider.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.elasticslider' );
-
-			wp_deregister_script( 'jquery.fitvids' );
-			wp_register_script( 'jquery.fitvids', Avada::$template_dir_url . '/assets/js/jquery.fitvids.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.fitvids' );
-
-			wp_deregister_script( 'jquery.flexslider' );
-			wp_register_script( 'jquery.flexslider', Avada::$template_dir_url . '/assets/js/jquery.flexslider.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.flexslider' );
-
-			wp_deregister_script( 'jquery.fusion_maps' );
-			wp_register_script( 'jquery.fusion_maps', Avada::$template_dir_url . '/assets/js/jquery.fusion_maps.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.fusion_maps' );
-
-			wp_deregister_script( 'jquery.hoverflow' );
-			wp_register_script( 'jquery.hoverflow', Avada::$template_dir_url . '/assets/js/jquery.hoverflow.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.hoverflow' );
-
-			wp_deregister_script( 'jquery.hoverIntent' );
-			wp_register_script( 'jquery.hoverIntent', Avada::$template_dir_url . '/assets/js/jquery.hoverIntent.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.hoverIntent' );
-
-			wp_deregister_script( 'jquery.placeholder' );
-			wp_register_script( 'jquery.placeholder', Avada::$template_dir_url . '/assets/js/jquery.placeholder.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.placeholder' );
-
-			wp_deregister_script( 'jquery.toTop' );
-			wp_register_script( 'jquery.toTop', Avada::$template_dir_url . '/assets/js/jquery.toTop.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.toTop' );
-			wp_localize_script( 'jquery.toTop', 'toTopscreenReaderText', array( 'label' => esc_attr__( 'Go to Top', 'Avada' ) ) );
-
-			wp_deregister_script( 'jquery.waypoints' );
-			wp_register_script( 'jquery.waypoints', Avada::$template_dir_url . '/assets/js/jquery.waypoints.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.waypoints' );
-
-			wp_deregister_script( 'modernizr' );
-			wp_register_script( 'modernizr', Avada::$template_dir_url . '/assets/js/modernizr.js', array(), self::$version, true );
-			wp_enqueue_script( 'modernizr' );
-
-			wp_deregister_script( 'jquery.requestAnimationFrame' );
-			wp_register_script( 'jquery.requestAnimationFrame', Avada::$template_dir_url . '/assets/js/jquery.requestAnimationFrame.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.requestAnimationFrame' );
-
-			wp_deregister_script( 'jquery.mousewheel' );
-			wp_register_script( 'jquery.mousewheel', Avada::$template_dir_url . '/assets/js/jquery.mousewheel.js', array(), self::$version, true );
-			wp_enqueue_script( 'jquery.mousewheel' );
-
-			if ( Avada()->settings->get( 'status_lightbox' ) ) {
-				wp_deregister_script( 'ilightbox.packed' );
-				wp_register_script( 'ilightbox.packed', Avada::$template_dir_url . '/assets/js/ilightbox.js', array(), self::$version, true );
-				wp_enqueue_script( 'ilightbox.packed' );
-			}
-
-			wp_deregister_script( 'avada-lightbox' );
-			wp_register_script( 'avada-lightbox', Avada::$template_dir_url . '/assets/js/avada-lightbox.js', array(), self::$version, true );
-			wp_enqueue_script( 'avada-lightbox' );
-
-			wp_deregister_script( 'avada-header' );
-			wp_register_script( 'avada-header', Avada::$template_dir_url . '/assets/js/avada-header.js', array(), self::$version, true );
-			wp_enqueue_script( 'avada-header' );
-
-			wp_deregister_script( 'avada-select' );
-			wp_register_script( 'avada-select', Avada::$template_dir_url . '/assets/js/avada-select.js', array(), self::$version, true );
-			wp_enqueue_script( 'avada-select' );
-
-			wp_deregister_script( 'avada-parallax' );
-			wp_register_script( 'avada-parallax', Avada::$template_dir_url . '/assets/js/avada-parallax.js', array(), self::$version, true );
-			wp_enqueue_script( 'avada-parallax' );
-
-			wp_deregister_script( 'avada-video-bg' );
-			wp_register_script( 'avada-video-bg', Avada::$template_dir_url . '/assets/js/avada-video-bg.js', array(), self::$version, true );
-			wp_enqueue_script( 'avada-video-bg' );
-
-			if ( class_exists( 'WooCommerce' ) ) {
-				wp_dequeue_script( 'avada-woocommerce' );
-				wp_register_script( 'avada-woocommerce', Avada::$template_dir_url . '/assets/js/avada-woocommerce.js' , array( 'jquery' ), self::$version, true );
-				wp_enqueue_script( 'avada-woocommerce' );
-			}
-			if ( function_exists( 'is_bbpress' ) && is_bbpress() ) {
-				wp_dequeue_script( 'avada-bbpress' );
-				wp_register_script( 'avada-bbpress', Avada::$template_dir_url . '/assets/js/avada-bbpress.js' , array( 'jquery' ), self::$version, true );
-				wp_enqueue_script( 'avada-bbpress' );
-			}
-
-			if ( class_exists( 'Tribe__Events__Main' ) && ( tribe_is_event() || Avada_Helper::is_events_archive() ) ) {
-				wp_dequeue_script( 'avada-events' );
-				wp_register_script( 'avada-events', Avada::$template_dir_url . '/assets/js/avada-events.js' , array( 'jquery' ), self::$version, true );
-				wp_enqueue_script( 'avada-events' );
-			}
-
-			if ( Avada()->settings->get( 'smooth_scrolling' ) ) {
-				wp_dequeue_script( 'jquery.nicescroll' );
-				wp_register_script( 'jquery.nicescroll', Avada::$template_dir_url . '/assets/js/jquery.nicescroll.js' , array( 'jquery' ), self::$version, true );
-				wp_enqueue_script( 'jquery.nicescroll' );
-
-				wp_dequeue_script( 'avada-nicescroll' );
-				wp_register_script( 'avada-nicescroll', Avada::$template_dir_url . '/assets/js/avada-nicescroll.js' , array( 'jquery' ), self::$version, true );
-				wp_enqueue_script( 'avada-nicescroll' );
-			}
-		} else {
-
-			$main_js = Avada::$template_dir_url . '/assets/js/main.min.js';
-
-		}
-
-		wp_deregister_script( 'avada' );
-		wp_register_script( 'avada', $main_js, array(), self::$version, true );
-		wp_enqueue_script( 'avada' );
-		wp_localize_script( 'avada', 'toTopscreenReaderText', array( 'label' => esc_attr__( 'Go to Top', 'Avada' ) ) );
-
-		// Conditional loading for older IE versions.
-		wp_register_script( 'avada-ie9', Avada::$template_dir_url . '/assets/js/avada-ie9.js', array(), self::$version, true );
-		wp_enqueue_script( 'avada-ie9' );
-		wp_script_add_data( 'avada-ie9', 'conditional', 'IE 9' );
-
-		wp_register_script( 'avada-ie8', Avada::$template_dir_url . '/assets/js/respond.js', array(), self::$version, true );
-		wp_enqueue_script( 'avada-ie8' );
-		wp_script_add_data( 'avada-ie8', 'conditional', 'lt IE 9' );
-
-		wp_register_script( 'html5shiv', Avada::$template_dir_url . '/assets/js/html5shiv.js', array(), self::$version, false );
-		wp_enqueue_script( 'html5shiv' );
-		wp_script_add_data( 'html5shiv', 'conditional', 'lt IE 9' );
-
-		wp_register_script( 'excanvas', Avada::$template_dir_url . '/assets/js/excanvas.js', array(), self::$version, false );
-		wp_enqueue_script( 'excanvas' );
-		wp_script_add_data( 'excanvas', 'conditional', 'lt IE 9' );
-
-		wp_register_script( 'avada-ie8', Avada::$template_dir_url . '/assets/js/avada-ie8.js', array(), self::$version, true );
-		wp_enqueue_script( 'avada-ie8' );
-		wp_script_add_data( 'avada-ie8', 'conditional', 'lt IE 9' );
-
-		$smooth_height = ( 'auto' == get_post_meta( Avada()->get_page_id(), 'pyre_fimg_width', true ) && 'half' == get_post_meta( Avada()->get_page_id(), 'pyre_width', true ) ) ? 'true' : 'false';
-
-		if ( get_post_meta( 'auto' == Avada()->get_page_id(), 'pyre_fimg_width', true ) && 'half' == get_post_meta( Avada()->get_page_id(), 'pyre_width', true ) ) {
-			$flex_smooth_height = 'true';
-		} else {
-			$flex_smooth_height = ( Avada()->settings->get( 'slideshow_smooth_height' ) ) ? 'true' : 'false';
-		}
-
-		$db_vars = Avada()->settings->get_all();
-
-		$db_vars['slideshow_autoplay'] = ( ! Avada()->settings->get( 'slideshow_autoplay' ) ) ? false : true;
-		$db_vars['slideshow_speed']    = ( ! Avada()->settings->get( 'slideshow_speed' ) ) ? 7000 : Avada()->settings->get( 'slideshow_speed' );
-
-		$current_page_template = get_page_template_slug( Avada()->get_page_id() );
-		$portfolio_image_size  = avada_get_portfolio_image_size( Avada()->get_page_id() );
-		$isotope_type          = ( 'full' == $portfolio_image_size ) ? 'masonry' : 'fitRows';
-
-		if ( is_archive() ) {
-
-			$portfolio_layout_setting = strtolower( Avada()->settings->get( 'portfolio_archive_layout' ) );
-			$isotope_type = ( Avada()->settings->get( 'portfolio_featured_image_size' ) == 'full' || strpos( $portfolio_layout_setting, 'grid' ) ) ? 'masonry' : 'fitRows';
-
-		}
-
-		$layout = ( get_post_meta( Avada()->get_page_id(), 'pyre_page_bg_layout', true ) == 'boxed' || get_post_meta( Avada()->get_page_id(), 'pyre_page_bg_layout', true ) == 'wide' ) ? get_post_meta( Avada()->get_page_id(), 'pyre_page_bg_layout', true ) : Avada()->settings->get( 'layout' );
-
-		$avada_rev_styles = ( 'no' == get_post_meta( Avada()->get_page_id(), 'pyre_avada_rev_styles', true ) || ( Avada()->settings->get( 'avada_rev_styles' ) && 'yes' != get_post_meta( Avada()->get_page_id(), 'pyre_avada_rev_styles', true ) ) ) ? 1 : 0;
-
-		$available_languages = Avada_Multilingual::get_available_languages();
-
-		$local_variables = array(
-			'admin_ajax'                    => admin_url( 'admin-ajax.php' ),
-			'admin_ajax_nonce'              => wp_create_nonce( 'avada_admin_ajax' ),
-			'protocol'                      => is_ssl(),
-			'theme_url'                     => Avada::$template_dir_url,
-			'dropdown_goto'                 => __( 'Go to...', 'Avada' ),
-			'mobile_nav_cart'               => __( 'Shopping Cart', 'Avada' ),
-			'page_smoothHeight'             => $smooth_height,
-			'flex_smoothHeight'             => $flex_smooth_height,
-			'language_flag'                 => ( ! empty( $available_languages ) ) ? Avada_Multilingual::get_active_language() : '',
-			'infinite_blog_finished_msg'    => '<em>' . __( 'All posts displayed.', 'Avada' ) . '</em>',
-			'infinite_finished_msg'         => '<em>' . __( 'All items displayed.', 'Avada' ) . '</em>',
-			'infinite_blog_text'            => '<em>' . __( 'Loading the next set of posts...', 'Avada' ) . '</em>',
-			'portfolio_loading_text'        => '<em>' . __( 'Loading Portfolio Items...', 'Avada' ) . '</em>',
-			'faqs_loading_text'             => '<em>' . __( 'Loading FAQ Items...', 'Avada' ) . '</em>',
-			'order_actions'                 => __( 'Details' , 'Avada' ),
-			'avada_rev_styles'              => $avada_rev_styles,
-			'avada_styles_dropdowns'        => Avada()->settings->get( 'avada_styles_dropdowns' ),
-			'blog_grid_column_spacing'      => Avada()->settings->get( 'blog_grid_column_spacing' ),
-			'blog_pagination_type'          => Avada()->settings->get( 'blog_pagination_type' ),
-			'carousel_speed'                => Avada()->settings->get( 'carousel_speed' ),
-			'counter_box_speed'           	=> intval( Avada()->settings->get( 'counter_box_speed' ) ),
-			'content_break_point'           => intval( Avada()->settings->get( 'content_break_point' ) ),
-			'disable_mobile_animate_css'    => Avada()->settings->get( 'disable_mobile_animate_css' ),
-			'disable_mobile_image_hovers'   => Avada()->settings->get( 'disable_mobile_image_hovers' ),
-			'portfolio_pagination_type'     => Avada()->settings->get( 'grid_pagination_type' ),
-			'form_bg_color'                 => Avada()->settings->get( 'form_bg_color' ),
-			'header_transparency'           => ( ( 1 !== Avada_Color::new_color( Avada()->settings->get( 'header_bg_color' ) )->alpha && ! get_post_meta( Avada()->get_page_id(), 'pyre_header_bg_opacity', true ) ) || ( '' != get_post_meta( Avada()->get_page_id(), 'pyre_header_bg_opacity', true ) && 1 > get_post_meta( Avada()->get_page_id(), 'pyre_header_bg_opacity', true ) ) ) ? 1 : 0,
-			'header_padding_bottom'         => Avada()->settings->get( 'header_padding', 'bottom' ),
-			'header_padding_top'            => Avada()->settings->get( 'header_padding', 'top' ),
-			'header_position'               => Avada()->settings->get( 'header_position' ),
-			'header_sticky'                 => Avada()->settings->get( 'header_sticky' ),
-			'header_sticky_tablet'          => Avada()->settings->get( 'header_sticky_tablet' ),
-			'header_sticky_mobile'          => Avada()->settings->get( 'header_sticky_mobile' ),
-			'header_sticky_type2_layout'    => Avada()->settings->get( 'header_sticky_type2_layout' ),
-			'sticky_header_shrinkage'       => Avada()->settings->get( 'header_sticky_shrinkage' ),
-			'is_responsive'                 => Avada()->settings->get( 'responsive' ),
-			'is_ssl'                        => is_ssl() ? 'true' : 'false',
-			'isotope_type'                  => $isotope_type,
-			'layout_mode'                   => strtolower( $layout ),
-			'lightbox_animation_speed'      => Avada()->settings->get( 'lightbox_animation_speed' ),
-			'lightbox_arrows'               => Avada()->settings->get( 'lightbox_arrows' ),
-			'lightbox_autoplay'             => Avada()->settings->get( 'lightbox_autoplay' ),
-			'lightbox_behavior'             => Avada()->settings->get( 'lightbox_behavior' ),
-			'lightbox_desc'                 => Avada()->settings->get( 'lightbox_desc' ),
-			'lightbox_deeplinking'          => Avada()->settings->get( 'lightbox_deeplinking' ),
-			'lightbox_gallery'              => Avada()->settings->get( 'lightbox_gallery' ),
-			'lightbox_opacity'              => Avada()->settings->get( 'lightbox_opacity' ),
-			'lightbox_path'                 => Avada()->settings->get( 'lightbox_path' ),
-			'lightbox_post_images'          => Avada()->settings->get( 'lightbox_post_images' ),
-			'lightbox_skin'                 => Avada()->settings->get( 'lightbox_skin' ),
-			'lightbox_slideshow_speed'      => (int) Avada()->settings->get( 'lightbox_slideshow_speed' ),
-			'lightbox_social'               => Avada()->settings->get( 'lightbox_social' ),
-			'lightbox_title'                => Avada()->settings->get( 'lightbox_title' ),
-			'lightbox_video_height'         => Avada_Sanitize::number( Avada()->settings->get( 'lightbox_video_dimensions', 'height' ) ),
-			'lightbox_video_width'          => Avada_Sanitize::number( Avada()->settings->get( 'lightbox_video_dimensions', 'width' ) ),
-			'logo_alignment'                => Avada()->settings->get( 'logo_alignment' ),
-			'logo_margin_bottom'            => Avada()->settings->get( 'logo_margin', 'bottom' ),
-			'logo_margin_top'               => Avada()->settings->get( 'logo_margin', 'top' ),
-			'megamenu_max_width'            => (int) Avada()->settings->get( 'megamenu_max_width' ),
-			'mobile_menu_design'            => Avada()->settings->get( 'mobile_menu_design' ),
-			'nav_height'                    => (int) Avada()->settings->get( 'nav_height' ),
-			'nav_highlight_border'          => (int) Avada()->settings->get( 'nav_highlight_border' ),
-			'page_title_fading'             => Avada()->settings->get( 'page_title_fading' ),
-			'pagination_video_slide'        => Avada()->settings->get( 'pagination_video_slide' ),
-			'related_posts_speed'           => Avada()->settings->get( 'related_posts_speed' ),
-			'submenu_slideout'              => Avada()->settings->get( 'mobile_nav_submenu_slideout' ),
-			'side_header_break_point'       => (int) Avada()->settings->get( 'side_header_break_point' ),
-			'sidenav_behavior'              => Avada()->settings->get( 'sidenav_behavior' ),
-			'site_width'                    => Avada()->settings->get( 'site_width' ),
-			'slider_position'               => ( get_post_meta( Avada()->get_page_id(), 'pyre_slider_position', true ) && 'default' != get_post_meta( Avada()->get_page_id(), 'pyre_slider_position', true ) ) ? get_post_meta( Avada()->get_page_id(), 'pyre_slider_position', true ) : strtolower( Avada()->settings->get( 'slider_position' ) ),
-			'slideshow_autoplay'            => Avada()->settings->get( 'slideshow_autoplay' ),
-			'slideshow_speed'               => Avada()->settings->get( 'slideshow_speed' ),
-			'smooth_scrolling'              => Avada()->settings->get( 'smooth_scrolling' ),
-			'status_lightbox'               => Avada()->settings->get( 'status_lightbox' ),
-			'status_totop_mobile'           => Avada()->settings->get( 'status_totop_mobile' ),
-			'status_vimeo'                  => Avada()->settings->get( 'status_vimeo' ),
-			'status_yt'                     => Avada()->settings->get( 'status_yt' ),
-			'submenu_slideout'              => Avada()->settings->get( 'mobile_nav_submenu_slideout' ),
-			'testimonials_speed'            => Avada()->settings->get( 'testimonials_speed' ),
-			'tfes_animation'                => Avada()->settings->get( 'tfes_animation' ),
-			'tfes_autoplay'                 => Avada()->settings->get( 'tfes_autoplay' ),
-			'tfes_interval'                 => (int) Avada()->settings->get( 'tfes_interval' ),
-			'tfes_speed'                    => (int) Avada()->settings->get( 'tfes_speed' ),
-			'tfes_width'                    => (int) Avada()->settings->get( 'tfes_width' ),
-			'title_style_type'              => Avada()->settings->get( 'title_style_type' ),
-			'title_margin_top'				=> Avada()->settings->get( 'title_margin', 'top' ),
-			'title_margin_bottom'			=> Avada()->settings->get( 'title_margin', 'bottom' ),
-			'typography_responsive'         => Avada()->settings->get( 'typography_responsive' ),
-			'typography_sensitivity'        => Avada()->settings->get( 'typography_sensitivity' ),
-			'typography_factor'             => Avada()->settings->get( 'typography_factor' ),
-			'woocommerce_shop_page_columns' => Avada()->settings->get( 'woocommerce_shop_page_columns' ),
-			'woocommerce_checkout_error'	=> esc_attr__( 'Not all fields have been filled in correctly.', 'Avada' ),
-		);
-
-		$local_variables['side_header_width'] = ( 'Top' != Avada()->settings->get( 'header_position' ) ) ? intval( Avada()->settings->get( 'side_header_width' ) ) : '0';
-
-		wp_localize_script( 'avada', 'avadaVars', $local_variables );
 
 		wp_enqueue_style( 'avada-stylesheet', Avada::$template_dir_url . '/assets/css/style.min.css', array(), self::$version );
 
-		wp_enqueue_style( 'avada-shortcodes', Avada::$template_dir_url . '/shortcodes.css', array(), self::$version );
-		$wp_styles->add_data( 'avada-shortcodes', 'conditional', 'lte IE 9' );
-
 		if ( Avada()->settings->get( 'status_fontawesome' ) ) {
-			wp_enqueue_style( 'fontawesome', Avada::$template_dir_url . '/assets/fonts/fontawesome/font-awesome.css', array(), self::$version );
-			wp_enqueue_style( 'avada-IE-fontawesome', Avada::$template_dir_url . '/assets/fonts/fontawesome/font-awesome.css', array(), self::$version );
-			$wp_styles->add_data( 'avada-IE-fontawesome', 'conditional', 'lte IE 9' );
+			if ( 'off' === Avada()->settings->get( 'css_cache_method' ) ) {
+				wp_enqueue_style( 'fusion-font-awesome', FUSION_LIBRARY_URL . '/assets/fonts/fontawesome/font-awesome.css', array(), self::$version );
+			}
+			wp_enqueue_style( 'avada-IE-fontawesome', FUSION_LIBRARY_URL . '/assets/fonts/fontawesome/font-awesome.css', array(), self::$version );
+			wp_style_add_data( 'avada-IE-fontawesome', 'conditional', 'lte IE 9' );
 		}
-
-		wp_enqueue_style( 'avada-IE8', Avada::$template_dir_url . '/assets/css/ie8.css', array(), self::$version );
-		$wp_styles->add_data( 'avada-IE8', 'conditional', 'lte IE 8' );
 
 		wp_enqueue_style( 'avada-IE', Avada::$template_dir_url . '/assets/css/ie.css', array(), self::$version );
-		$wp_styles->add_data( 'avada-IE', 'conditional', 'IE' );
-
-		if ( Avada()->settings->get( 'status_lightbox' ) ) {
-			wp_enqueue_style( 'avada-iLightbox', Avada::$template_dir_url . '/ilightbox.css', array(), self::$version );
-		}
-
-		if ( Avada()->settings->get( 'use_animate_css' ) ) {
-			wp_enqueue_style( 'avada-animations', Avada::$template_dir_url . '/animations.css', array(), self::$version );
-		}
-
-		if ( class_exists( 'WooCommerce' ) ) {
-			wp_enqueue_style( 'avada-woocommerce', Avada::$template_dir_url . '/assets/css/woocommerce.css', array(), self::$version );
-		}
-
-		if ( class_exists( 'bbPress' ) ) {
-			wp_enqueue_style( 'avada-bbpress', Avada::$template_dir_url . '/assets/css/bbpress.css', array(), self::$version );
-		}
+		wp_style_add_data( 'avada-IE', 'conditional', 'IE' );
 
 		if ( Avada()->settings->get( 'status_lightbox' ) && class_exists( 'WooCommerce' ) ) {
 			wp_dequeue_script( 'prettyPhoto' );
@@ -430,10 +678,48 @@ class Avada_Scripts {
 			wp_dequeue_style( 'woocommerce_prettyPhoto_css' );
 		}
 
-		if ( is_rtl() ) {
-			wp_enqueue_style( 'avada-rtl', Avada::$template_dir_url . '/assets/css/rtl.css', array(), self::$version );
+		if ( is_rtl() && 'file' !== $this->compiler_mode ) {
+			wp_enqueue_style( 'avada-rtl', Avada::$template_dir_url . '/assets/css/rtl.min.css', array(), self::$version );
 		}
 
+		if ( is_page_template( 'contact.php' ) ) {
+			$options = get_option( Avada::get_option_name() );
+			if ( $options['recaptcha_public'] && $options['recaptcha_private'] && ! function_exists( 'recaptcha_get_html' ) ) {
+				if ( version_compare( PHP_VERSION, '5.3' ) >= 0 && ! class_exists( 'ReCaptcha' ) ) {
+					wp_enqueue_script( 'recaptcha-api', 'https://www.google.com/recaptcha/api.js?hl=' . get_locale() );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds assets to the compiled CSS.
+	 *
+	 * @access public
+	 * @since 5.1.5
+	 * @param string $original_styles The compiled styles.
+	 * @return string The compiled styles with any additional CSS appended.
+	 */
+	public function combine_stylesheets( $original_styles ) {
+		$wp_filesystem = Fusion_Helper::init_filesystem();
+		$styles = '';
+
+		if ( 'off' !== Avada()->settings->get( 'css_cache_method' ) ) {
+			if ( Avada()->settings->get( 'status_fontawesome' ) ) {
+				// Stylesheet ID: fusion-font-awesome. @codingStandardsIgnoreLine
+				$font_awesome_css = @file_get_contents( FUSION_LIBRARY_PATH . '/assets/fonts/fontawesome/font-awesome.min.css' );
+
+				$font_url = FUSION_LIBRARY_URL . '/assets/fonts/fontawesome';
+				$font_url = str_replace( array( 'http://', 'https://' ), '//', $font_url );
+				$styles .= str_replace( 'url(fontawesome-webfont', 'url(' . $font_url . '/fontawesome-webfont', $font_awesome_css );
+
+			}
+			if ( is_rtl() ) {
+				// Stylesheet ID: avada-rtl. @codingStandardsIgnoreLine
+				$styles .= @file_get_contents( Avada::$template_dir_path . '/assets/css/rtl.min.css' );
+			}
+		}
+		return $styles . $original_styles;
 	}
 
 	/**
@@ -461,22 +747,49 @@ class Avada_Scripts {
 
 	/**
 	 * Add admin CSS
+	 *
+	 * @access public
 	 */
 	public function admin_css() {
-
-		echo '<link rel="stylesheet" type="text/css" href="' . Avada::$template_dir_url . '/assets/admin/css/admin_css.css?vesion=' . self::$version . '">';
-		echo '<style type="text/css">.widget input { border-color: #DFDFDF !important; }</style>';
-
+		wp_enqueue_style( 'avada_wp_admin_css', get_template_directory_uri() . '/assets/admin/css/admin.css', false, self::$version );
 	}
 
 	/**
 	 * Add async to avada javascript file for performance
 	 *
+	 * @access public
 	 * @param  string $tag    The script tag.
 	 * @param  string $handle The script handle.
 	 */
 	public function add_async( $tag, $handle ) {
 		return ( 'avada' == $handle ) ? preg_replace( '/(><\/[a-zA-Z][^0-9](.*)>)$/', ' async $1 ', $tag ) : $tag;
+	}
+
+	/**
+	 * Add extra admin styles.
+	 *
+	 * @access public
+	 * @since 5.1.2
+	 */
+	public function admin_styles() {
+
+		$font_url = FUSION_LIBRARY_URL . '/assets/fonts/icomoon';
+		$font_url = str_replace( array( 'http://', 'https://' ), '//', $font_url );
+		?>
+		<style type="text/css">
+			@font-face {
+				font-family: 'icomoon';
+				src:url('<?php echo esc_url_raw( $font_url ); ?>/icomoon.eot');
+				src:url('<?php echo esc_url_raw( $font_url ); ?>/icomoon.eot?#iefix') format('embedded-opentype'),
+					url('<?php echo esc_url_raw( $font_url ); ?>/icomoon.woff') format('woff'),
+					url('<?php echo esc_url_raw( $font_url ); ?>/icomoon.ttf') format('truetype'),
+					url('<?php echo esc_url_raw( $font_url ); ?>/icomoon.svg#icomoon') format('svg');
+				font-weight: normal;
+				font-style: normal;
+			}
+		</style>
+		<?php
+
 	}
 }
 

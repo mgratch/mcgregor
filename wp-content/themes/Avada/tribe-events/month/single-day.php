@@ -38,12 +38,9 @@ $day = tribe_events_get_current_month_day();
 <!-- View More -->
 <?php if ( $day['view_more'] ) : ?>
 	<div class="tribe-events-viewmore">
-		<?php
-
-			$view_all_label = sprintf( _n( 'View 1 %1$s', 'View All %2$s %3$s', $day['total_events'], 'the-events-calendar' ), $events_label_singular, $day['total_events'], $events_label_plural );
-
-		?>
+		<?php $view_all_label = sprintf( _n( 'View 1 %1$s', 'View All %2$s %3$s', $day['total_events'], 'the-events-calendar' ), $events_label_singular, $day['total_events'], $events_label_plural ); ?>
 		<a href="<?php echo esc_url( $day['view_more'] ); ?>" class="fusion-read-more"><?php echo $view_all_label ?></a>
 	</div>
-<?php
-endif;
+<?php endif;
+
+/* Omit closing PHP tag to avoid "Headers already sent" issues. */

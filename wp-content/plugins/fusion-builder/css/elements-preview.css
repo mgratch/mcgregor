@@ -34,6 +34,7 @@
   border-color: inherit;
   color: inherit;
   font-size: 15px;
+  -webkit-transition: all 0.2s;
   transition: all 0.2s;
 }
 .fusion-alert .close:hover {
@@ -71,6 +72,7 @@
   font-weight: bold;
   cursor: pointer;
   box-sizing: content-box;
+  -webkit-transition: all 0.2s;
   transition: all 0.2s;
 }
 .fusion-button:after,
@@ -94,6 +96,7 @@
 .gform_wrapper .gform_button:hover,
 .woocommerce .checkout #place_order:hover,
 .wpcf7-submit:hover {
+  -webkit-transition: all 0.3s;
   transition: all 0.3s;
 }
 .fusion-button:focus,
@@ -104,10 +107,12 @@
 }
 .ls-container .button,
 .ls-container .fusion-button {
+  -webkit-transition: none !important;
   transition: none !important;
 }
 .ls-container .button:hover,
 .ls-container .fusion-button:hover {
+  -webkit-transition: none !important;
   transition: none !important;
 }
 #wrapper .button-square,
@@ -450,6 +455,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-green,
 .fusion-button.button-green.wpcf7-submit {
   background: #d1e990;
+  background-image: -webkit-linear-gradient(bottom, #aad75d, #d1e990);
   background-image: linear-gradient(to top, #aad75d, #d1e990);
   border: 1px solid #9dba60;
   color: #54770f;
@@ -536,6 +542,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-green:hover,
 .fusion-button.button-green.wpcf7-submit:hover {
   background: #aad75d;
+  background-image: -webkit-linear-gradient(bottom, #d1e990, #aad75d);
   background-image: linear-gradient(to top, #d1e990, #aad75d);
   border: 1px solid #9dba60;
   color: #54770f;
@@ -564,6 +571,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-darkgreen,
 .fusion-button.button-darkgreen.wpcf7-submit {
   background: #d0e0a5;
+  background-image: -webkit-linear-gradient(bottom, #a8c76a, #d0e0a5);
   background-image: linear-gradient(to top, #a8c76a, #d0e0a5);
   border: 1px solid #9dba60;
   color: #54770f;
@@ -650,6 +658,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-darkgreen:hover,
 .fusion-button.button-darkgreen.wpcf7-submit:hover {
   background: #a8c76a;
+  background-image: -webkit-linear-gradient(bottom, #d0e0a5, #a8c76a);
   background-image: linear-gradient(to top, #d0e0a5, #a8c76a);
   border: 1px solid #9dba60;
   color: #54770f;
@@ -678,6 +687,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-orange,
 .fusion-button.button-orange.wpcf7-submit {
   background: #fbdc86;
+  background-image: -webkit-linear-gradient(bottom, #f8bf56, #fbdc86);
   background-image: linear-gradient(to top, #f8bf56, #fbdc86);
   border: 1px solid #c0830b;
   color: #c0830b;
@@ -764,6 +774,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-orange:hover,
 .fusion-button.button-orange.wpcf7-submit:hover {
   background: #f8bf56;
+  background-image: -webkit-linear-gradient(bottom, #fbdc86, #f8bf56);
   background-image: linear-gradient(to top, #fbdc86, #f8bf56);
   border: 1px solid #c0830b;
   color: #c0830b;
@@ -792,6 +803,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-blue,
 .fusion-button.button-blue.wpcf7-submit {
   background: #b5e0f7;
+  background-image: -webkit-linear-gradient(bottom, #76c7f1, #b5e0f7);
   background-image: linear-gradient(to top, #76c7f1, #b5e0f7);
   border: 1px solid #1172c1;
   color: #1172c1;
@@ -878,6 +890,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-blue:hover,
 .fusion-button.button-blue.wpcf7-submit:hover {
   background: #76c7f1;
+  background-image: -webkit-linear-gradient(bottom, #b5e0f7, #76c7f1);
   background-image: linear-gradient(to top, #b5e0f7, #76c7f1);
   border: 1px solid #1172c1;
   color: #1172c1;
@@ -906,6 +919,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-darkblue,
 .fusion-button.button-darkblue.wpcf7-submit {
   background: #2a6496;
+  background-image: -webkit-linear-gradient(bottom, #428bca, #2a6496);
   background-image: linear-gradient(to top, #428bca, #2a6496);
   border: 1px solid #072c5e;
   color: #072c5e;
@@ -992,6 +1006,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-darkblue:hover,
 .fusion-button.button-darkblue.wpcf7-submit:hover {
   background: #428bca;
+  background-image: -webkit-linear-gradient(bottom, #2a6496, #428bca);
   background-image: linear-gradient(to top, #2a6496, #428bca);
   border: 1px solid #072c5e;
   color: #072c5e;
@@ -1020,6 +1035,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-red,
 .fusion-button.button-red.wpcf7-submit {
   background: #fd9c9c;
+  background-image: -webkit-linear-gradient(bottom, #fc7d7d, #fd9c9c);
   background-image: linear-gradient(to top, #fc7d7d, #fd9c9c);
   border: 1px solid #9d1111;
   color: #9d1111;
@@ -1106,6 +1122,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-red:hover,
 .fusion-button.button-red.wpcf7-submit:hover {
   background: #fc7d7d;
+  background-image: -webkit-linear-gradient(bottom, #fd9c9c, #fc7d7d);
   background-image: linear-gradient(to top, #fd9c9c, #fc7d7d);
   border: 1px solid #9d1111;
   color: #9d1111;
@@ -1134,6 +1151,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-darkred,
 .fusion-button.button-darkred.wpcf7-submit {
   background: #fe2020;
+  background-image: -webkit-linear-gradient(bottom, #b01818, #fe2020);
   background-image: linear-gradient(to top, #b01818, #fe2020);
   border: 1px solid #690e0e;
   color: #690e0e;
@@ -1220,6 +1238,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-darkred:hover,
 .fusion-button.button-darkred.wpcf7-submit:hover {
   background: #b01818;
+  background-image: -webkit-linear-gradient(bottom, #fe2020, #b01818);
   background-image: linear-gradient(to top, #fe2020, #b01818);
   border: 1px solid #690e0e;
   color: #690e0e;
@@ -1248,6 +1267,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-pink,
 .fusion-button.button-pink.wpcf7-submit {
   background: #fda1d5;
+  background-image: -webkit-linear-gradient(bottom, #fc84c8, #fda1d5);
   background-image: linear-gradient(to top, #fc84c8, #fda1d5);
   border: 1px solid #a31366;
   color: #a31366;
@@ -1334,6 +1354,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-pink:hover,
 .fusion-button.button-pink.wpcf7-submit:hover {
   background: #fc84c8;
+  background-image: -webkit-linear-gradient(bottom, #fda1d5, #fc84c8);
   background-image: linear-gradient(to top, #fda1d5, #fc84c8);
   border: 1px solid #a31366;
   color: #a31366;
@@ -1362,6 +1383,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-lightgray,
 .fusion-button.button-lightgray.wpcf7-submit {
   background: #fbfbfb;
+  background-image: -webkit-linear-gradient(bottom, #f0f0f0, #fbfbfb);
   background-image: linear-gradient(to top, #f0f0f0, #fbfbfb);
   border: 1px solid #ababab;
   color: #ababab;
@@ -1448,6 +1470,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-lightgray:hover,
 .fusion-button.button-lightgray.wpcf7-submit:hover {
   background: #f0f0f0;
+  background-image: -webkit-linear-gradient(bottom, #fbfbfb, #f0f0f0);
   background-image: linear-gradient(to top, #fbfbfb, #f0f0f0);
   border: 1px solid #ababab;
   color: #ababab;
@@ -1476,6 +1499,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-darkgray,
 .fusion-button.button-darkgray.wpcf7-submit {
   background: #c0c0c0;
+  background-image: -webkit-linear-gradient(bottom, #9e9e9e, #c0c0c0);
   background-image: linear-gradient(to top, #9e9e9e, #c0c0c0);
   border: 1px solid #434c50;
   color: #434c50;
@@ -1562,6 +1586,7 @@ button.fusion-button.button-3d:active {
 .fusion-button.button-darkgray:hover,
 .fusion-button.button-darkgray.wpcf7-submit:hover {
   background: #9e9e9e;
+  background-image: -webkit-linear-gradient(bottom, #c0c0c0, #9e9e9e);
   background-image: linear-gradient(to top, #c0c0c0, #9e9e9e);
   border: 1px solid #434c50;
   color: #434c50;
@@ -2141,6 +2166,7 @@ button.fusion-button.button-3d:active {
   font-family: 'icomoon';
   -webkit-font-smoothing: none;
   color: #fff;
+  -webkit-transition: opacity all 0.3s ease;
   transition: opacity all 0.3s ease;
 }
 .fusion-flexslider .flex-direction-nav .flex-next {
@@ -2285,6 +2311,7 @@ button.fusion-button.button-3d:active {
   background-clip: padding-box;
   -webkit-transform-style: preserve-3d;
           transform-style: preserve-3d;
+  -webkit-transition: all 0.4s cubic-bezier(0.2, 0.85, 0.4, 1.275) !important;
   transition: all 0.4s cubic-bezier(0.2, 0.85, 0.4, 1.275) !important;
 }
 .fusion-flip-box .flip-box-front {
@@ -2352,6 +2379,7 @@ button.fusion-button.button-3d:active {
   text-transform: uppercase;
 }
 .fusion-flip-box .finished-animating {
+  -webkit-transition: none !important;
   transition: none !important;
   -webkit-animation: none !important;
           animation: none !important;
@@ -2634,10 +2662,6 @@ button.fusion-button.button-3d:active {
 .fusion-carousel-border img {
   border: 1px solid #e9eaee;
 }
-.no-rgba .fusion-carousel .fusion-carousel-nav .fusion-nav-next,
-.no-rgba .fusion-carousel .fusion-carousel-nav .fusion-nav-prev {
-  background-color: #3e3e3e;
-}
 .fusion-image-carousel-fixed .fusion-carousel .fusion-carousel-wrapper {
   height: 115px !important;
 }
@@ -2744,16 +2768,22 @@ button.fusion-button.button-3d:active {
   margin-left: 0;
   margin-right: 0;
 }
+.fusion-layout-column .fusion-column-content-centered {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
 .fusion-equal-height-columns .fusion-column-wrapper {
   overflow: hidden;
-}
-.fusion-equal-height-columns .fusion-column-table {
-  display: table;
-  width: 100%;
-}
-.fusion-equal-height-columns .fusion-column-tablecell {
-  display: table-cell;
-  vertical-align: middle;
 }
 .modal-dialog {
   margin-top: 60px;
@@ -3193,6 +3223,7 @@ button.fusion-button.button-3d:active {
 }
 .fusion-separator.sep-single {
   border-top-width: 1px;
+  border-bottom: none !important;
 }
 .fusion-separator.sep-dashed {
   border-bottom-style: dashed;
@@ -3207,6 +3238,7 @@ button.fusion-button.button-3d:active {
   overflow: visible;
   border: none;
   background: none;
+  background: -webkit-linear-gradient(left, rgba(150, 150, 150, 0) 0%, rgba(150, 150, 150, 0) 15%, rgba(150, 150, 150, 0.65) 50%, rgba(150, 150, 150, 0) 85%, rgba(150, 150, 150, 0) 100%);
   background: linear-gradient(left, rgba(150, 150, 150, 0) 0%, rgba(150, 150, 150, 0) 15%, rgba(150, 150, 150, 0.65) 50%, rgba(150, 150, 150, 0) 85%, rgba(150, 150, 150, 0) 100%);
 }
 .fusion-separator.sep-shadow:after {
@@ -3215,6 +3247,7 @@ button.fusion-button.button-3d:active {
   height: 6px;
   width: 100%;
   content: '';
+  background: -webkit-radial-gradient(50% -50% ellipse, rgba(0, 0, 0, 0.5) 0px, rgba(255, 255, 255, 0) 65%);
   background: radial-gradient(ellipse at 50% -50%, rgba(0, 0, 0, 0.5) 0px, rgba(255, 255, 255, 0) 65%);
 }
 .fusion-separator .icon-wrapper {
@@ -3387,6 +3420,7 @@ body:not(:-moz-handler-blocked) .fusion-separator.sep-shadow:after {
   background-color: #f1f2f2;
   color: #747474;
   cursor: pointer;
+  -webkit-transition: all 0.2s;
   transition: all 0.2s;
 }
 .fusion-tabs .nav-tabs li .tab-link:focus,
@@ -3608,8 +3642,8 @@ body:not(:-moz-handler-blocked) .fusion-separator.sep-shadow:after {
   font-weight: bold;
 }
 .table > tbody > tr > td,
-.table > tfoot > tr > td,
-.table > thead > tr > td {
+.table > thead > tr > td,
+.table > tfoot > tr > td {
   padding: 10px 20px;
 }
 .table > tfoot > tr > td {

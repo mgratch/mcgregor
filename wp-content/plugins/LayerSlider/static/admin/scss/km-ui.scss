@@ -104,8 +104,10 @@ KM-UI styles
 		h1 {
 			position: fixed;
 			margin: 0 !important;
+			margin-right: 90px !important;
 			padding: 0 !important;
 			font-size: 24px;
+			line-height: 24px;
 			font-weight: 400;
 			color: #555 !important;
 		}
@@ -165,7 +167,7 @@ body.hidepopover .km-ui-popover
 }
 
 .km-ui-popover {
-	max-width: 260px;
+	max-width: 270px;
 	min-width: 80px;
 	position: absolute;
 	padding: 15px;

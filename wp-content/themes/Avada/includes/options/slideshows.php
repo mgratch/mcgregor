@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,7 +79,7 @@ function avada_options_section_slideshows( $sections ) {
 				'label'       => esc_html__( 'Navigation Box Dimensions', 'Avada' ),
 				'description' => esc_html__( 'Controls the width and height of the navigation box.', 'Avada' ),
 				'id'          => 'slider_nav_box_dimensions',
-				'units'		  => false,
+				'units'       => false,
 				'default'     => array(
 					'width'   => '30px',
 					'height'  => '30px',

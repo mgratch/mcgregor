@@ -2,7 +2,7 @@
 /*
 	* Style settings of LayerSlider
 	*
-	* (c) 2011-2016 George Krupa, John Gera & Kreatura Media
+	* (c) 2011-2018 George Krupa, John Gera & Kreatura Media
 	*
 	* Plugin web:			https://layerslider.kreaturamedia.com/
 	* Licenses: 			http://codecanyon.net/licenses/
@@ -56,6 +56,7 @@
 
 	.ls-layers,
 	.ls-slide-backgrounds,
+	.ls-slide-effects,
 	.ls-background-videos,
 	.ls-bg-video-overlay {
 		width: 100%;
@@ -79,17 +80,21 @@
 	}
 
 	.ls-background-videos {
-		z-index: 31;
+		z-index: 1;
 	}
 
 	.ls-bg-video-overlay {
-		z-index: 32;
+		z-index: 21;
 		background-repeat: repeat;
 		background-position: center center;
 	}
 
 	.ls-slide-backgrounds {
-		z-index: 33;
+		z-index: 2;
+	}
+
+	.ls-slide-effects {
+		z-index: 4;
 	}
 
 	.ls-layers {
@@ -141,6 +146,7 @@
 	.ls-wrapper > .ls-bg {
 		line-height: normal;
 		white-space: nowrap;
+		word-wrap: normal;
 		margin-right: 0 !important;
 		margin-bottom: 0 !important;
 	}
@@ -261,6 +267,10 @@
 
 		.ls-link {
 			display: none;
+		}
+
+		.ls-link-on-top {
+			z-index: 999999 !important;
 		}
 
 		.ls-link, .ls-wrapper > a > * {
@@ -633,6 +643,10 @@
 		z-index: 2;
 	}
 
+	.ls-autoplay .ls-playvideo {
+		display: none !important;
+	}
+
 
 
 /* Mobile features */
@@ -661,7 +675,7 @@
 		position: absolute;
 		left: 0;
 		top: 0;
-		z-index: 34;
+		z-index: 3;
 	}
 
 	.ls-slide-transition-wrapper,
@@ -840,7 +854,26 @@
 
 	.ls-fullscreen .ls-container {
 		background-color: black;
+		margin: 0 auto !important;
+	}
+
+	.ls-fullscreen .ls-fullscreen-wrapper {
+		width: 100% !important;
+		height: 100% !important;
 		margin: 0 !important;
+		padding: 0 !important;
+		border: 0 !important;
+		background-color: black;
+		overflow: hidden !important;
+		position: relative !important;
+	}
+
+	.ls-fullscreen .ls-fullscreen-wrapper .ls-container,
+	.ls-fullscreen .ls-fullscreen-wrapper .ls-wp-container {
+		position: absolute !important;
+		top: 50% !important;
+		left: 50% !important;
+		transform: translate(-50%,-50%) !important;
 	}
 
 	.ls-layer .split-item {
@@ -988,6 +1021,12 @@
 		font-size: 0;
 	}
 
+	html .ls-container video,
+	body .ls-container video,
+	#ls-global .ls-container video {
+		max-width: none !important;
+	}
+
 	/* direction: ltr */
 
 	html .ls-container,
@@ -1077,21 +1116,45 @@
 /* Device Responsiveness */
 
 @media screen and (max-width: 767px) {
-	.ls-container .ls-layers .ls-hide-on-phone {
+	.ls-container .ls-layers > .ls-hide-on-phone,
+	.ls-container .ls-background-videos .ls-hide-on-phone video,
+	.ls-container .ls-background-videos .ls-hide-on-phone audio,
+	.ls-container .ls-background-videos .ls-hide-on-phone iframe {
 		display: none !important;
 	}
 }
 
 @media screen and (min-width: 768px) and (max-width: 1024px) {
-	.ls-container .ls-layers .ls-hide-on-tablet {
+	.ls-container .ls-layers > .ls-hide-on-tablet,
+	.ls-container .ls-background-videos .ls-hide-on-tablet video,
+	.ls-container .ls-background-videos .ls-hide-on-tablet audio,
+	.ls-container .ls-background-videos .ls-hide-on-tablet iframe {
 		display: none !important;
 	}
 }
 
 @media screen and (min-width: 1025px) {
-	.ls-container .ls-layers .ls-hide-on-desktop {
+	.ls-container .ls-layers > .ls-hide-on-desktop,
+	.ls-container .ls-background-videos .ls-hide-on-desktop video,
+	.ls-container .ls-background-videos .ls-hide-on-desktop audio,
+	.ls-container .ls-background-videos .ls-hide-on-desktop iframe {
 		display: none !important;
 	}
+}
+
+.ls-container .ls-background-videos .ls-vpcontainer {
+	z-index: 10;
+}
+
+.ls-container .ls-background-videos .ls-videopreview {
+	background-size: cover !important;
+}
+
+.ls-container .ls-background-videos video,
+.ls-container .ls-background-videos audio,
+.ls-container .ls-background-videos iframe {
+	position: relative;
+	z-index: 20;
 }
 
 

@@ -3,7 +3,7 @@
  * Plugin Name: WP Extra File Types
  * Description: Plugin to let you extend the list of allowed file types supported by the Wordpress Media Library.
  * Plugin URI: http://www.airaghi.net/en/2015/01/02/wordpress-custom-mime-types/
- * Version: 0.3.6
+ * Version: 0.4.1
  * Author: Davide Airaghi
  * Author URI: http://www.airaghi.net
  * License: GPLv2 or later
@@ -59,6 +59,7 @@ class WPEFT {
 		register_setting('wp-extra-file-types-page','wpeft_types');	
 		register_setting('wp-extra-file-types-page','wpeft_custom_types');
 		register_setting('wp-extra-file-types-page','wpeft_no_strict');
+		register_setting('wp-extra-file-types-page','wpeft_no_wp');
 	}
 
 	public function admin() {
@@ -119,6 +120,11 @@ class WPEFT {
 			} else {
 				update_option('wpeft_no_strict',false);
 			}
+			if (isset($_POST['no_wp']) && $_POST['no_wp']) {
+				update_option('wpeft_no_wp',true);
+			} else {
+				update_option('wpeft_no_wp',false);
+			}
 		}
 		$selected = get_option('wpeft_types','');
 		if (!$selected) {
@@ -128,12 +134,58 @@ class WPEFT {
 			$selected = array();
 		}
 		$exts = array_keys($selected);
+		
 		$nostrict = get_option('wpeft_no_strict',false);
+		$nowp = get_option('wpeft_no_wp',false);
 		$custom = get_option('wpeft_custom_types','');
 		if (!$custom) {
 			$custom = array();
-		}
+		}		
 		?>
+		<script>
+		    function showAll() {
+		    	var els = document.getElementsByClassName('in_wp');
+			var i=0,m=els.length;
+			for (i=0;i<m;i++) {
+			    els[i].style.display = 'table-row';
+			}
+		    }
+		    function hideSome() {
+			var els = document.getElementsByClassName('in_wp');
+			var i=0,m=els.length;
+			for (i=0;i<m;i++) {
+			    els[i].style.display = 'none';
+			}
+		    }
+		    function ShowOrHide() {
+			var f = document.wpeft_form;
+			var c = f.no_wp.checked;
+			if (c) {
+			    showAll();
+			} else {
+			    hideSome();
+			}
+		    }
+		    function setupShowOrHide() {
+			var f = document.wpeft_form;
+			var c = f.no_wp;
+			c.onchange = function() {
+			    if (this.checked) { showAll();  }
+			    else              { hideSome(); }
+			}
+		    }
+		</script>
+		<style>
+		    .not_in_wp {
+			display: table-row;
+		    }
+		    .in_wp {
+			display: none;
+		    }
+		    .in_wp td {
+			background-color: #F5A9A9;
+		    }
+		</style>
 		<div class="wrap">
 		<h2><?php echo htmlentities($this->lang['ADMIN_PAGE_TITLE']);?></h2>
 		<p><?php echo htmlentities($this->lang['TEXT_CHOOSE']);?></p>
@@ -143,21 +195,31 @@ class WPEFT {
 			<?php do_settings_sections( 'wp-extra-file-types-page' ); ?>
 			<table>
 				<tr>
-					<td><?php echo $this->lang['TEXT_NO_STRICT'];?></td>
-					<td>&nbsp;</td>
-					<td><input type="checkbox" name="no_strict" <?php if ($nostrict) { echo 'checked="checked" '; } ?>></td>
+					<td valign="top"><?php echo $this->lang['TEXT_NO_STRICT'];?></td>
+					<td valign="top">&nbsp;</td>
+					<td valign="top"><input type="checkbox" name="no_strict" <?php if ($nostrict) { echo 'checked="checked" '; } ?>> <?php echo $this->lang['TEXT_NO_STRICT_1'];?></td>
+				</tr>
+				<tr>
+					<td valign="top"><?php echo $this->lang['TEXT_SKIP_WP'];?></td>
+					<td valign="top">&nbsp;</td>
+					<td valign="top"><input type="checkbox" name="no_wp" <?php if ($nowp) { echo 'checked="checked" '; } ?>> <?php echo $this->lang['TEXT_SKIP_WP_1'];?></td>
+				</tr>
+				<tr>
+				    <td colspan="3">
+					<hr />
+				    </td>
 				</tr>
 				<?php
 				foreach ($this->types_list as $type) {
 					foreach ($type->extensions as $ext) {
+						$class = "not_in_wp";
 						$ext0 = str_replace('.','',$ext);
 						if ($this->_inWP($ext0)) { 
-							// do not consider mimetype already in wordpress' list
-							continue;
+						    $class = "in_wp";
 						}
 						if (''==$ext0) { continue; }
 						?>
-						<tr>
+						<tr class="<?php echo $class;?>">
 							<td valign="top"><?php echo $type->application;?></td>
 							<td valign="top"><?php echo $ext;?></td>
 							<td valign="top">
@@ -230,12 +292,21 @@ class WPEFT {
 			<?php } ?>
 			<?php submit_button(); ?>
 		</form>
+		<script>
+		    ShowOrHide();
+		    setupShowOrHide();
+		</script>
 		<?php
 	}
 	
 	public function mime($mimes) {
+		$nowp = get_option('wpeft_no_wp');
 		$usr = $this->_buildList();
-		$ret =  array_merge($mimes,$usr);
+		if ($nowp) {
+		    $ret =  $usr;
+		} else {
+		    $ret =  array_merge($mimes,$usr);
+		}
 		return $ret;
 	}
 	
@@ -243,6 +314,7 @@ class WPEFT {
 		// extra checks to handle situations where "finfo mimetype" is different from "user mimetype"
 		$ret = array('ext'=>'','type'=>'','proper_filename'=>'');
 		$nostrict = get_option('wpeft_no_strict');
+		$nowp = get_option('wpeft_no_wp');
 		foreach ($info as $k=>$v) {
 			if ($v!=='') {
 				$ret[$k] = $v;
@@ -252,9 +324,12 @@ class WPEFT {
 		$ext   = array_pop($parts);
 		$ext   = strtolower($ext);
 		$inwp = $this->_inWP($ext);
-		if ($inwp || !$nostrict) {
+		if (!$nowp) {
+		    // if the user want to use also WordPress internals (default case) ...
+		    if ($inwp || !$nostrict) {
 			// do nothing for WordPress file types or when we do not have to force anything ...
 			return $ret;
+		    }
 		}
 		$usr = $this->_buildList();
 		if (isset($usr[$ext])) {
@@ -310,6 +385,7 @@ $wpeft_obj = new \WPEFT();
 
 add_action('admin_menu', array($wpeft_obj,'admin'));
 add_filter('upload_mimes',array($wpeft_obj,'mime'));
+
 add_filter('wp_check_filetype_and_ext',array($wpeft_obj,'mime2'),10,4);
 
 /* add_filter('upload_mimes','add_extra_mime_types');

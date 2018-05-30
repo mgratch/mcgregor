@@ -139,7 +139,7 @@ class csd_parser
         $this->csds  = is_array($csd) ? implode("\n", $csd) : $csd;
         $this->times = self::prep_csds($csd);
         if ($this->times === false) {
-            throw new Exception(__METHOD__.': No valid definition(s) provided. Check error log for details.');
+            throw new Exception(__METHOD__.': No valid definition(s) provided. Check error log for details.');			
         }
         $this->base_time = self::parse_time($time);
     }

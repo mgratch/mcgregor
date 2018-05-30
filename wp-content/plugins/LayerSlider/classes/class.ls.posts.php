@@ -62,7 +62,7 @@ class LS_Posts {
 			$ret[$key]['thumbnail'] = !empty($ret[$key]['thumbnail']) ? $ret[$key]['thumbnail'] : LS_ROOT_URL . '/static/admin/img/blank.gif';
 			$ret[$key]['image'] = '<img src="'.$ret[$key]['thumbnail'].'" alt="">';
 			$ret[$key]['image-url'] = $ret[$key]['thumbnail'];
-			$ret[$key]['title'] = htmlspecialchars($this->getTitle(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE);
+			$ret[$key]['title'] = htmlspecialchars($this->getTitle());
 			$ret[$key]['content'] = $this->getContent();
 			$ret[$key]['excerpt'] = $this->getExcerpt();
 			$ret[$key]['author'] = get_userdata($val->post_author)->user_nicename;
@@ -189,7 +189,7 @@ class LS_Posts {
 
 		if(!is_object($this->post)) { return false; }
 
-		$title = __($this->post->post_title);
+		$title = $this->post->post_title;
 		if(!empty($length)) {
 			$title = substr($title, 0, $length);
 		}
@@ -268,7 +268,7 @@ class LS_Posts {
 
 		if(!is_object($this->post)) { return false; }
 
-		$content = __($this->post->post_content);
+		$content = $this->post->post_content;
 		if(!empty($length)) {
 			$content = substr(wp_strip_all_tags($content), 0, $length);
 		}

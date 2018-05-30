@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,8 +37,8 @@ function avada_options_section_lightbox( $sections ) {
 				'type'        => 'switch',
 			),
 			'status_lightbox_single' => array(
-				'label'       => esc_html__( 'Lightbox On Single Post Pages', 'Avada' ),
-				'description' => esc_html__( 'Turn on to enable the lightbox on single blog and portfolio posts.', 'Avada' ),
+				'label'       => esc_html__( 'Lightbox For Featured Images On Single Post Pages', 'Avada' ),
+				'description' => esc_html__( 'Turn on to enable the lightbox on single blog and portfolio posts for the main featured images.', 'Avada' ),
 				'id'          => 'status_lightbox_single',
 				'default'     => '1',
 				'type'        => 'switch',
@@ -129,6 +139,11 @@ function avada_options_section_lightbox( $sections ) {
 						'setting'  => 'status_lightbox',
 						'operator' => '==',
 						'value'    => '1',
+					),
+					array(
+						'setting'  => 'lightbox_skin',
+						'operator' => '!=',
+						'value'    => 'parade',
 					),
 				),
 			),

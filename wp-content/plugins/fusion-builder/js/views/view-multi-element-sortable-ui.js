@@ -1,3 +1,4 @@
+/* global FusionPageBuilderApp, FusionPageBuilderEvents, fusionAllElements, FusionPageBuilderViewManager, fusionMultiElements */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function( $ ) {
@@ -28,7 +29,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					cancel: '.fusion-builder-multi-setting-remove, .fusion-builder-multi-setting-options, .fusion-builder-multi-setting-clone',
 					helper: 'clone',
 
-					update: function( event, ui ) {
+					update: function() {
 						FusionPageBuilderEvents.trigger( 'fusion-multi-element-edited' );
 					}
 				} );
@@ -48,7 +49,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				var params = {},
 				    defaultParams,
-				    value;
+				    value,
+				    allowGenerator;
 
 				if ( event ) {
 					event.preventDefault();
@@ -56,10 +58,12 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				defaultParams = fusionAllElements[ this.element_type ].params;
 
+				allowGenerator = ( 'undefined' !== typeof fusionAllElements[ this.element_type ].allow_generator ) ? fusionAllElements[ this.element_type ].allow_generator : '';
+
 				// Process default parameters from shortcode
 				_.each( defaultParams, function( param )  {
 					if ( _.isObject( param.value ) ) {
-						value = param.default;
+						value = param['default'];
 					} else {
 						value = param.value;
 					}
@@ -75,7 +79,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					multi: 'multi_element_child',
 					child_element: 'true',
 					parent: this.attributes.cid,
-					params: params
+					params: params,
+					allow_generator: allowGenerator
 				} ] );
 
 				this.$add_sortable_item.removeClass( 'fusion-builder-add-sortable-initial' );
@@ -112,7 +117,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 			generateMultiElementChildSortables: function( content, moduleType, fixSettingsLvl, parentAtts ) {
 				var thisEl        = this,
-				    shortcodeTags = jQuery.map( fusionMultiElements, function( val, i ) {
+				    shortcodeTags = jQuery.map( fusionMultiElements, function( val, i ) { // jshint ignore:line
 						return val;
 				    }).join( '|' ),
 				    regExp      = window.wp.shortcode.regexp( shortcodeTags ),
@@ -129,7 +134,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					    shortcodeAttributes  = '' !== shortcodeElement[3] ? window.wp.shortcode.attrs( shortcodeElement[3] ) : '',
 					    shortcodeContent     = shortcodeElement[5],
 					    elementName          = '',
-					    moduleCID            = FusionPageBuilderViewManager.generateCid(),
+					    moduleCID            = FusionPageBuilderViewManager.generateCid(), // jshint ignore:line
 					    prefixedAttributes   = { params: ( {}) },
 
 					    // TODO: check if needed.  Commented out for FB item 420.
@@ -150,6 +155,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						elementName = shortcodeAttributes.named.title_front;
 					} else if ( 'undefined' !== typeof shortcodeAttributes.named && 'undefined' !== typeof shortcodeAttributes.named.image && shortcodeAttributes.named.image.length ) {
 						elementName = shortcodeAttributes.named.image;
+
+						// If contains backslash, retrieve only last part.
+						if ( -1 !== elementName.indexOf( '/' ) && -1 === elementName.indexOf( '[' ) ) {
+							elementName = elementName.split( '/' );
+							elementName = elementName.slice( -1 )[0];
+						}
+					} else if ( 'undefined' !== typeof shortcodeAttributes.named && 'image' === shortcodeAttributes.named.type && 'undefined' !== typeof shortcodeContent && shortcodeContent.length ) {
+						elementName = shortcodeContent;
 
 						// If contains backslash, retrieve only last part.
 						if ( -1 !== elementName.indexOf( '/' ) && -1 === elementName.indexOf( '[' ) ) {
@@ -240,9 +253,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					thisEl.model.collection.add( [ moduleSettings ] );
 				} );
 			}
-
 		} );
-
 	} );
-
 } )( jQuery );

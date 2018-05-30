@@ -10,8 +10,8 @@
 				<li class=""><a href="#default-container">{{ fusionBuilderText.full_width_section }}</a></li>
 				<li class=""><a href="#builder-regular-columns">{{ fusionBuilderText.columns }}</a></li>
 			<# } #>
-			<li class=""><a href="#default-columns">{{ fusionBuilderText.inner_columns }}</a></li>
 			<li class=""><a href="#default-elements">{{ fusionBuilderText.builder_elements }}</a></li>
+			<li class=""><a href="#default-columns">{{ fusionBuilderText.inner_columns }}</a></li>
 		</ul>
 	</div>
 
@@ -27,12 +27,9 @@
 						</ul>
 					</div>
 					<div id="builder-regular-columns" class="fusion-tab-content">
-						<?php echo fusion_builder_generator_column_layouts(); ?>
+						<?php echo fusion_builder_generator_column_layouts(); // WPCS: XSS ok. ?>
 					</div>
 				<# } #>
-				<div id="default-columns" class="fusion-tab-content">
-					<?php echo fusion_builder_generator_column_layouts(); ?>
-				</div>
 				<div id="default-elements" class="fusion-tab-content">
 					<ul class="fusion-builder-all-modules">
 						<# _.each( generator_elements, function(module) { #>
@@ -48,7 +45,9 @@
 						<# } ); #>
 					</ul>
 				</div>
-
+				<div id="default-columns" class="fusion-tab-content">
+					<?php echo fusion_builder_generator_column_layouts(); // WPCS: XSS ok. ?>
+				</div>
 			</div>
 		</div>
 	</div>

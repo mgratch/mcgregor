@@ -1,4 +1,14 @@
 <?php
+/**
+ * Avada Options.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -108,6 +118,93 @@ function avada_options_section_logo( $sections ) {
 							),
 						),
 					),
+					'logo_background' => array(
+						'label'       => esc_html__( 'Logo Background', 'Avada' ),
+						'description' => esc_html__( 'Turn on to display a colored background for the logo.', 'Avada' ),
+						'id'          => 'logo_background',
+						'default'     => '0',
+						'type'        => 'switch',
+						'class'       => 'fusion-gutter-and-and-or-and',
+						'required'    => array(
+							array(
+								'setting'  => 'header_layout',
+								'operator' => '!=',
+								'value'    => 'v4',
+							),
+							array(
+								'setting'  => 'header_layout',
+								'operator' => '!=',
+								'value'    => 'v5',
+							),
+							array(
+								'setting'  => 'logo',
+								'operator' => '!=',
+								'value'    => '',
+							),
+							array(
+								'setting'  => 'header_position',
+								'operator' => '!=',
+								'value'    => 'Top',
+							),
+							array(
+								'setting'  => 'logo',
+								'operator' => '!=',
+								'value'    => '',
+							),
+						),
+					),
+					'logo_background_color' => array(
+						'label'       => esc_html__( 'Logo Background Color', 'Avada' ),
+						'description' => esc_html__( 'Controls the background color for the logo.', 'Avada' ),
+						'id'          => 'logo_background_color',
+						'default'     => '#a0ce4e',
+						'type'        => 'color-alpha',
+						'class'       => 'fusion-gutter-and-and-and-or-and-and',
+						'required'    => array(
+							array(
+								'setting'  => 'header_layout',
+								'operator' => '!=',
+								'value'    => 'v4',
+							),
+							array(
+								'setting'  => 'header_layout',
+								'operator' => '!=',
+								'value'    => 'v5',
+							),
+							array(
+								'setting'  => 'logo_background',
+								'operator' => '==',
+								'value'    => '1',
+							),
+							array(
+								'setting'  => 'logo',
+								'operator' => '!=',
+								'value'    => '',
+							),
+							array(
+								'setting'  => 'header_position',
+								'operator' => '!=',
+								'value'    => 'Top',
+							),
+							array(
+								'setting'  => 'logo_background',
+								'operator' => '==',
+								'value'    => '1',
+							),
+							array(
+								'setting'  => 'logo',
+								'operator' => '!=',
+								'value'    => '',
+							),
+						),
+					),
+					'logo_custom_link' => array(
+						'label'           => esc_html__( 'Logo Custom Link URL', 'Avada' ),
+						'description'     => esc_html__( 'Enter a custom URL the site logo should link to. Leave empty to let logo link to the home page.', 'Avada' ),
+						'id'              => 'logo_custom_link',
+						'default'         => '',
+						'type'            => 'text',
+					),
 					'default_logo_info_title' => array(
 						'label'       => esc_html__( 'Default Logo', 'Avada' ),
 						'description' => '',
@@ -173,6 +270,7 @@ function avada_options_section_logo( $sections ) {
 						'default'     => '',
 						'mod'         => 'min',
 						'type'        => 'media',
+						'mode'        => false,
 					),
 					'sticky_header_logo_retina' => array(
 						'label'       => esc_html__( 'Retina Sticky Header Logo', 'Avada' ),
@@ -181,6 +279,7 @@ function avada_options_section_logo( $sections ) {
 						'default'     => '',
 						'mod'         => 'min',
 						'type'        => 'media',
+						'mode'        => false,
 						'required'    => array(
 							array(
 								'setting'  => 'sticky_header_logo',
@@ -221,6 +320,7 @@ function avada_options_section_logo( $sections ) {
 						'default'     => '',
 						'mod'         => 'min',
 						'type'        => 'media',
+						'mode'        => false,
 					),
 					'mobile_logo_retina' => array(
 						'label'       => esc_html__( 'Retina Mobile Logo', 'Avada' ),
@@ -229,6 +329,7 @@ function avada_options_section_logo( $sections ) {
 						'default'     => '',
 						'mod'         => 'min',
 						'type'        => 'media',
+						'mode'        => false,
 						'required'    => array(
 							array(
 								'setting'  => 'mobile_logo',
@@ -271,6 +372,7 @@ function avada_options_section_logo( $sections ) {
 						'id'          => 'favicon',
 						'default'     => '',
 						'type'        => 'media',
+						'mode'        => false,
 					),
 					'iphone_icon' => array(
 						'label'       => esc_html__( 'Apple iPhone Icon Upload', 'Avada' ),
@@ -278,6 +380,7 @@ function avada_options_section_logo( $sections ) {
 						'id'          => 'iphone_icon',
 						'default'     => '',
 						'type'        => 'media',
+						'mode'        => false,
 					),
 					'iphone_icon_retina' => array(
 						'label'       => esc_html__( 'Apple iPhone Retina Icon Upload', 'Avada' ),
@@ -285,6 +388,7 @@ function avada_options_section_logo( $sections ) {
 						'id'          => 'iphone_icon_retina',
 						'default'     => '',
 						'type'        => 'media',
+						'mode'        => false,
 						'required'    => array(
 							array(
 								'setting'  => 'iphone_icon',
@@ -317,6 +421,7 @@ function avada_options_section_logo( $sections ) {
 						'id'          => 'ipad_icon',
 						'default'     => '',
 						'type'        => 'media',
+						'mode'        => false,
 					),
 					'ipad_icon_retina' => array(
 						'label'       => esc_html__( 'Apple iPad Retina Icon Upload', 'Avada' ),
@@ -324,6 +429,7 @@ function avada_options_section_logo( $sections ) {
 						'id'          => 'ipad_icon_retina',
 						'default'     => '',
 						'type'        => 'media',
+						'mode'        => false,
 						'required'    => array(
 							array(
 								'setting'  => 'ipad_icon',

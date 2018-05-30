@@ -68,3 +68,5 @@ endif;
 
 // Cleanup. Do not remove this.
 wp_reset_postdata();
+
+/* Omit closing PHP tag to avoid "Headers already sent" issues. */

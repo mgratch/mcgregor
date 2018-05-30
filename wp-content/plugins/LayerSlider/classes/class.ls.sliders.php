@@ -85,7 +85,7 @@ class LS_Sliders {
 				'data' => true
 			);
 
-			// User data
+			// Merge user data with defaults
 			foreach($defaults as $key => $val) {
 				if(!isset($args[$key])) { $args[$key] = $val; }
 			}
@@ -96,6 +96,26 @@ class LS_Sliders {
 					$args[$key] = esc_sql($val);
 				}
 			}
+
+			// Due to the nature of dynamically built queries we can't
+			// use prepared statements or $wpdb::prepare(). By keeping
+			// this function backwards compatible, we have even less
+			// options to completely eliminate potential issues caused
+			// by unhandled data.
+
+			// In addition of using esc_sql(), we're performing some
+			// further tests trying to filter out user data that might
+			// not be handled properly prior to this function call.
+			$columns = array('id', 'author', 'name', 'slug', 'data', 'date_c', 'date_m', 'flag_hidden', 'flag_deleted', 'schedule_start', 'schedule_end');
+
+			$args['orderby'] 	= in_array($args['orderby'], $columns) ? $args['orderby'] : 'date_c';
+			$args['order'] 		= ($args['order'] === 'DESC') ? 'DESC' : 'ASC';
+			$args['limit'] 		= (int)  $args['limit'];
+			$args['page'] 		= (int)  $args['page'];
+			$args['data'] 		= (bool) $args['data'];
+
+
+
 
 			// Exclude
 			if(!empty($args['exclude'])) {
@@ -126,8 +146,13 @@ class LS_Sliders {
 			// Build the query
 			global $wpdb;
 			$table = $wpdb->prefix.LS_DB_TABLE;
-			$sliders = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS {$args['columns']} FROM $table $where
-									ORDER BY {$args['orderby']} {$args['order']} LIMIT {$args['limit']}", ARRAY_A);
+			$sliders = $wpdb->get_results("
+				SELECT SQL_CALC_FOUND_ROWS {$args['columns']}
+				FROM $table
+				$where
+				ORDER BY `{$args['orderby']}` {$args['order']}
+				LIMIT {$args['limit']}
+			", ARRAY_A);
 
 			// Set counter
 			$found = $wpdb->get_col("SELECT FOUND_ROWS()");
@@ -166,7 +191,8 @@ class LS_Sliders {
 		// Slider data
 		$data = !empty($data) ? $data : array(
 			'properties' => array(
-				'sliderVersion' => LS_DB_VERSION,
+				'createdWith' => LS_PLUGIN_VERSION,
+				'sliderVersion' => LS_PLUGIN_VERSION,
 				'title' => $title,
 				'new' => true,
 			),
@@ -179,6 +205,12 @@ class LS_Sliders {
 			$title = substr($title, 0, (99-strlen($title)) );
 		}
 
+		// Popup?
+		$popup = 0;
+		if( ! empty($data['properties']['type']) && $data['properties']['type'] == 'popup') {
+			$popup = 1;
+		}
+
 		// Insert slider, WPDB will escape data automatically
 		$wpdb->insert($wpdb->prefix.LS_DB_TABLE, array(
 			'author' => get_current_user_id(),
@@ -186,9 +218,10 @@ class LS_Sliders {
 			'slug' => $slug,
 			'data' => json_encode($data),
 			'date_c' => time(),
-			'date_m' => time()
+			'date_m' => time(),
+			'flag_popup' => $popup
 		), array(
-			'%d', '%s', '%s', '%s', '%d', '%d'
+			'%d', '%s', '%s', '%s', '%d', '%d', '%d'
 		));
 
 		// Return insert database ID
@@ -244,7 +277,11 @@ class LS_Sliders {
 			}
 		}
 
-
+		// Popup?
+		$popup = 0;
+		if( ! empty($data['properties']['type']) && $data['properties']['type'] == 'popup') {
+			$popup = 1;
+		}
 
 		// Insert slider, WPDB will escape data automatically
 		$wpdb->update($wpdb->prefix.LS_DB_TABLE, array(
@@ -254,10 +291,11 @@ class LS_Sliders {
 				'schedule_start' => $schedule['schedule_start'],
 				'schedule_end' => $schedule['schedule_end'],
 				'date_m' => time(),
-				'flag_hidden' => $status
+				'flag_hidden' => $status,
+				'flag_popup' => $popup
 			),
 			array('id' => $id),
-			array('%s', '%s', '%s', '%d', '%d', '%d', '%d')
+			array('%s', '%s', '%s', '%d', '%d', '%d', '%d', '%d')
 		);
 
 		// Return insert database ID

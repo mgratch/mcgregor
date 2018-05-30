@@ -1,3 +1,4 @@
+/* global FusionPageBuilderApp, fusionBuilderGetContent, fusionBuilderText, console, fusionHistoryState */
 /*
  * Adds undo and redo functionality to the Fusion Page Builder
  */
@@ -27,7 +28,8 @@
 
 		if ( fusionHistoryManager.isTrackingOn() ) {
 
-			if ( currStep ==  maxSteps ) { // If reached limit
+			// If reached limit.
+			if ( currStep == maxSteps ) { // jshint ignore:line
 				fusionCommands.shift(); // Remove first index
 			} else {
 				currStep += 1; // Else increment index
@@ -49,7 +51,7 @@
 
 			// Update buttons
 			fusionHistoryManager.updateButtons();
-			fusionHistoryState = '';
+			fusionHistoryState = ''; // jshint ignore:line
 		}
 	};
 
@@ -60,6 +62,10 @@
 	 */
 	fusionHistoryManager.turnOnTracking = function( ) {
 		window.tracking = 'on';
+
+		if ( 'undefined' !== typeof FusionPageBuilderApp && FusionPageBuilderApp.pauseBuilder ) {
+			fusionHistoryManager.turnOffTracking();
+		}
 	};
 
 	/**
@@ -214,7 +220,7 @@
 		fusionCommands       = new Array( '[]' );
 		fusionCommandsStates = new Array( '[]' );
 		currStep             = 1;
-		fusionHistoryState   = '';
+		fusionHistoryState   = ''; // jshint ignore:line
 
 		if ( 'blank' === state ) {
 			fusionCommands[ currStep ] = '';
@@ -262,14 +268,21 @@
 	 */
 	fusionHistoryManager.updateButtons = function() {
 
-		// Undo button
-		$( '.fusion-builder-layout-buttons-undo' ).css( 'background', fusionHistoryManager.hasUndo() ? '#222222' : '' );
+		// Undo & History states buttons
+		if ( fusionHistoryManager.hasUndo() ) {
+			$( '.fusion-builder-layout-buttons-undo' ).addClass( 'fusion-history-has-step' );
+			$( '.fusion-builder-layout-buttons-history' ).addClass( 'fusion-history-has-step' );
+		} else {
+			$( '.fusion-builder-layout-buttons-undo' ).removeClass( 'fusion-history-has-step' );
+			$( '.fusion-builder-layout-buttons-history' ).removeClass( 'fusion-history-has-step' );
+		}
 
 		// Redo button
-		$( '.fusion-builder-layout-buttons-redo' ).css( 'background', fusionHistoryManager.hasRedo() ? '#222222' : '' );
-
-		// History states button
-		$( '.fusion-builder-layout-buttons-history' ).css( 'background', fusionHistoryManager.hasUndo() ? '#222222' : '' );
+		if ( fusionHistoryManager.hasRedo() ) {
+			$( '.fusion-builder-layout-buttons-redo' ).addClass( 'fusion-history-has-step' );
+		} else {
+			$( '.fusion-builder-layout-buttons-redo' ).removeClass( 'fusion-history-has-step' );
+		}
 	};
 
 })( jQuery );

@@ -18,7 +18,7 @@
 			<# } #>
 		</ul>
 	</div>
-	
+
 	<div class="fusion-builder-main-settings fusion-builder-main-settings-full has-group-options">
 		<div class="fusion-builder-all-elements-container">
 			<div class="fusion-tabs">
@@ -39,12 +39,12 @@
 				</div>
 				<# if ( FusionPageBuilderApp.innerColumn == 'false' && FusionPageBuilderApp.shortcodeGenerator !== true ) { #>
 					<div id="inner-columns" class="fusion-tab-content">
-						<?php echo fusion_builder_inner_column_layouts(); ?>
+						<?php echo fusion_builder_inner_column_layouts(); // WPCS: XSS ok. ?>
 					</div>
 				<# } #>
 				<# if ( FusionPageBuilderApp.shortcodeGenerator === true ) { #>
 					<div id="default-columns" class="fusion-tab-content">
-						<?php echo fusion_builder_generator_column_layouts(); ?>
+						<?php echo fusion_builder_generator_column_layouts(); // WPCS: XSS ok. ?>
 					</div>
 				<# } #>
 				<div id="custom-elements" class="fusion-tab-content"></div>

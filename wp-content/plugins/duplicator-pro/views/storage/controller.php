@@ -1,6 +1,6 @@
-<?php
+<?phpdefined("ABSPATH") or die("");
 
-DUP_PRO_Util::CheckPermissions('manage_options');
+DUP_PRO_U::hasCapability('manage_options');
 
 global $wpdb;
 

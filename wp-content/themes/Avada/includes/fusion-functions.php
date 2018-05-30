@@ -2,9 +2,12 @@
 /**
  * Contains all framework specific functions that are not part of a separate class
  *
- * @author      ThemeFusion
- * @package     FusionFramework
- * @since       Version 1.0
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      1.0
  */
 
 // Do not allow directly accessing this file.
@@ -28,12 +31,14 @@ if ( ! function_exists( 'fusion_get_related_posts' ) ) {
 			return $query;
 		}
 
-		$args = wp_parse_args( $args, array(
-			'category__in'        => wp_get_post_categories( $post_id ),
-			'ignore_sticky_posts' => 0,
-			'posts_per_page'      => $number_posts,
-			'post__not_in'        => array( $post_id ),
-		) );
+		$args = wp_parse_args(
+			$args, array(
+				'category__in'        => wp_get_post_categories( $post_id ),
+				'ignore_sticky_posts' => 0,
+				'posts_per_page'      => $number_posts,
+				'post__not_in'        => array( $post_id ),
+			)
+		);
 
 		// If placeholder images are disabled,
 		// add the _thumbnail_id meta key to the query to only retrieve posts with featured images.
@@ -41,7 +46,7 @@ if ( ! function_exists( 'fusion_get_related_posts' ) ) {
 			$args['meta_key'] = '_thumbnail_id';
 		}
 
-		return avada_cached_query( $args );
+		return fusion_cached_query( $args );
 
 	}
 }
@@ -77,32 +82,34 @@ if ( ! function_exists( 'fusion_get_custom_posttype_related_posts' ) ) {
 		}
 
 		if ( ! empty( $item_array ) ) {
-			$args = wp_parse_args( $args, array(
-				'ignore_sticky_posts' => 0,
-				'posts_per_page'      => $number_posts,
-				'post__not_in'        => array( $post_id ),
-				'post_type'           => 'avada_' . $post_type,
-				'tax_query'           => array(
-					array(
-						'field'    => 'id',
-						'taxonomy' => $post_type . '_category',
-						'terms'    => $item_array,
+			$args = wp_parse_args(
+				$args, array(
+					'ignore_sticky_posts' => 0,
+					'posts_per_page'      => $number_posts,
+					'post__not_in'        => array( $post_id ),
+					'post_type'           => 'avada_' . $post_type,
+					'tax_query'           => array(
+						array(
+							'field'    => 'id',
+							'taxonomy' => $post_type . '_category',
+							'terms'    => $item_array,
+						),
 					),
-				),
-			) );
+				)
+			);
 
 			// If placeholder images are disabled, add the _thumbnail_id meta key to the query to only retrieve posts with featured images.
 			if ( ! Avada()->settings->get( 'featured_image_placeholder' ) ) {
 				$args['meta_key'] = '_thumbnail_id';
 			}
 
-			$query = avada_cached_query( $args );
+			$query = fusion_cached_query( $args );
 
 		}
 
 		return $query;
 	}
-}
+} // End if().
 
 if ( ! function_exists( 'fusion_attr' ) ) {
 	/**
@@ -134,83 +141,6 @@ if ( ! function_exists( 'fusion_attr' ) ) {
 	}
 }
 
-if ( ! function_exists( 'fusion_pagination' ) ) {
-	/**
-	 * Number based pagination
-	 *
-	 * @param  string  $pages         Maximum number of pages.
-	 * @param  integer $range         Our range.
-	 * @param  string  $current_query The current query.
-	 * @return void
-	 */
-	function fusion_pagination( $pages = '', $range = 2, $current_query = '' ) {
-		$showitems = ( $range * 2 ) + 1;
-
-		if ( '' == $current_query ) {
-			global $paged;
-			if ( empty( $paged ) ) {
-				$paged = 1;
-			}
-		} else {
-			$paged = $current_query->query_vars['paged'];
-		}
-
-		if ( '' == $pages ) {
-			if ( '' == $current_query ) {
-				global $wp_query;
-				$pages = $wp_query->max_num_pages;
-				if ( ! $pages ) {
-					$pages = 1;
-				}
-			} else {
-				$pages = $current_query->max_num_pages;
-			}
-		}
-		?>
-
-		<?php if ( 1 != $pages ) : ?>
-			<?php if ( ( 'Pagination' != Avada()->settings->get( 'blog_pagination_type' ) && ( is_home() || is_search() || ( 'post' == get_post_type() && ( is_author() || is_archive() ) ) ) ) || ( 'Pagination' != Avada()->settings->get( 'grid_pagination_type' ) && ( is_post_type_archive( 'avada_portfolio' ) || is_tax( 'portfolio_category' ) || is_tax( 'portfolio_skills' )  || is_tax( 'portfolio_tags' ) ) ) ) : ?>
-				<div class='pagination infinite-scroll clearfix' style="display:none;">
-			<?php else : ?>
-				<div class='pagination clearfix'>
-			<?php endif; ?>
-
-			<?php if ( 1 < $paged ) : ?>
-				<a class="pagination-prev" href="<?php echo get_pagenum_link( $paged - 1 ); ?>">
-					<span class="page-prev"></span>
-					<span class="page-text"><?php esc_html_e( 'Previous', 'Avada' ); ?></span>
-				</a>
-			<?php endif; ?>
-
-			<?php for ( $i = 1; $i <= $pages; $i++ ) : ?>
-				<?php if ( 1 != $pages && ( ! ( $i >= $paged + $range + 1 || $i <= $paged - $range - 1 ) || $pages <= $showitems ) ) : ?>
-					<?php if ( $paged == $i ) : ?>
-						<span class="current"><?php echo $i; ?></span>
-					<?php else : ?>
-						<a href="<?php echo get_pagenum_link( $i ); ?>" class="inactive"><?php echo $i; ?></a>
-					<?php endif; ?>
-				<?php endif; ?>
-			<?php endfor; ?>
-
-			<?php if ( $paged < $pages ) : ?>
-				<a class="pagination-next" href="<?php echo get_pagenum_link( $paged + 1 ); ?>">
-					<span class="page-text"><?php esc_html_e( 'Next', 'Avada' ); ?></span>
-					<span class="page-next"></span>
-				</a>
-			<?php endif; ?>
-
-			</div>
-			<?php
-			// Needed for Theme check.
-			ob_start();
-			posts_nav_link();
-			ob_get_clean();
-			?>
-		<?php endif;
-
-	}
-}
-
 if ( ! function_exists( 'fusion_breadcrumbs' ) ) {
 	/**
 	 * Render the breadcrumbs with help of class-breadcrumbs.php.
@@ -218,7 +148,7 @@ if ( ! function_exists( 'fusion_breadcrumbs' ) ) {
 	 * @return void
 	 */
 	function fusion_breadcrumbs() {
-		$breadcrumbs = Fusion_Breadcrumbs::get_instance();
+		$breadcrumbs = Avada_Breadcrumbs::get_instance();
 		$breadcrumbs->get_breadcrumbs();
 	}
 }
@@ -229,14 +159,14 @@ if ( ! function_exists( 'fusion_strip_unit' ) ) {
 	 *
 	 * @param  string $value The value with or without unit.
 	 * @param  string $unit_to_strip The unit to be stripped.
-	 * @return string	the value without a unit.
+	 * @return string   the value without a unit.
 	 */
 	function fusion_strip_unit( $value, $unit_to_strip = 'px' ) {
 		$value_length = strlen( $value );
 		$unit_length = strlen( $unit_to_strip );
 
 		if ( $value_length > $unit_length &&
-			 substr_compare( $value, $unit_to_strip, $unit_length * (-1), $unit_length ) === 0
+			 substr_compare( $value, $unit_to_strip, $unit_length * ( -1 ), $unit_length ) === 0
 		) {
 			return substr( $value, 0, $value_length - $unit_length );
 		} else {
@@ -258,12 +188,37 @@ if ( ! function_exists( 'fusion_feed_link' ) ) {
 		if ( Avada()->settings->get( 'rss_link' ) ) {
 			$feed_url = Avada()->settings->get( 'rss_link' );
 
-			$feed_array = array( 'rss' => $feed_url, 'rss2' => $feed_url, 'atom' => $feed_url, 'rdf' => $feed_url, 'comments_rss2' => '' );
+			$feed_array = array(
+				'rss' => $feed_url,
+				'rss2' => $feed_url,
+				'atom' => $feed_url,
+				'rdf' => $feed_url,
+				'comments_rss2' => '',
+			);
 			$feed_array[ $feed ] = $feed_url;
 			$output = $feed_array[ $feed ];
 		}
 
 		return $output;
+	}
+}
+
+
+add_filter( 'the_excerpt_rss', 'fusion_feed_excerpt' );
+if ( ! function_exists( 'fusion_feed_excerpt' ) ) {
+	/**
+	 * Modifies feed description, by extracting shortcode contents.
+	 *
+	 * @since  5.0.4
+	 * @param  string $excerpt The post excerpt.
+	 * @return string The modified post excerpt.
+	 */
+	function fusion_feed_excerpt( $excerpt ) {
+
+		$excerpt = wp_strip_all_tags( fusion_get_post_content_excerpt( 55, true ) );
+
+		return $excerpt;
+
 	}
 }
 
@@ -338,7 +293,7 @@ if ( ! function_exists( 'fusion_build_url' ) ) {
 
 		return $url;
 	}
-}
+} // End if().
 
 if ( ! function_exists( 'fusion_color_luminance' ) ) {
 	/**
@@ -361,7 +316,7 @@ if ( ! function_exists( 'fusion_color_luminance' ) ) {
 		for ( $i = 0; $i < 3; $i++ ) {
 			$dec = hexdec( substr( $hex, $i * 2, 2 ) );
 			$dec = min( max( 0, $dec + $dec * $percent ), 255 );
-			$new_hex .= str_pad( dechex( $dec ) , 2, 0, STR_PAD_LEFT );
+			$new_hex .= str_pad( dechex( $dec ), 2, 0, STR_PAD_LEFT );
 		}
 
 		return $new_hex;
@@ -377,24 +332,10 @@ if ( ! function_exists( 'fusion_adjust_brightness' ) ) {
 	 * @return  string        Returns hex color or rgba, depending on input.
 	 */
 	function fusion_adjust_brightness( $color, $steps ) {
-		$color_obj = Avada_Color::new_color( $color );
-		// Steps should be between -255 and 255. Negative = darker, positive = lighter.
-		$steps = max( -255, min( 255, $steps ) );
-		// Adjust number of steps and keep it inside 0 to 255.
-		$red   = max( 0, min( 255, $color_obj->red + $steps ) );
-		$green = max( 0, min( 255, $color_obj->green + $steps ) );
-		$blue  = max( 0, min( 255, $color_obj->blue + $steps ) );
-
-		$red_hex   = str_pad( dechex( $red ), 2, '0', STR_PAD_LEFT );
-		$green_hex = str_pad( dechex( $green ), 2, '0', STR_PAD_LEFT );
-		$blue_hex  = str_pad( dechex( $blue ), 2, '0', STR_PAD_LEFT );
-
-		$new_color_obj = Avada_Color::new_color( $red_hex . $green_hex . $blue_hex );
-		if ( 'hex' == $color_obj->mode ) {
-			return $new_color_obj->to_css( 'hex' );
-		}
-		$new_color_obj->alpha = $color_obj->alpha;
-		return $new_color_obj->to_css( 'rgba' );
+		$color_obj = Fusion_Color::new_color( $color );
+		$lightness = absint( round( $color_obj->lightness + ( $steps / 2.55 ) ) );
+		$lightness = max( 0, min( $lightness, 100 ) );
+		return $color_obj->get_new( 'lightness', $lightness )->to_css( $color_obj->mode );
 	}
 }
 
@@ -405,71 +346,9 @@ if ( ! function_exists( 'fusion_adjust_brightness' ) ) {
  * @return int          Value between 0 and 255.
  */
 function fusion_get_brightness( $color ) {
-	$color_obj = Avada_Color::new_color( $color );
+	$color_obj = Fusion_Color::new_color( $color );
 	// Returns brightness value from 0 to 255.
 	return intval( ( ( $color_obj->red * 299 ) + ( $color_obj->green * 587 ) + ( $color_obj->blue * 114 ) ) / 1000 );
-}
-
-if ( ! function_exists( 'fusion_calc_color_brightness' ) ) {
-	/**
-	 * Convert Calculate the brightness of a color.
-	 *
-	 * @param  string $color Color (Hex) Code.
-	 * @return integer brightness level.
-	 */
-	function fusion_calc_color_brightness( $color ) {
-
-		if ( in_array( strtolower( $color ), array( 'black', 'navy', 'purple', 'maroon', 'indigo', 'darkslategray', 'darkslateblue', 'darkolivegreen', 'darkgreen', 'darkblue' ) ) ) {
-			$brightness_level = 0;
-		} elseif ( strpos( $color, '#' ) === 0 ) {
-			$color = fusion_hex2rgb( $color );
-
-			$brightness_level = sqrt( pow( $color[0], 2 ) * 0.299 + pow( $color[1], 2 ) * 0.587 + pow( $color[2], 2 ) * 0.114 );
-		} else {
-			$brightness_level = 150;
-		}
-
-		return $brightness_level;
-	}
-}
-
-if ( ! function_exists( 'fusion_hex2rgb' ) ) {
-	/**
-	 * Convert Hex Code to RGB.
-	 *
-	 * @param  string $hex Color Hex Code.
-	 * @return array       RGB values.
-	 */
-	function fusion_hex2rgb( $hex ) {
-		if ( false !== strpos( $hex,'rgb' ) ) {
-
-			$rgb_part = strstr( $hex, '(' );
-			$rgb_part = trim( $rgb_part, '(' );
-			$rgb_part = rtrim( $rgb_part, ')' );
-			$rgb_part = explode( ',', $rgb_part );
-
-			$rgb = array( $rgb_part[0], $rgb_part[1], $rgb_part[2], $rgb_part[3] );
-
-		} elseif ( 'transparent' == $hex ) {
-			$rgb = array( '255', '255', '255', '0' );
-		} else {
-
-			$hex = str_replace( '#', '', $hex );
-
-			if ( strlen( $hex ) == 3 ) {
-				$r = hexdec( substr( $hex, 0, 1 ) . substr( $hex, 0, 1 ) );
-				$g = hexdec( substr( $hex, 1, 1 ) . substr( $hex, 1, 1 ) );
-				$b = hexdec( substr( $hex, 2, 1 ) . substr( $hex, 2, 1 ) );
-			} else {
-				$r = hexdec( substr( $hex, 0, 2 ) );
-				$g = hexdec( substr( $hex, 2, 2 ) );
-				$b = hexdec( substr( $hex, 4, 2 ) );
-			}
-			$rgb = array( $r, $g, $b );
-		}
-
-		return $rgb; // Returns an array with the rgb values.
-	}
 }
 
 if ( ! function_exists( 'fusion_rgb2hsl' ) ) {
@@ -489,13 +368,18 @@ if ( ! function_exists( 'fusion_rgb2hsl' ) ) {
 
 		$add      = strlen( $hex_color ) == 6 ? 2 : 1;
 		$aa       = 0;
+		// @codingStandardsIgnoreLine
 		$add_on   = 1 == $add ? ( $aa = 16 - 1 ) + 1 : 1;
 
 		$red         = round( ( hexdec( substr( $hex_color, 0, $add ) ) * $add_on + $aa ) / 255, 6 );
 		$green     = round( ( hexdec( substr( $hex_color, $add, $add ) ) * $add_on + $aa ) / 255, 6 );
-		$blue       = round( ( hexdec( substr( $hex_color, ( $add + $add ) , $add ) ) * $add_on + $aa ) / 255, 6 );
+		$blue       = round( ( hexdec( substr( $hex_color, ( $add + $add ), $add ) ) * $add_on + $aa ) / 255, 6 );
 
-		$hsl_color  = array( 'hue' => 0, 'sat' => 0, 'lum' => 0 );
+		$hsl_color  = array(
+			'hue' => 0,
+			'sat' => 0,
+			'lum' => 0,
+		);
 
 		$minimum     = min( $red, $green, $blue );
 		$maximum     = max( $red, $green, $blue );
@@ -534,100 +418,7 @@ if ( ! function_exists( 'fusion_rgb2hsl' ) ) {
 
 		return $hsl_color;
 	}
-}
-
-if ( ! function_exists( 'fusion_get_theme_option' ) ) {
-	/**
-	 * Get theme option value.
-	 *
-	 * @param  string $theme_option ID of theme option.
-	 * @return string               Value of theme option.
-	 */
-	function fusion_get_theme_option( $theme_option ) {
-
-		if ( $theme_option && null !== Avada()->settings->get( $theme_option ) ) {
-			return Avada()->settings->get( $theme_option );
-		}
-
-		return false;
-	}
-}
-
-if ( ! function_exists( 'fusion_get_page_option' ) ) {
-	/**
-	 * Get page option value.
-	 *
-	 * @param  string  $page_option ID of page option.
-	 * @param  integer $post_id     Post/Page ID.
-	 * @return string               Value of page option.
-	 */
-	function fusion_get_page_option( $page_option, $post_id ) {
-		if ( $page_option && $post_id ) {
-			if ( 0 === strpos( $page_option, 'pyre_' ) ) {
-				$page_option = str_replace( 'pyre_', '', $page_option );
-			}
-			return get_post_meta( $post_id, 'pyre_' . $page_option, true );
-		}
-
-		return false;
-	}
-}
-
-if ( ! function_exists( 'fusion_get_option' ) ) {
-	/**
-	 * Get theme option or page option.
-	 *
-	 * @param  string  $theme_option Theme option ID.
-	 * @param  string  $page_option  Page option ID.
-	 * @param  integer $post_id      Post/Page ID.
-	 * @return string                Theme option or page option value.
-	 */
-	function fusion_get_option( $theme_option, $page_option, $post_id ) {
-		if ( $theme_option && $page_option && ( $post_id || '0' == $post_id ) ) {
-			$page_option = strtolower( fusion_get_page_option( $page_option, $post_id ) );
-			$theme_option = strtolower( Avada()->settings->get( $theme_option ) );
-
-			if ( 'default' != $page_option && ! empty( $page_option ) ) {
-				return $page_option;
-			} else {
-				return $theme_option;
-			}
-		}
-
-		return false;
-	}
-}
-
-if ( ! function_exists( 'fusion_get_mismatch_option' ) ) {
-	/**
-	 * Get theme option or page option when mismatched.
-	 *
-	 * @param  string  $theme_option Theme option ID.
-	 * @param  string  $page_option  Page option ID.
-	 * @param  integer $post_id      Post/Page ID.
-	 * @since  4.0
-	 * @return string                Theme option or page option value.
-	 */
-	function fusion_get_mismatch_option( $theme_option, $page_option, $post_id ) {
-		if ( $theme_option && $page_option && $post_id ) {
-			$page_option = strtolower( fusion_get_page_option( $page_option, $post_id ) );
-			$theme_option = strtolower( Avada()->settings->get( $theme_option ) );
-			if ( 1 == $theme_option ) {
-				$theme_option = 0;
-			} else {
-				$theme_option = 1;
-			}
-
-			if ( 'default' != $page_option && ! empty( $page_option ) ) {
-				return $page_option;
-			} else {
-				return $theme_option;
-			}
-		}
-
-		return false;
-	}
-}
+} // End if().
 
 if ( ! function_exists( 'fusion_compress_css' ) ) {
 	/**
@@ -645,253 +436,6 @@ if ( ! function_exists( 'fusion_compress_css' ) ) {
 	}
 }
 
-/**
- * Returns the excerpt length for portfolio posts.
- *
- * @since 4.0.0
- * @param  string $page_id        The id of the current page or post.
- * @return string/boolean The excerpt length for the post; false if full content should be shown.
- **/
-function avada_get_portfolio_excerpt_length( $page_id = '' ) {
-	$excerpt_length = false;
-
-	if ( fusion_get_option( 'portfolio_content_length', 'portfolio_content_length', $page_id ) == 'excerpt' ) {
-		// Determine the correct excerpt length.
-		if ( fusion_get_page_option( 'portfolio_excerpt', $page_id ) ) {
-			$excerpt_length = fusion_get_page_option( 'portfolio_excerpt', $page_id );
-		} else {
-			$excerpt_length = Avada()->settings->get( 'excerpt_length_portfolio' );
-		}
-	} elseif ( ! $page_id && 'Excerpt' === Avada()->settings->get( 'portfolio_content_length' ) ) {
-		$excerpt_length = Avada()->settings->get( 'excerpt_length_portfolio' );
-	}
-
-	return $excerpt_length;
-
-}
-
-if ( ! function_exists( 'fusion_get_post_content' ) ) {
-	/**
-	 * Return the post content, either excerpted or in full length.
-	 *
-	 * @param  string  $page_id        The id of the current page or post.
-	 * @param  string  $excerpt        Can be either 'blog' (for main blog page), 'portfolio' (for portfolio page template) or 'yes' (for shortcodes).
-	 * @param  integer $excerpt_length Length of the excerpts.
-	 * @param  boolean $strip_html     Can be used by shortcodes for a custom strip html setting.
-	 * @return string Post content.
-	 **/
-	function fusion_get_post_content( $page_id = '', $excerpt = 'blog', $excerpt_length = 55, $strip_html = false ) {
-
-		$content_excerpted = false;
-
-		// Main blog page.
-		if ( 'blog' == $excerpt ) {
-
-			// Check if the content should be excerpted.
-			if ( strtolower( Avada()->settings->get( 'content_length' ) ) === 'excerpt' ) {
-				$content_excerpted = true;
-
-				// Get the excerpt length.
-				$excerpt_length = Avada()->settings->get( 'excerpt_length_blog' );
-			}
-
-			// Check if HTML should be stripped from contant.
-			if ( Avada()->settings->get( 'strip_html_excerpt' ) ) {
-				$strip_html = true;
-			}
-
-			// Portfolio page templates.
-		} elseif ( 'portfolio' == $excerpt ) {
-			// Check if the content should be excerpted.
-			$portfolio_excerpt_length = avada_get_portfolio_excerpt_length( $page_id );
-			if ( false !== $portfolio_excerpt_length ) {
-				$excerpt_length = $portfolio_excerpt_length;
-				$content_excerpted = true;
-			}
-
-			// Check if HTML should be stripped from contant.
-			if ( Avada()->settings->get( 'portfolio_strip_html_excerpt' ) ) {
-				$strip_html = true;
-			}
-			// Shortcodes.
-		} elseif ( 'yes' == $excerpt ) {
-			$content_excerpted = true;
-		}
-
-		// Sermon specific additional content.
-		if ( 'wpfc_sermon' == get_post_type( get_the_ID() ) ) {
-			return avada_get_sermon_content( true );
-		}
-
-		// Return excerpted content.
-		if ( $content_excerpted ) {
-			return fusion_get_post_content_excerpt( $excerpt_length, $strip_html );
-		}
-
-		// Return full content.
-		ob_start();
-		the_content();
-		return ob_get_clean();
-
-	}
-}
-
-if ( ! function_exists( 'fusion_get_post_content_excerpt' ) ) {
-	/**
-	 * Do the actual custom excerpting for of post/page content.
-	 *
-	 * @param  string  $limit      Maximum number of words or chars to be displayed in excerpt.
-	 * @param  boolean $strip_html Set to TRUE to strip HTML tags from excerpt.
-	 * @return string 				The custom excerpt.
-	 **/
-	function fusion_get_post_content_excerpt( $limit, $strip_html ) {
-		global $more;
-
-		$content = '';
-
-		$limit = intval( $limit );
-
-		// If excerpt length is set to 0, return empty.
-		if ( 0 === $limit ) {
-			return $content;
-		}
-
-		// Set a default excerpt limit if none is set.
-		if ( ! $limit && 0 != $limit ) {
-			$limit = 285;
-		}
-
-		// Make sure $strip_html is a boolean.
-		if ( 'true' == $strip_html || true == $strip_html ) {
-			$strip_html = true;
-		} else {
-			$strip_html = false;
-		}
-
-		$custom_excerpt = false;
-
-		$post = get_post( get_the_ID() );
-
-		// Check if the more tag is used in the post.
-		$pos = strpos( $post->post_content, '<!--more-->' );
-
-		// Check if the read more [...] should link to single post.
-		$read_more_text = apply_filters( 'avada_blog_read_more_excerpt', '&#91;...&#93;' );
-
-		if ( Avada()->settings->get( 'link_read_more' ) ) {
-			$read_more = ' <a href="' . get_permalink( get_the_ID() ) . '">' . $read_more_text . '</a>';
-		} else {
-			$read_more = ' ' . $read_more_text;
-		}
-
-		if ( ! Avada()->settings->get( 'disable_excerpts' ) ) {
-			$read_more = '';
-		}
-
-		// HTML tags should be stripped.
-		if ( $strip_html ) {
-			$more = 0;
-			$raw_content = wp_strip_all_tags( get_the_content( '{{read_more_placeholder}}' ), '<p>' );
-
-			// Strip out all attributes.
-			$raw_content = preg_replace( '/<(\w+)[^>]*>/', '<$1>', $raw_content );
-			$raw_content = str_replace( '{{read_more_placeholder}}', $read_more, $raw_content );
-
-			if ( $post->post_excerpt || false !== $pos ) {
-				$more = 0;
-				if ( ! $pos ) {
-					if ( strlen( get_the_excerpt() ) === strpos( get_the_excerpt(), '[...]' ) + 5 ) {
-						$raw_content = substr( $raw_content, 0, -5 );
-					}
-					$raw_content = wp_strip_all_tags( get_the_excerpt(), '<p>' ) . $read_more;
-				}
-
-				$custom_excerpt = true;
-			}
-			// HTML tags remain in excerpt.
-		} else {
-			$more = 0;
-			$raw_content = get_the_content( $read_more );
-			if ( $post->post_excerpt || false !== $pos ) {
-				$more = 0;
-				if ( ! $pos ) {
-					if ( strlen( get_the_excerpt() ) === strpos( get_the_excerpt(), '[...]' ) + 5 ) {
-						$raw_content = substr( $raw_content, 0, -5 );
-					}
-					$raw_content = wp_strip_all_tags( get_the_excerpt(), '<p>' ) . $read_more;
-				}
-				$custom_excerpt = true;
-			}
-		}
-
-		// We have our raw post content and need to cut it down to the excerpt limit.
-		if ( ( $raw_content && false === $custom_excerpt ) || 'product' == $post->post_type ) {
-			$pattern = get_shortcode_regex();
-			$content = preg_replace_callback( "/$pattern/s", 'avada_extract_shortcode_contents', $raw_content );
-
-			// Check if the excerpting should be char or word based.
-			if ( Avada()->settings->get( 'excerpt_base' ) == 'Characters' ) {
-				$content = mb_substr( $content, 0, $limit );
-				if ( 0 != $limit && Avada()->settings->get( 'disable_excerpts' ) ) {
-					$content .= $read_more;
-				}
-				// Excerpting is word based.
-			} else {
-				$content = explode( ' ', $content, $limit + 1 );
-				if ( count( $content ) > $limit ) {
-					array_pop( $content );
-					if ( ! Avada()->settings->get( 'disable_excerpts' ) ) {
-						$content = implode( ' ', $content );
-					} else {
-						$content = implode( ' ', $content );
-						if ( 0 != $limit ) {
-							if ( Avada()->settings->get( 'link_read_more' ) ) {
-								$content .= $read_more;
-							} else {
-								$content .= $read_more;
-							}
-						}
-					}
-				} else {
-					$content = implode( ' ', $content );
-				}
-			}
-
-			if ( 0 != $limit && ! $strip_html ) {
-				$content = apply_filters( 'the_content', $content );
-				$content = str_replace( ']]>', ']]&gt;', $content );
-			} else {
-				$content = '<p>' . $content . '</p>';
-			}
-
-			$content = do_shortcode( $content );
-
-			return $content;
-		}
-
-		// If we have a custom excerpt, e.g. using the <!--more--> tag.
-		if ( true == $custom_excerpt ) {
-			$pattern = get_shortcode_regex();
-			$content = preg_replace_callback( "/$pattern/s", 'avada_extract_shortcode_contents', $raw_content );
-			if ( true == $strip_html ) {
-				$content = apply_filters( 'the_content', $content );
-				$content = str_replace( ']]>', ']]&gt;', $content );
-				$content = do_shortcode( $content );
-			} else {
-				$content = apply_filters( 'the_content', $content );
-				$content = str_replace( ']]>', ']]&gt;', $content );
-			}
-		}
-
-		// If the custom excerpt field is used, just use that contents.
-		if ( has_excerpt() && 'product' != $post->post_type ) {
-			$content = '<p>' . do_shortcode( get_the_excerpt() ) . '</p>';
-		}
-
-		return $content;
-	}
-}
-
 if ( ! function_exists( 'fusion_get_attachment_data_by_url' ) ) {
 	/**
 	 * Get attachment data by URL.
@@ -903,7 +447,7 @@ if ( ! function_exists( 'fusion_get_attachment_data_by_url' ) ) {
 	function fusion_get_attachment_data_by_url( $image_url, $logo_field = '' ) {
 		global $wpdb;
 
-		$attachment = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid='%s';", $image_url ) );
+		$attachment = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid=%s;", $image_url ) );
 
 		if ( $attachment ) {
 			return wp_get_attachment_metadata( $attachment[0] );
@@ -928,7 +472,7 @@ if ( ! function_exists( 'fusion_import_to_media_library' ) ) {
 	function fusion_import_to_media_library( $url, $theme_option = '' ) {
 
 		// Gives us access to the download_url() and wp_handle_sideload() functions.
-		require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		require_once wp_normalize_path( ABSPATH . '/wp-admin/includes/file.php' );
 
 		$timeout_seconds = 30;
 
@@ -978,7 +522,7 @@ if ( ! function_exists( 'fusion_import_to_media_library' ) ) {
 			$attach_id = wp_insert_attachment( $attachment, $results['file'] );
 
 			// Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
-			require_once( ABSPATH . 'wp-admin/includes/image.php' );
+			require_once wp_normalize_path( ABSPATH . '/wp-admin/includes/image.php' );
 
 			// Generate the metadata for the attachment, and update the database record.
 			$attach_data = wp_generate_attachment_metadata( $attach_id, $results['file'] );
@@ -989,8 +533,8 @@ if ( ! function_exists( 'fusion_import_to_media_library' ) ) {
 			}
 
 			return $attach_id;
-		}
+		} // End if().
 		return false;
 	}
-}
+} // End if().
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

@@ -1,4 +1,13 @@
 <?php
+/**
+ * Handles multiple featured images.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -33,25 +42,23 @@ class Avada_Multiple_Featured_Images {
 			'avada_portfolio',
 		);
 
-		if ( ! class_exists( 'kdMultipleFeaturedImages' ) ) {
-			return;
-		}
-
 		$i = 2;
 
 		while ( $i <= Avada()->settings->get( 'posts_slideshow_number' ) ) {
 
 			foreach ( $post_types as $post_type ) {
-				new kdMultipleFeaturedImages( array(
-					'id'         => 'featured-image-' . $i,
-					'post_type'  => $post_type,
-					'labels'     => array(
-						'name'   => sprintf( __( 'Featured image %s', 'Avada' ), $i ),
-						'set'	 => sprintf( __( 'Set featured image %s', 'Avada' ), $i ),
-						'remove' => sprintf( __( 'Remove featured image %s', 'Avada' ), $i ),
-						'use'    => sprintf( __( 'Use as featured image %s', 'Avada' ), $i ),
-					),
-				) );
+				new Fusion_Featured_Image(
+					array(
+						'id'           => 'featured-image-' . $i,
+						'post_type'    => $post_type,
+						/* translators: Number. */
+						'name'         => sprintf( __( 'Featured image %s', 'Avada' ), $i ),
+						/* translators: Number. */
+						'label_set'    => sprintf( __( 'Set featured image %s', 'Avada' ), $i ),
+						/* translators: Number. */
+						'label_remove' => sprintf( __( 'Remove featured image %s', 'Avada' ), $i ),
+					)
+				);
 			}
 
 			$i++;

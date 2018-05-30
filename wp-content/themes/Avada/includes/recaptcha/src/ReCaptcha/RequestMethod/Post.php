@@ -65,6 +65,21 @@ class Post implements RequestMethod
             ),
         );
         $context = stream_context_create($options);
-        return file_get_contents(self::SITE_VERIFY_URL, false, $context);
+        $contents = file_get_contents(self::SITE_VERIFY_URL, false, $context);
+
+        if ( ! $contents ) {
+    		$raw_response = wp_remote_post( self::SITE_VERIFY_URL, array(
+    			'method' => 'POST',
+    			'timeout' => 45,
+    			'redirection' => 5,
+    			'headers' => array( "Content-type" => "application/x-www-form-urlencoded" ),
+    			'body' => $params->toArray(),
+    		    )
+    		);
+
+    		$contents = wp_remote_retrieve_body( $raw_response );
+    	}
+
+        return $contents;
     }
 }

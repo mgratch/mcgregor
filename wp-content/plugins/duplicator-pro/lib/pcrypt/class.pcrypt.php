@@ -90,7 +90,8 @@ class pcrypt
       * @return void
       */
     
-    function pcrypt($blockmode = MODE_ECB, $cipher = 'BLOWFISH', $key = null)
+    //rsrfunction pcrypt($blockmode = MODE_ECB, $cipher = 'BLOWFISH', $key = null)
+	function __construct($blockmode = MODE_ECB, $cipher = 'BLOWFISH', $key = null)
     {
         // Include cipher_class file
         $cipher = strtolower($cipher);

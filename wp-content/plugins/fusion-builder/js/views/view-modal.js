@@ -1,3 +1,4 @@
+/* global FusionPageBuilderEvents, FusionPageBuilderViewManager, fusionAllElements, FusionPageBuilderApp, fusionHistoryManager, fusionBuilderGetContent, fusionBuilderInsertIntoEditor, fusionBuilderText, FusionPageBuilderElements */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function( $ ) {
@@ -43,7 +44,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				    customSettingsViewName,
 				    $container;
 
-				// TODO: update the row view if it has been dragged into another column
+				// TODO: checked column
 				if ( 'undefined' !== typeof this.model && 'undefined' !== typeof this.model.get( 'view' ) && ( 'row_inner' === this.model.get( 'element_type' ) || 'fusion_builder_row' === this.model.get( 'element_type' ) ) && this.model.get( 'parent' ) !== this.model.get( 'view' ).$el.data( 'cid' ) ) {
 					this.model.set( 'view', FusionPageBuilderViewManager.getView( this.model.get( 'parent' ) ), { silent: true } );
 				}
@@ -90,7 +91,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 					viewSettings.view = this;
 
-					customSettingsViewName = fusionAllElements[this.model.get( 'element_type' )].custom_settings_view_name;
+					customSettingsViewName = fusionAllElements[ this.model.get( 'element_type' ) ].custom_settings_view_name;
 
 					if ( 'undefined' !== typeof customSettingsViewName && '' !== customSettingsViewName ) {
 						view = new FusionPageBuilder[ customSettingsViewName ]( viewSettings );
@@ -102,7 +103,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				$container.append( view.render().el );
 
-				$( 'body' ).addClass( 'fusion_builder_no_scroll' ).append( '<div class="fusion_builder_modal_overlay"></div>' );
+				if ( $( '.fusion_builder_modal_overlay' ).length < 1 && $( '.fusion_builder_modal_inner_row_overlay' ).length < 1 ) {
+					$( 'body' ).addClass( 'fusion_builder_no_scroll' ).append( '<div class="fusion_builder_modal_overlay"></div>' );
+				}
 
 				// Element search field
 				if ( 'column_library' === this.attributes['data-modal_view'] || 'element_library' === this.attributes['data-modal_view'] || 'all_elements_generator' === this.attributes['data-modal_view'] ) {
@@ -146,14 +149,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 
 				// If new section creation was cancelled
-				if ( true == FusionPageBuilderApp.newContainerAdded ) {
+				if ( true === FusionPageBuilderApp.newContainerAdded ) {
 					FusionPageBuilderApp.newContainerAdded = false;
 				}
 
 				// Remove each instance of tinyMCE editor from this view
 				this.$el.find( '.tinymce' ).each( function() {
 					editorID = $( this ).find( 'textarea.fusion-editor-field' ).attr( 'id' );
-						FusionPageBuilderApp.fusionBuilderMCEremoveEditor( editorID );
+					FusionPageBuilderApp.fusionBuilderMCEremoveEditor( editorID );
 				} );
 
 				// Save history state
@@ -169,16 +172,16 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					// Multi element parent
 					if ( 'undefined' !== typeof this.model && 'undefined' !== typeof this.model.get( 'multi' ) && 'multi_element_parent' === this.model.get( 'multi' ) ) {
 
-						FusionPageBuilderApp.shortcodeGeneratorMultiElement = '';
+						FusionPageBuilderApp.shortcodeGeneratorMultiElement      = '';
 						FusionPageBuilderApp.shortcodeGeneratorMultiElementChild = '';
-						FusionPageBuilderApp.shortcodeGenerator = '';
+						FusionPageBuilderApp.shortcodeGenerator                  = '';
 
 						// Remove sortable UI view
-						sortableCID = this.$el.find( '.fusion-builder-option-advanced-module-settings' ).data( 'cid' );
+						sortableCID    = this.$el.find( '.fusion-builder-option-advanced-module-settings' ).data( 'cid' );
 						sortableUIView = FusionPageBuilderViewManager.getView( sortableCID );
 						sortableUIView.removeView();
 
-						sortableCID = '';
+						sortableCID    = '';
 						sortableUIView = '';
 
 					// Multi element child
@@ -189,7 +192,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					// Regular element
 					} else {
 
-						FusionPageBuilderApp.shortcodeGenerator = '';
+						FusionPageBuilderApp.shortcodeGenerator         = '';
 						FusionPageBuilderApp.shortcodeGeneratorEditorID = '';
 					}
 
@@ -199,7 +202,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					if ( 'undefined' !== this.model.get( 'added' ) && 'manually' === this.model.get( 'added' ) ) {
 
 						if ( 'fusion_builder_row' === this.model.get( 'element_type' ) ) {
-							parentID   = this.model.get( 'parent' ),
+							parentID   = this.model.get( 'parent' );
 							parentView = FusionPageBuilderViewManager.getView( parentID );
 
 							if ( 'undefined' !== typeof parentView ) {
@@ -214,12 +217,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 							// Process default parameters from shortcode
 							_.each( defaultParams, function( param ) {
-								if ( _.isObject( param.value ) ) {
-									value = param.default;
-								} else {
-									value = param.value;
-								}
-								params[param.param_name] = value;
+								value = ( _.isObject( param.value ) ) ? param['default'] : param.value;
+								params[ param.param_name ] = value;
 							} );
 
 							attributes = {
@@ -264,11 +263,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			saveSettings: function( event ) {
 
 				var attributes,
-				    shortcode,
-				    columnCounter,
-				    table,
 				    generatedShortcode,
-				    view,
 				    editorID,
 				    functionName,
 				    sortableUIView,
@@ -297,6 +292,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				attributes = { params: ({}) };
 
+				// Preserve container admin label
+				if ( 'fusion_builder_container' === this.model.get( 'element_type' ) ) {
+					if ( 'undefined' !== typeof this.model.attributes.params.admin_label ) {
+						attributes.params.admin_label = this.model.attributes.params.admin_label;
+					}
+				}
+
+				// Preserve global elements.
+				if ( 'undefined' !== typeof this.model.attributes.params.fusion_global ) {
+					attributes.params.fusion_global = this.model.attributes.params.fusion_global;
+				}
+
 				this.$el.find( 'input, select, textarea, #fusion_builder_content_main, #fusion_builder_content_main_child, #generator_element_content, #generator_multi_child_content, #element_content' ).not( ':input[type=button], .fusion-icon-search, .category-search-field, .fusion-builder-table input, .fusion-builder-table textarea, .single-builder-dimension .fusion-builder-dimension input, .fusion-hide-from-atts' ).each( function() {
 					var $thisEl = $( this ),
 					    settingValue,
@@ -304,9 +311,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 					// Multi element
 					if ( $thisEl.is( '#generator_element_content' ) ||
-						 $thisEl.is( '#fusion_builder_content_main' ) ||
-						 $thisEl.is( '#element_content' ) ||
-						 $thisEl.is( '#generator_multi_child_content' ) ) {
+						$thisEl.is( '#fusion_builder_content_main' ) ||
+						$thisEl.is( '#element_content' ) ||
+						$thisEl.is( '#generator_multi_child_content' ) ) {
 						name = 'element_content';
 					} else {
 						name = $thisEl.attr( 'id' );
@@ -339,7 +346,13 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							settingValue = settingValue;
 						}
 					}
-					if ( 'infobox_content' == name ) {
+
+					// Encode raw-textarea.
+					if ( $thisEl.hasClass( 'fusion-builder-raw-textarea' ) ) {
+						settingValue = FusionPageBuilderApp.base64Encode( settingValue );
+					}
+
+					if ( 'infobox_content' === name ) {
 						settingValue = _.escape( settingValue );
 					}
 					attributes.params[ name ] = settingValue;
@@ -429,8 +442,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						this.remove();
 
 						// Remove overlay if generator was triggered outside of builder
-						if ( false === FusionPageBuilderApp.builderActive ) {
+						if ( false === FusionPageBuilderApp.builderActive || true === FusionPageBuilderApp.fromExcerpt ) {
 							this.removeOverlay();
+							FusionPageBuilderApp.fromExcerpt = false;
 						}
 					}
 
@@ -451,7 +465,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 						// Save history state
 						if ( 'undefined' === typeof this.model.get( 'added' ) ) {
-							fusionHistoryState = fusionBuilderText.edited + ' ' + fusionAllElements[this.model.get( 'element_type' )].name + ' ' + fusionBuilderText.element;
+							window.fusionHistoryState = fusionBuilderText.edited + ' ' + fusionAllElements[this.model.get( 'element_type' )].name + ' ' + fusionBuilderText.element;
 						}
 
 						// Remove 'added' attribute from newly created elements
@@ -480,7 +494,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 						// Save history state
 						if ( 'undefined' === typeof this.model.get( 'added' ) ) {
-							fusionHistoryState = fusionBuilderText.edited + ' ' + fusionAllElements[this.model.get( 'element_type' )].name + ' ' + fusionBuilderText.element;
+							window.fusionHistoryState = fusionBuilderText.edited + ' ' + fusionAllElements[this.model.get( 'element_type' )].name + ' ' + fusionBuilderText.element;
 						}
 
 						// Remove 'added' attribute from newly created elements
@@ -498,7 +512,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 						FusionPageBuilderEvents.trigger( 'fusion-modal-view-removed' );
 
-						this.generatePreview();
+						if ( true === FusionPageBuilderApp.builderActive ) {
+							this.generatePreview();
+						}
 
 						this.removeOverlay();
 
@@ -508,6 +524,12 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						FusionPageBuilderEvents.trigger( 'fusion-element-added' );
 					}
 
+				}
+
+				if ( FusionPageBuilderApp.manuallyAdded ) {
+					FusionPageBuilderApp.shortcodeGenerator         = FusionPageBuilderApp.manualGenerator;
+					FusionPageBuilderApp.shortcodeGeneratorEditorID = FusionPageBuilderApp.manualEditor;
+					FusionPageBuilderApp.manuallyAdded              = false;
 				}
 
 				// Remove each instance of tinyMCE editor from this view
@@ -521,7 +543,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			removeOverlay: function() {
-				if ( $( '.fusion_builder_modal_overlay' ).length ) {
+				if ( $( '.fusion_builder_modal_overlay' ).length && $( '.fusion-builder-modal-settings-container' ).length < 2 ) {
 					$( '.fusion_builder_modal_overlay' ).remove();
 					$( 'body' ).removeClass( 'fusion_builder_no_scroll' );
 				}
@@ -596,12 +618,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 						thisEl.find( '.fusion-builder-all-modules li' ).show();
 					}
-
 				} );
 			}
-
 		} );
-
 	} );
-
 } )( jQuery );

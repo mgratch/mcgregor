@@ -35,7 +35,7 @@
 
 			<div id="table-options" class="fusion-tab-content">
 
-				<?php fusion_element_options_loop('fusionAllElements[atts.element_type].params'); ?>
+				<?php fusion_element_options_loop( 'fusionAllElements[atts.element_type].params' ); ?>
 
 			</div>
 
@@ -116,13 +116,15 @@
 									price_shortcode_attributes = price_shortcode_element[3] !== '' ? window.wp.shortcode.attrs( price_shortcode_element[3] ) : '',
 
 									currency = typeof price_shortcode_attributes.named['currency'] !== 'undefined' ? price_shortcode_attributes.named['currency'] : '',
+									currency_position = typeof price_shortcode_attributes.named['currency_position'] !== 'undefined' ? price_shortcode_attributes.named['currency_position'] : 'left',
 									price = typeof price_shortcode_attributes.named['price'] !== 'undefined' ? price_shortcode_attributes.named['price'] : '',
 									time = typeof price_shortcode_attributes.named['time'] !== 'undefined' ? price_shortcode_attributes.named['time'] : '';
 
 									td_pricing[column_counter] = {
 										currency : currency,
 										price : price,
-										time : time
+										time : time,
+										currency_position : currency_position
 									};
 
 								} );
@@ -173,7 +175,7 @@
 													<span class="fa fusiona-file-add fusion-builder-table-clone-column" title="{{ fusionBuilderText.clone_column }}" data-column-id="{{ c }}" />
 												</div>
 											</div>
-											<div class="fusion-builer-table-featured">
+											<div class="fusion-builder-table-featured">
 												<span>{{ fusionBuilderText.standout_design }}</span>
 												<div class="fusion-form-radio-button-set ui-buttonset th_standout-{{c}}">
 
@@ -201,7 +203,7 @@
 												<span class="fa fusiona-file-add fusion-builder-table-clone-column" title="{{ fusionBuilderText.clone_column }}" data-column-id="{{ c }}" />
 											</div>
 										</div>
-										<div class="fusion-builer-table-featured">
+										<div class="fusion-builder-table-featured">
 											<span>{{ fusionBuilderText.standout_design }}</span>
 											<div class="fusion-form-radio-button-set ui-buttonset th_standout-{{c}}">
 
@@ -231,7 +233,16 @@
 									for ( c = 1; c <= column_counter; c++ ) { #>
 
 										<td class="td-{{ c }}" data-td-id="{{ c }}">
-											<input type="text" class="currency-input" placeholder="{{ fusionBuilderText.currency }}" value="{{ td_pricing[c].currency }}" />
+											<div class="fusion-currency-holder">
+												<input type="text" class="currency-input" placeholder="{{ fusionBuilderText.currency }}" value="{{ td_pricing[c].currency }}" />
+												<div class="fusion-form-radio-button-set ui-buttonset currencypos-{{c}}">
+
+													<input type="hidden" id="currencypos-{{c}}" name="currencypos-{{c}}" value="{{ td_pricing[c].currency_position }}" class="button-set-value currency-position" />
+													<a href="#" class="fusion-form-radio-button-set-button ui-button buttonset-item{{ typeof( td_pricing[c].currency_position ) !== 'undefined' && td_pricing[c].currency_position === 'left' ?  ' ui-state-active' : '' }}" data-value="left">{{ fusionBuilderText.currency_before }}</a>
+
+													<a href="#" class="fusion-form-radio-button-set-button ui-button buttonset-item{{ typeof( td_pricing[c].currency_position ) !== 'undefined' && td_pricing[c].currency_position === 'right' ?  ' ui-state-active' : '' }}" data-value="right">{{ fusionBuilderText.currency_after }}</a>
+												</div>
+											</div>
 											<input type="text" class="price-input" placeholder="{{ fusionBuilderText.price }}" value="{{ td_pricing[c].price }}" />
 											<input type="text" class="time-input" placeholder="{{ fusionBuilderText.period }}" value="{{ td_pricing[c].time }}" />
 										</td>

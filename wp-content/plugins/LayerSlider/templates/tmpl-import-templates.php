@@ -1,12 +1,7 @@
 <?php if(!defined('LS_ROOT_FILE')) {  header('HTTP/1.0 403 Forbidden'); exit; }
 $demoSliders = LS_Sources::getDemoSliders(); ?>
-<script>
+<script type="text/javascript">
 	window.lsImportNonce = '<?php echo wp_create_nonce('ls-import-demos'); ?>';
-	window.lsImportWarningTitle = "<?php _e('Activate your site to access premium templates.', 'LayerSlider') ?>";
-	window.lsImportWarningContent = "<?php _e('This template is only available for activated sites. Please review the PRODUCT ACTIVATION section on the main LayerSlider screen or <a href=\"https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#activation\" target=\"_blank\">click here</a> for more information.', 'LayerSlider') ?>";
-
-	window.lsImportVersionWarningTitle = "<?php _e('Plugin update required', 'LayerSlider') ?>";
-	window.lsImportVersionWarningContent = '<?php _e('This slider template requires a newer version of LayerSlider in order to work properly. This is due to additional features introduced in a later version than you have. For updating instructions, please refer to our <a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#updating" target="_blank">online documnetation</a>.', 'LayerSlider') ?>';
 </script>
 <script type="text/html" id="tmpl-import-sliders">
 	<div id="ls-import-modal-window" class="ls-modal fullpage ls-box <?php echo $lsStoreHasUpdate ? 'has-updates' : '' ?>">
@@ -43,15 +38,16 @@ $demoSliders = LS_Sources::getDemoSliders(); ?>
 			<nav>
 				<ul>
 					<li class="uppercase active" data-group="all"><?php _e('All', 'LayerSlider') ?></li>
-					<li class="uppercase" data-group="free"><?php _e('All free', 'LayerSlider') ?></li>
+					<li class="uppercase" data-group="free"><?php _e('All Free', 'LayerSlider') ?></li>
 					<li class="uppercase" data-group="premium"><?php _e('All Premium', 'LayerSlider') ?></li>
 					<?php if( count($demoSliders) ) : ?>
 					<li class="uppercase" data-group="bundled"><?php _e('Bundled', 'LayerSlider') ?></li>
 					<?php endif; ?>
-					<li class="uppercase separator" data-group="new"><?php _e('New', 'LayerSlider') ?></li>
+					<li class="uppercase separator" data-group="packs"><?php _e('SLIDER PACKS', 'LayerSlider') ?></li>
 
-					<li data-group="fullwidth"><?php _e('Full-width', 'LayerSlider') ?></li>
-					<li data-group="fullsize"><?php _e('Full-size', 'LayerSlider') ?></li>
+					<li data-group="popup"><?php _e('Popup', 'LayerSlider') ?></li>
+					<li data-group="fullwidth"><?php _e('Full Width', 'LayerSlider') ?></li>
+					<li data-group="fullsize"><?php _e('Full Size', 'LayerSlider') ?></li>
 
 					<li data-group="landing"><?php _e('Landing Page', 'LayerSlider') ?></li>
 					<li data-group="parallax"><?php _e('Parallax', 'LayerSlider') ?></li>
@@ -60,6 +56,7 @@ $demoSliders = LS_Sources::getDemoSliders(); ?>
 					<li data-group="kenburns"><?php _e('Ken Burns', 'LayerSlider') ?></li>
 					<li data-group="playbyscroll"><?php _e('Play By Scroll', 'LayerSlider') ?></li>
 					<li data-group="filter"><?php _e('Filter Transition', 'LayerSlider') ?></li>
+					<li data-group="blendmode"><?php _e('Blend Modes', 'LayerSlider') ?></li>
 					<li data-group="carousel"><?php _e('Carousel', 'LayerSlider') ?></li>
 					<li data-group="media"><?php _e('Media', 'LayerSlider') ?></li>
 
@@ -76,9 +73,10 @@ $demoSliders = LS_Sources::getDemoSliders(); ?>
 					if( ! empty($lsStoreData) && ! empty($lsStoreData['sliders']) ) {
 						$demoSliders = array_merge($demoSliders, $lsStoreData['sliders']);
 					}
+					$now = time();
 					foreach($demoSliders as $handle => $item) :
 				?>
-				<figure class="item" data-groups="<?php echo $item['groups'] ?>" data-handle="<?php echo $handle; ?>" data-bundled="<?php echo ! empty($item['bundled']) ? 'true' : 'false' ?>" data-premium-warning="<?php echo ( ! $validity && ! empty($item['premium']) ) ? 'true' : 'false' ?>" data-version-warning="<?php echo version_compare($item['requires'], LS_PLUGIN_VERSION, '>') ? 'true' : 'false' ?>">
+				<figure class="item" data-groups="<?php echo $item['groups'] ?>" data-handle="<?php echo $handle; ?>" data-bundled="<?php echo ! empty($item['bundled']) ? 'true' : 'false' ?>" data-premium="<?php echo ( ! empty($item['premium']) ) ? 'true' : 'false' ?>" data-version-warning="<?php echo version_compare($item['requires'], LS_PLUGIN_VERSION, '>') ? 'true' : 'false' ?>">
 					<div class="aspect">
 						<div class="item-picture" style="background: url(<?php echo $item['preview'] ?>);">
 						</div>
@@ -87,6 +85,12 @@ $demoSliders = LS_Sources::getDemoSliders(); ?>
 						</figcaption>
 						<a class="item-preview" target="_blank" href="<?php echo ! empty($item['url']) ? $item['url'] : '#' ?>" ><b class="dashicons dashicons-format-image"></b><?php _e('preview', 'LayerSlider') ?></a>
 						<a class="item-import" href="#"><?php _e('import', 'LayerSlider') ?><b class="dashicons dashicons-download"></b></a>
+
+						<?php if( ! empty( $item['released'] ) ) : ?>
+							<?php if( strtotime($item['released']) + MONTH_IN_SECONDS > $now ) :  ?>
+							<span class="badge-new"><?php _ex('NEW', 'Template Store', 'LayerSlider') ?>
+							<?php endif ?>
+						<?php endif ?>
 					</div>
 				</figure>
 				<?php endforeach ?>

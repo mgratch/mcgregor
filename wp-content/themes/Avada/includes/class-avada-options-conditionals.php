@@ -1,4 +1,14 @@
 <?php
+/**
+ * Conditionals.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ * @since      4.0.0
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,13 +31,8 @@ class Avada_Options_Conditionals {
 	 * @return  bool
 	 */
 	public static function is_woo() {
-		// Check if WooCommerce is installed.
-		// If not, then return false.
-		if ( ! function_exists( 'is_woocommerce' ) ) {
-			return false;
-		}
 		// Return the result of the is_woocommerce() function (boolean).
-		return is_woocommerce();
+		return Avada_Helper::is_woocommerce();
 	}
 
 	/**
@@ -38,13 +43,8 @@ class Avada_Options_Conditionals {
 	 * @return  bool
 	 */
 	public static function is_bbpress() {
-		// Check if bbPress is installed.
-		// If not, then return false.
-		if ( ! function_exists( 'is_bbpress' ) ) {
-			return false;
-		}
-		// Return the result of the is_woocommerce() function (boolean).
-		return is_bbpress();
+		// Return the result of the is_bbpress() function (boolean).
+		return Avada_Helper::is_bbpress();
 	}
 
 	/**

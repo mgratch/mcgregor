@@ -1,4 +1,13 @@
 <?php
+/**
+ * Options handler.
+ *
+ * @author     ThemeFusion
+ * @copyright  (c) Copyright by ThemeFusion
+ * @link       http://theme-fusion.com
+ * @package    Avada
+ * @subpackage Core
+ */
 
 // Do not allow directly accessing this file.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -50,6 +59,7 @@ class Avada_Options {
 	 * @access public
 	 */
 	private function __construct() {
+
 		Avada::$is_updating = ( $_GET && isset( $_GET['avada_update'] ) && '1' == $_GET['avada_update'] ) ? true : false;
 
 		/**
@@ -94,6 +104,8 @@ class Avada_Options {
 		// Set the $fields.
 		$this->set_fields();
 
+		add_filter( 'fusion_settings_all_fields', array( __CLASS__, 'get_option_fields' ) );
+
 	}
 
 	/**
@@ -131,6 +143,10 @@ class Avada_Options {
 
 		$sections = array();
 		foreach ( $this->section_names as $section ) {
+			// Make sure the function exists before call_user_func().
+			if ( ! function_exists( 'avada_options_section_' . $section ) ) {
+				continue;
+			}
 			$sections = call_user_func( 'avada_options_section_' . $section, $sections );
 		}
 
@@ -234,9 +250,17 @@ class Avada_Options {
 	 *
 	 * @static
 	 * @access public
+	 * @param array $fields The existing fields.
 	 * @return array
 	 */
-	public static function get_option_fields() {
-		return self::$fields;
+	public static function get_option_fields( $fields = array() ) {
+
+		if ( ! is_array( self::$fields ) || ! self::$fields || empty( self::$fields ) ) {
+			$instance = self::get_instance();
+			$instance->set_fields();
+		}
+
+		return array_replace_recursive( $fields, self::$fields );
+
 	}
 }

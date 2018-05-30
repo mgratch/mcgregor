@@ -32,7 +32,7 @@
 }
 .fusion_builder_modal_inner_row_overlay,
 .fusion_builder_modal_overlay {
-  background-color: rgba(0, 0, 0, .4);
+  background-color: rgba(0, 0, 0, .8);
   height: 100%;
   left: 0;
   position: fixed;
@@ -657,10 +657,12 @@
   width: 100%;
 }
 .icon_select_container .selected-element {
-  color: #d54e21;
+  color: #ffffff;
+  background-color: #278ab7;
 }
 .icon_select_container .selected-element:hover {
-  color: #d54e21;
+  color: #ffffff;
+  background-color: #278ab7;
 }
 .icon_preview {
   background: #ffffff;
@@ -675,7 +677,8 @@
   margin-top: -1px;
   position: relative;
   text-align: center;
-  transition: all .1s ease-out;
+  -webkit-transition: all .1s ease-out;
+          transition: all .1s ease-out;
   width: 32px;
 }
 .icon_preview:hover {
@@ -720,7 +723,6 @@
   box-sizing: border-box;
   cursor: pointer;
   float: left;
-  margin-bottom: 2em;
   margin: 1.5%;
   padding: .5em;
   width: 17%;
@@ -735,7 +737,6 @@
   cursor: move;
   display: inline-block;
   float: none;
-  margin-bottom: 1em;
   margin: 2%;
   position: relative;
   text-align: center;
@@ -1241,6 +1242,8 @@ input[type="text"].fusion-builder-section-name:focus {
 .fusion_module_block_preview .fusion-slide-preview img {
   max-height: 80px;
   max-width: 120px;
+  width: auto;
+  height: auto;
 }
 .fusion_module_block_preview .fusion-slide-preview h4 {
   margin: 0 0 .5em;
@@ -1269,7 +1272,8 @@ input[type="text"].fusion-builder-section-name:focus {
   border: 1px solid #dddddd;
   box-shadow: 0 1px 2px rgba(0, 0, 0, .07) inset;
   color: #333333;
-  transition: border-color .05s ease-in-out 0s;
+  -webkit-transition: border-color .05s ease-in-out 0s;
+          transition: border-color .05s ease-in-out 0s;
 }
 .fusion-builder-load-template-dialog-container {
   display: none;
@@ -1502,7 +1506,6 @@ input[type="text"].fusion-builder-section-name:focus {
   color: #222222;
   float: right;
   font-size: 26px;
-  margin-right: 10px;
   margin: 12px 12px 0 0;
   text-decoration: none;
 }
@@ -1766,24 +1769,24 @@ input[type="range"].fusion-range-option::-ms-thumb {
 .fusion-table-builder .fusion-builder-table > tbody + tbody {
   border-top: 2px solid #e5e4e3;
 }
-.fusion-table-builder .fusion-builder-table > tbody > tr > td,
+.fusion-table-builder .fusion-builder-table > tfoot > tr > th,
+.fusion-table-builder .fusion-builder-table > thead > tr > th,
+.fusion-table-builder .fusion-builder-table > tbody > tr > th,
 .fusion-table-builder .fusion-builder-table > tfoot > tr > td,
 .fusion-table-builder .fusion-builder-table > thead > tr > td,
-.fusion-table-builder .fusion-builder-table > tbody > tr > th,
-.fusion-table-builder .fusion-builder-table > tfoot > tr > th,
-.fusion-table-builder .fusion-builder-table > thead > tr > th {
+.fusion-table-builder .fusion-builder-table > tbody > tr > td {
   border-right: 1px solid #e5e4e3;
   border-top: 1px solid #e5e4e3;
   line-height: 1.5384615384615385;
   padding: 8px;
   vertical-align: top;
 }
-.fusion-table-builder .fusion-builder-table > colgroup + thead > tr:first-child > td,
-.fusion-table-builder .fusion-builder-table > thead:first-child > tr:first-child > td,
-.fusion-table-builder .fusion-builder-table > caption + thead > tr:first-child > td,
-.fusion-table-builder .fusion-builder-table > colgroup + thead > tr:first-child > th,
+.fusion-table-builder .fusion-builder-table > caption + thead > tr:first-child > th,
 .fusion-table-builder .fusion-builder-table > thead:first-child > tr:first-child > th,
-.fusion-table-builder .fusion-builder-table > caption + thead > tr:first-child > th {
+.fusion-table-builder .fusion-builder-table > colgroup + thead > tr:first-child > th,
+.fusion-table-builder .fusion-builder-table > caption + thead > tr:first-child > td,
+.fusion-table-builder .fusion-builder-table > thead:first-child > tr:first-child > td,
+.fusion-table-builder .fusion-builder-table > colgroup + thead > tr:first-child > td {
   border-top: 0;
 }
 .fusion-table-builder input {
@@ -1824,7 +1827,7 @@ input[type="range"].fusion-range-option::-ms-thumb {
 .fusion-table-remove-row {
   cursor: pointer;
 }
-.fusion-builer-table-featured {
+.fusion-builder-table-featured {
   background: #f5f5f5;
   float: left;
   margin-bottom: 8px;

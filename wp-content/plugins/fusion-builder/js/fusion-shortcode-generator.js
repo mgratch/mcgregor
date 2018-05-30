@@ -1,18 +1,23 @@
+/* global FusionPageBuilderApp, FusionPageBuilder, FusionPageBuilderElements, fusionBuilderInsertIntoEditor */
 ( function( $ ) {
 
 	// Insert shortcode into post editor
-	fusionBuilderInsertIntoEditor = function( shortcode, editorID ) {
-		var currentEditor = window.SCmoduleContentEditorMode,
+	fusionBuilderInsertIntoEditor = function( shortcode, editorID ) { // jshint ignore:line
+		var currentEditor = window.SCmoduleContentEditorMode, // jshint ignore:line
 		    editorArea,
 		    editor;
 
-		if ( 'tinymce' === window.SCmoduleContentEditorMode ) {
+		if ( 'tinymce' === window.SCmoduleContentEditorMode && ( '' === editorID || 'undefined' === typeof editorID ) ) {
 
 			if ( 'undefined' !== typeof window.tinyMCE ) {
 
 				// Set active editor
 				editor = FusionPageBuilderApp.shortcodeGeneratorActiveEditor;
 				editor.focus();
+
+				if ( 'excerpt' === editor.id ) {
+					FusionPageBuilderApp.fromExcerpt = true;
+				}
 
 				// Insert shortcode
 				window.tinyMCE.activeEditor.execCommand( 'mceInsertContent', false, shortcode );
@@ -28,6 +33,10 @@
 				editorArea = $( '#' + editorID );
 			}
 
+			if ( 'excerpt' === editorArea.attr( 'id' ) ) {
+				FusionPageBuilderApp.fromExcerpt = true;
+			}
+
 			if ( 'undefined' === typeof window.cursorPosition ) {
 				if ( 0 === editorArea.getCursorPosition() ) {
 					editorArea.val( shortcode + editorArea.val() );
@@ -41,12 +50,14 @@
 			}
 		}
 
-		FusionPageBuilderApp.shortcodeGeneratorActiveEditor = '';
+		if ( false === FusionPageBuilderApp.manuallyAdded ) {
+			FusionPageBuilderApp.shortcodeGeneratorActiveEditor = '';
+		}
 	};
 
 } )( jQuery );
 
-function openShortcodeGenerator( trigger ) {
+function openShortcodeGenerator( trigger ) { // jshint ignore:line
 
 	// Get editor id from event.trigger.  parent.parent
 

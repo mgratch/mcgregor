@@ -14,21 +14,27 @@ if( !empty( $_GET['user'] ) ) {
 	$deleteLink = wp_nonce_url('users.php?action=delete&amp;user='.(int)$_GET['user'], 'bulk-users' );
 }
 
-// Notification messages
-$notifications = array(
-	'debugAccountSuccess' 	=> __("Successfully created debug account. The credentials were sent to us via email. We will get back to you as soon as we've checked your site.", 'LayerSlider'),
-	'debugAccountError' 	=> __('Debug account already exists. Please try again after removing it manually by clicking ', 'LayerSlider') . '<a href="'.$deleteLink.'">' .__('here', 'LayerSlider').'</a>.'
-);
+$authorized = get_option('layerslider-authorized-site', false);
+$isAdmin 	= current_user_can('manage_options');
 
-$authorized 	= get_option('layerslider-authorized-site', false);
-$isAdmin 		= current_user_can('manage_options');
-$debugCondition = $authorized && $isAdmin;
+$notifications = array(
+
+	'dbUpdateSuccess' => __('LayerSlider has attempted to update your database. Server restrictions may apply, please verify whether it was successful.', 'LayerSlider')
+);
 
 ?><div class="wrap">
 	<h2>
 		<?php _e('System Status', 'LayerSlider') ?>
-		<a href="<?php echo admin_url('?page=layerslider') ?>" class="add-new-h2"><?php _e('Back', 'LayerSlider') ?></a>
+		<a href="<?php echo admin_url('admin.php?page=layerslider-options') ?>" class="add-new-h2"><?php _e('&larr; Options', 'LayerSlider') ?></a>
 	</h2>
+
+	<div class="notice notice-info">
+		<p>
+			<?php _e('This page is intended to help you identifying possible issues and to display relevant debug information about your site.', 'LayerSlider') ?>
+			<?php _e('Whenever a potential issues is detected, it will be marked with red or orange text describing the nature of that issue.', 'LayerSlider') ?>
+			<strong><?php _e('Please keep in mind that in most cases only your web hosting company can change server settings, thus you should contact them with the messages provided (if any).', 'LayerSlider') ?></strong>
+		</p>
+	</div>
 
 	<!-- Error messages -->
 	<?php if(isset($_GET['message'])) : ?>
@@ -50,11 +56,6 @@ $debugCondition = $authorized && $isAdmin;
 		$uploadB 	= str_replace(array('G', 'M', 'K'), array('000000000', '000000', '000'), ini_get('upload_max_filesize'));
 	?>
 	<div class="ls-system-status">
-		<ul>
-			<li><?php _e('This page is intended to help you identifying possible issues and to display relevant debug information about your site.', 'LayerSlider') ?></li>
-			<li><?php _e('Whenever a potential issues is detected, it will be marked with red or orange text describing the nature of that issue.', 'LayerSlider') ?></li>
-			<li><?php _e('Please keep in mind that in most cases only your web hosting company can change server settings, thus you should contact them with the messages provided (if any).', 'LayerSlider') ?></li>
-		</ul>
 		<div class="ls-box km-tabs-inner">
 			<table>
 				<thead>
@@ -69,7 +70,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo ! empty($authorized) ? __('Activated', 'LayerSlider') : __('Not set', 'LayerSlider') ?></td>
 						<td>
 							<?php if( ! $authorized ) : ?>
-							<span><?php echo __("Authorize this site to receive LayerSlider updates.", 'LayerSlider'). ' <a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#updating" target="_blank">' . __('Click here to learn more', 'LayerSlider') . '</a>' ?></span>
+							<span><?php echo sprintf(__('Activate your copy of LayerSlider for auto-updates, or ask new versions from the theme author, so you can always use the latest release with all the new features and bug fixes. %sClick here to learn more%s.', 'LayerSlider'), '<a href="https://support.kreaturamedia.com/docs/layersliderwp/documentation.html#updating" target="_blank">', '</a>') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -85,6 +86,20 @@ $debugCondition = $authorized && $isAdmin;
 						</td>
 					</tr>
 					<tr>
+						<?php $test = layerslider_verify_db_tables(); ?>
+						<td><?php _e('LayerSlider database:', 'LayerSlider') ?></td>
+						<td><span class="dashicons <?php echo ! empty($test) ? 'dashicons-yes' : 'dashicons-warning' ?>"></span></td>
+						<td><?php echo ! empty($test) ? __('OK', 'LayerSlider') : __('Error', 'LayerSlider') ?></td>
+						<td class="has-button">
+							<div>
+								<?php if( ! $test ) : ?>
+								<span><?php echo __('Your database needs an update in order for LayerSlider to work properly. Please press the ’Update Database’ button on the right. If this does not help, you need to contact your web server hosting company to fix any issue preventing plugins creating and updating database tables.', 'LayerSlider') ?></span>
+								<?php endif ?>
+								<a href="<?php echo wp_nonce_url('admin.php?page=layerslider-options&section=system-status&action=database_update', 'database_update') ?>" class="button button-small"><?php _e('Update Database', 'LayerSlider') ?></a>
+							</div>
+						</td>
+					</tr>
+					<tr>
 						<?php $test = true; ?>
 						<td><?php _e('WordPress version:', 'LayerSlider') ?></td>
 						<td><span class="dashicons <?php echo ! empty($test) ? 'dashicons-yes' : 'dashicons-warning' ?>"></span></td>
@@ -96,6 +111,30 @@ $debugCondition = $authorized && $isAdmin;
 					<th colspan="4"><?php _e('Site Setup & Plugin Settings', 'LayerSlider') ?></th>
 				</thead>
 				<tbody>
+
+
+					<?php
+
+						if( $authorized ) :
+						$test = strpos(LS_ROOT_FILE, '/wp-content/plugins/LayerSlider/');
+						if( ! $test ) { $test = strpos(LS_ROOT_FILE, '\\wp-content\\plugins\\LayerSlider\\'); }
+
+					?>
+					<tr>
+						<td><?php _e('Install Location', 'LayerSlider') ?></td>
+						<td><span class="dashicons <?php echo ! empty($test) ? 'dashicons-yes' : 'dashicons-info' ?>"></span></td>
+						<td><?php echo ! empty( $test ) ? _e('OK', 'LayerSlider') : _e('Non-standard', 'LayerSlider') ?></td>
+						<td>
+							<?php if( ! $test ) : ?>
+							<span>
+								<?php echo __('Using LayerSlider from a non-standard install location or having a different directory name could lead issues in receiving and installing updates. Commonly, you see this issue when you’re using a theme-included version of LayerSlider. To fix this, please first search for an option to disable/unload the bundled version in your theme, then re-install a fresh copy downloaded from CodeCanyon. Your sliders and settings are stored in the database, re-installing the plugin will not harm them.', 'LayerSlider') ?>
+							</span>
+							<?php endif ?>
+						</td>
+					</tr>
+					<?php endif ?>
+
+
 					<?php $test = defined('WP_DEBUG') &&  WP_DEBUG; ?>
 					<tr class="<?php echo ! empty($test) ? '' : 'ls-info' ?>">
 						<td><?php _e('WP Debug Mode:', 'LayerSlider') ?></td>
@@ -156,7 +195,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo ! empty($test) ? __('Enabled', 'LayerSlider') : __('Disabled', 'LayerSlider') ?></td>
 						<td>
 							<?php if( ! empty( $test ) ) : ?>
-							<span><?php _e('Should be used in special cases only, as it can break otherwise functioning sites.', 'LayerSlider') ?></span>
+							<span><?php _e('Should be used in special cases only, as it can break otherwise functioning sites. This option is located on the main LayerSlider admin screen under the Advanced tab.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -174,7 +213,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo phpversion() ?></td>
 						<td>
 							<?php if( ! empty( $test ) ) : ?>
-							<span><?php _e('LayerSlider requires PHP 5.3 or newer.', 'LayerSlider') ?></span>
+							<span><?php _e('LayerSlider requires PHP 5.3.0 or newer. Please contact your host and ask them to upgrade PHP on your web server. Alternatively, they often offer a customer dashboard for their services, which might also provide an option to choose your preferred PHP version.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -185,7 +224,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo ! empty( $timeout ) ? $timeout.'s' : 'No limit' ?></td>
 						<td>
 							<?php if( $test ) : ?>
-							<span><?php _e('PHP max. execution time should be set to at least 60 seconds or higher when importing large sliders.', 'LayerSlider') ?></span>
+							<span><?php _e('PHP max. execution time should be set to at least 60 seconds or higher when importing large sliders. Please contact your host and ask them to change this PHP setting on your web server accordingly.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -196,7 +235,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo $memory ?></td>
 						<td>
 							<?php if( $test ) : ?>
-							<span><?php _e('PHP memory limit should be set to at least 64MB or higher when dealing with large sliders.', 'LayerSlider') ?></span>
+							<span><?php _e('PHP memory limit should be set to at least 64MB or higher when dealing with large sliders. Please contact your host and ask them to change this PHP setting on your web server accordingly.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 
@@ -208,7 +247,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo ini_get('post_max_size') ?></td>
 						<td>
 							<?php if( $test ) : ?>
-							<span><?php _e('Importing larger sliders could be problematic in some cases.', 'LayerSlider') ?></span>
+							<span><?php _e('Importing larger sliders could be problematic in some cases. This option is needed to upload large files. We recommend to set it to at least 16MB or higher. Please contact your host and ask them to change this PHP setting on your web server accordingly.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -219,7 +258,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo ini_get('upload_max_filesize') ?></td>
 						<td>
 							<?php if( $test ) : ?>
-							<span><?php _e('Importing larger sliders could be problematic in some cases.', 'LayerSlider') ?></span>
+							<span><?php _e('Importing larger sliders could be problematic in some cases. This option is needed to upload large files. We recommend to set it to at least 16MB or higher. Please contact your host and ask them to change this PHP setting on your web server accordingly.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -242,7 +281,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo $test ? __('Enabled', 'LayerSlider') : __('Disabled', 'LayerSlider'); ?></td>
 						<td>
 							<?php if( ! $test ) : ?>
-							<span><?php _e('The PHP ZipArchive extension is needed to export/import sliders with images.', 'LayerSlider') ?></span>
+							<span><?php _e('The PHP ZipArchive extension is needed to use the Template Store and import/export sliders with images.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -253,7 +292,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo $test ? __('Enabled', 'LayerSlider') : __('Disabled', 'LayerSlider') ?></td>
 						<td>
 							<?php if( ! $test ) : ?>
-							<span><?php _e('Front-end sliders and the slider builder interfaces relies on the PHP DOMDocument extension.', 'LayerSlider') ?></span>
+							<span><?php _e('Front-end sliders and the slider builder interface require the PHP DOMDocument extension.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -264,7 +303,18 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo $test ? __('Enabled', 'LayerSlider') : __('Disabled', 'LayerSlider') ?></td>
 						<td>
 							<?php if( ! $test ) : ?>
-							<span><?php _e('The lack of PHP Multibyte String extension can lead to unexpected issues.', 'LayerSlider') ?></span>
+							<span><?php _e('The lack of PHP “mbstring” extension can lead to unexpected issues. Contact your server hosting provider and ask them to install/enable this extension.', 'LayerSlider') ?></span>
+							<?php endif ?>
+						</td>
+					</tr>
+					<tr>
+						<?php $test = function_exists('mb_ereg_match'); ?>
+						<td><?php _e('PHP Multibyte Regex Functions:', 'LayerSlider') ?></td>
+						<td><span class="dashicons <?php echo ! empty($test) ? 'dashicons-yes' : 'dashicons-warning' ?>"></span></td>
+						<td><?php echo $test ? __('Enabled', 'LayerSlider') : __('Disabled', 'LayerSlider') ?></td>
+						<td>
+							<?php if( ! $test ) : ?>
+							<span><?php _e('The lack of PHP “mbregex” module can lead to unexpected issues. Contact your server hosting provider and ask them to install/enable this module.', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -278,7 +328,7 @@ $debugCondition = $authorized && $isAdmin;
 						<td><?php echo $test ? __('OK', 'LayerSlider') : __('Blocked', 'LayerSlider') ?></td>
 						<td>
 							<?php if( ! $test ) : ?>
-							<span><?php _e('Failed to connect to our update server. This could cause issues with activating the Auto-Updates feature or serving plugin updates. It\'s most likely a web server configuration issue. Please contact your web host and ask them to allow external connection to the following domain: repository.kreaturamedia.com', 'LayerSlider') ?></span>
+							<span><?php _e('Failed to connect to our update server. This could cause issues with product activation, serving updates or downloading templates from the Template Store. It’s most likely a web server configuration issue. Please contact your web host and ask them to allow external connection to the following domain: <mark>repository.kreaturamedia.com</mark>', 'LayerSlider') ?></span>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -286,6 +336,26 @@ $debugCondition = $authorized && $isAdmin;
 			</table>
 		</div>
 	</div>
+
+	<?php if( $isAdmin && ! empty( $_GET['updateinfo']) ) : ?>
+	<div class="ls-box">
+		<div class="header">
+			<h2><?php _e('Update info', 'LayerSlider') ?></h2>
+		</div>
+		<div class="inner">
+			<pre><?php var_dump( get_option('layerslider_update_info') ) ?></pre>
+		</div>
+	</div>
+
+	<div class="ls-box">
+		<div class="header">
+			<h2><?php _e('Update info after cancellation', 'LayerSlider') ?></h2>
+		</div>
+		<div class="inner">
+			<pre><?php var_dump( get_option('layerslider_cancellation_update_info') ) ?></pre>
+		</div>
+	</div>
+	<?php endif ?>
 
 	<script type="text/html" id="ls-phpinfo">
 		<?php phpinfo(); ?>
@@ -319,20 +389,19 @@ $debugCondition = $authorized && $isAdmin;
 						<li><?php _e('Remove the relevant entries from the <i>wp_options</i> database table, which stores plugin settings.', 'LayerSlider') ?></li>
 						<li><?php _e('Remove the relevant entries from the <i>wp_usermeta</i> database table, which stores user associated plugin settings.', 'LayerSlider') ?></li>
 						<li><?php _e('Remove files and folders created by LayerSlider from the <i>/wp-content/uploads</i> directory. This will not affect your own uploads in the Media Library.', 'LayerSlider') ?></li>
-						<li><?php _e('Remove created LayerSlider Debug Account (if any)', 'LayerSlider') ?></li>
 						<li><?php _e('Deactivate LayerSlider as a last step.', 'LayerSlider') ?></li>
 					</ul>
-					<p><i><?php _e('The actions above will be performed on this blog only. If you have a multisite network and you are a network administrator, then an "Apply to all sites" checkbox will appear, which you can use to erase data from every site in your network if you choose so.', 'LayerSlider') ?></i></p>
+					<p><i><?php _e('The actions above will be performed on this blog only. If you have a multisite network and you are a network administrator, then an “Apply to all sites” checkbox will appear, which you can use to erase data from every site in your network if you choose so.', 'LayerSlider') ?></i></p>
 
 					<p><?php _e('Please note: You CANNOT UNDO this action. Please CONSIDER EVERY POSSIBILITY before choosing to erase all plugin data, as you will not be able to restore data afterwards.', 'LayerSlider') ?></p>
 
 					<?php if( is_multisite() && current_user_can('manage_network') ) : ?>
 						<p class="center centered">
-							<label><input type="checkbox" name="networkwide" onclick="return confirm('<?php _e('Are you sure you want to erase plugin data from every site in network?', 'LayerSlider') ?>');"> Apply to all sites in multisite network</label>
+							<label><input type="checkbox" name="networkwide" onclick="return confirm('<?php _e('Are you sure you want to erase plugin data from every site in network?', 'LayerSlider') ?>');"> <?php _e('Apply to all sites in multisite network', 'LayerSlider') ?></label>
 						</p>
 					<?php endif ?>
 
-					<button type="submit" name="ls-erase-plugin-data" class="button button-primary button-hero <?php echo $isAdmin ? '' : 'disabled' ?>" <?php echo $isAdmin ? '' : 'disabled' ?>>Erase Plugin Data</button>
+					<button type="submit" name="ls-erase-plugin-data" class="button button-primary button-hero <?php echo $isAdmin ? '' : 'disabled' ?>" <?php echo $isAdmin ? '' : 'disabled' ?>><?php _e('Erase Plugin Data', 'LayerSlider') ?></button>
 					<?php if( ! $isAdmin ) : ?>
 					<i class="ls-notice"><?php _e('You must be an administrator to use this feature.', 'LayerSlider') ?></i>
 					<?php endif ?>
@@ -342,38 +411,11 @@ $debugCondition = $authorized && $isAdmin;
 	</script>
 
 
-	<script type="text/html" id="ls-debug-account-modal">
-		<div id="ls-debug-account-modal-window">
-			<header>
-				<h1><?php _e('Create Debug Account', 'LayerSlider') ?></h1>
-				<b class="dashicons dashicons-no"></b>
-			</header>
-			<div class="km-ui-modal-scrollable">
-				<p><?php _e("In some cases we may need to access the admin area of your site in order to find and fix issues you may experience. This tool is intended to automatically create a debug account, so you don't have to bother to manually perform the necessary steps.", 'LayerSlider') ?></p>
-				<p class="dark"><?php _e('After your confirmation, the following actions will be performed on your site:', 'LayerSlider') ?></p>
-				<ul>
-					<li><?php _e('A new user account named <i><span class="dark">KreaturaSupport</span></i> will be created with a randomly generated secure password.', 'LayerSlider') ?></li>
-					<li><?php _e('This newly created account will have administrator permissions in order to access key pages on the admin area (e.g. the LayerSlider menu)', 'LayerSlider') ?></li>
-					<li><?php _e("The login credentials for this account will be emailed to us (from your site's admin email address), so we can have a look and help you as fast as possible.", 'LayerSlider') ?></li>
-					<li><?php _e("You can remove this account manually after we've managed to find a solution, or at any time if you change your mind.", 'LayerSlider') ?></li>
-				</ul>
-				<p><?php _e('Please note: this utility is intended to make your life easier. No action will be performed without your consent. If you feel uncomfortable using it, you can always create a debug account on your own or manually edit/remove the created one at any time.', 'LayerSlider') ?></p>
-				<p class="dark"><strong><?php _e('This is not an error reporting tool. Make sure to contact our support team before using this utility!', 'LayerSlider') ?></strong></p>
-				<a href="<?php echo $debugCondition ? wp_nonce_url('?page=ls-system-status&action=debug_account', 'debug_account') : '#' ?>" class="button button-primary button-hero <?php echo $debugCondition ? '' : 'disabled' ?>" onclick="return confirm('Please read the description carefully. Are you sure you want to proceed?');">I understand, create debug account</a>
-				<?php if( ! $debugCondition ) : ?>
-				<p class="notice center centered">
-					<i class="ls-notice"><?php _e('To use this feature, you must be an administrator and have activated your site with a LayerSlider purchase code.', 'LayerSlider') ?></i>
-				</p>
-				<?php endif ?>
-			</div>
-		</div>
-	</script>
+	<div class="ls-system-status-actions">
+		<button class="button button-hero button-primary ls-phpinfo-button"><?php _e('Show Advanced Details', 'LayerSlider') ?></button>
 
-	<button class="button button-hero button-primary ls-phpinfo-button"><?php _e('Show Advanced Details', 'LayerSlider') ?></button>
-	<!-- <button class="button button-hero button-primary ls-debug-account-button"><?php _e('Create Debug Account', 'LayerSlider') ?></button> -->
-
-
-	<button class="button button-hero button-primary ls-erase-button"><?php _e('Erase Plugin Data', 'LayerSlider') ?></button>
+		<button class="button button-hero button-primary ls-erase-button"><?php _e('Erase All Plugin Data', 'LayerSlider') ?></button>
+	</div>
 
 
 	<script>
@@ -389,13 +431,6 @@ $debugCondition = $authorized && $isAdmin;
 
 				$modal.find('iframe').contents().find('html').html( $contents );
 			});
-
-
-
-			jQuery('.ls-debug-account-button').click(function() {
-				kmUI.modal.open('#ls-debug-account-modal');
-			});
-
 
 
 			jQuery('.ls-erase-button').click(function() {
